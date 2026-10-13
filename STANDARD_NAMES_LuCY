@@ -1,0 +1,97 @@
+# STANDARD DE NOMMAGE — LuCY
+
+**Horodatage :** 2026-10-14T00:00:00Z
+**Projet :** LuCY (Language Unit for Cognitive Yield)
+**Espace de numérotation :** rapports LuCY → `L-001–L-NNN` (indépendant de ARTCB et TERMINATOR)
+
+---
+
+## 1. Fichiers documentation (racine LuCY/)
+
+| Pattern | Exemple | Règle |
+|---------|---------|-------|
+| `{NOM}_LuCY` | `ROADMAP_LuCY` | Majuscules, suffixe `_LuCY`, sans extension `.md` |
+| Exceptions | `README.md` | Documentation publique uniquement |
+
+---
+
+## 2. Code Python
+
+| Élément | Convention | Exemple |
+|---------|------------|---------|
+| Modules | snake_case | `sensation_ex.py` |
+| Classes | PascalCase | `SensationExtravertie`, `LuCYKernel` |
+| Fonctions | snake_case | `perceive()`, `judge()` |
+| Constantes | UPPER_SNAKE | `MAX_WORKING_MEMORY = 1024` |
+| Enums | PascalCase | `FunctionType.SENSATION_EX` |
+| Tests | `test_{module}.py` | `test_sensation_ex.py` |
+
+---
+
+## 3. Code C (noyau natif basse latence)
+
+| Élément | Convention | Exemple |
+|---------|------------|---------|
+| Fichiers | snake_case | `lucy_kernel.c` |
+| Fonctions | snake_case préfixe `lucy_` | `lucy_process()` |
+| Structs | snake_case | `lucy_state_t` |
+| Headers | `lucy_{module}.h` | `lucy_kernel.h` |
+
+---
+
+## 4. Huit fonctions cognitives — noms canoniques
+
+| Code | Nom complet | Abréviation |
+|------|-------------|-------------|
+| `SE` | Sensation Extravertie | `se` |
+| `SI` | Sensation Introvertie | `si` |
+| `NE` | Intuition Extravertie | `ne` |
+| `NI` | Intuition Introvertie | `ni` |
+| `TE` | Pensée Extravertie | `te` |
+| `TI` | Pensée Introvertie | `ti` |
+| `FE` | Sentiment Extraverti | `fe` |
+| `FI` | Sentiment Introverti | `fi` |
+
+---
+
+## 5. États internes
+
+| Code | Signification |
+|------|---------------|
+| `PERCEIVE` | Phase de perception active |
+| `JUDGE`    | Phase de jugement actif |
+| `ARBITRATE`| Coordination en cours |
+| `LEARN`    | Mise à jour mémoire |
+| `IDLE`     | En attente |
+
+---
+
+## 6. Rapports LuCY
+
+| Pattern | Exemple |
+|---------|---------|
+| `rapports/L-{seq:03d}_{module}_{date}.md` | `rapports/L-001_init_2026-10-14.md` |
+| Jamais écraser | Nouveau fichier à chaque exécution |
+| Contenu obligatoire | Avant/après, lignes exactes, nom fichier source |
+
+---
+
+## 7. Logs forensic perpétuels
+
+| Pattern | Exemple |
+|---------|---------|
+| `logs/forensic/lucy_forensic.jsonl` | Append-only, jamais tronqué |
+| `logs/{date}_{module}.json` | Logs d'exécution par session |
+| Format | JSON Lines structuré |
+| Niveau défaut | DEBUG |
+
+**RÈGLE ABSOLUE :** `lucy_forensic.jsonl` est append-only. Toute suppression ou truncation est interdite.
+
+---
+
+## 8. Branches Git
+
+| Pattern | Exemple |
+|---------|---------|
+| `lucy/{description}` | `lucy/kernel-se-ni` |
+| Base | `main` |

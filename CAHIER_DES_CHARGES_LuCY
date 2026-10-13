@@ -1,0 +1,427 @@
+# CAHIER DES CHARGES — Projet LuCY
+
+**Titre :** LuCY — Language Unit for Cognitive Yield
+**Sous-titre :** Noyau cognitif natif à huit opérateurs jungiens pour une nouvelle architecture IA
+**Horodatage :** 2026-10-14T00:00:00Z
+**Statut :** PHASE 0 — Spécification
+**Mode DEBUG :** actif
+**CERTIFIED_100 :** false | **unique_human_proven :** false
+
+---
+
+## 1. Objectif central
+
+Concevoir LuCY comme un **noyau cognitif logiciel original**, capable de :
+
+1. Fonctionner **avec ou sans** un grand modèle de langage (LLM) externe.
+2. Exécuter **huit processus cognitifs** inspirés de la typologie jungienne.
+3. **Coordonner** ces huit processus et arbitrer leurs résultats en conflits.
+4. **Apprendre** à partir de résultats vérifiables et mesurables.
+5. Devenir progressivement une **architecture cognitive autonome**.
+
+**Ce que LuCY n'est pas :**
+- Un chatbot multi-personnalités.
+- Une simulation de personnalités MBTI.
+- Un wrapper de LLM avec des prompts différents pour chaque "type".
+- Un système de réponses statiques classifiées selon 8 cases.
+
+**Ce que LuCY est :**
+- Un moteur d'opérateurs cognitifs calculables.
+- Un système avec des représentations internes d'état.
+- Un apprenant à partir de traces vérifiables.
+- Un prototype exécutable dont l'autonomie se mesure par des tests.
+
+---
+
+## 2. Distinction fondamentale des trois couches
+
+### 2.1 Neurone artificiel classique
+Opération numérique simple : somme pondérée + fonction d'activation.
+`f(x) = σ(W·x + b)`
+
+### 2.2 Module cognitif (ce que LuCY implémente)
+Opération élaborée avec entrées structurées, transformations sémantiques, sorties évaluées :
+- Observer, rappeler, générer des hypothèses, vérifier une logique, arbitrer des valeurs.
+- Chaque module a des **entrées**, des **transformations**, des **sorties**, des **limites** et des **critères d'évaluation**.
+
+### 2.3 Modèle de langage
+Prédiction et génération de séquences (texte, embeddings) depuis paramètres appris.
+
+**LuCY articule les trois sans les confondre.** Le LLM devient un outil facultatif, pas le moteur.
+
+---
+
+## 3. Les huit opérateurs cognitifs
+
+### 3.1 SE — Sensation Extravertie
+**Nature :** Perception
+**Orientation :** Objet extérieur concret
+**Question de départ :** *Qu'est-ce qui est effectivement présent ou en train de se produire ?*
+
+**Entrées :** flux sensoriel / stream de données brutes / événements timestamp
+**Transformations :**
+1. Détection de présence (seuil de détection configurable)
+2. Encodage caractéristiques concrètes (type, magnitude, timestamp, source)
+3. Mise en tampon fenêtre glissante (working_memory_se)
+**Sorties :** `PerceptualFact(exists=bool, properties=dict, confidence=float, ts_ns=int)`
+**Critère d'évaluation :** précision détection, latence, taux de faux positifs
+**Limite :** ne juge pas la valeur ni la signification — constate l'existence
+
+### 3.2 SI — Sensation Introvertie
+**Nature :** Perception
+**Orientation :** Facteur subjectif — comment l'expérience est assimilée intérieurement
+**Question de départ :** *Comment cette expérience concrète est-elle assimilée intérieurement ?*
+
+**Entrées :** `PerceptualFact` (depuis SE) + mémoire épisodique existante
+**Transformations :**
+1. Comparaison avec expériences antérieures stockées
+2. Calcul de similarité vectorielle (embedding de l'expérience)
+3. Pondération par impression subjective (poids appris)
+**Sorties :** `SubjectiveImpression(fact_ref=str, similarity=float, assimilation_weight=float, notes=list)`
+**Critère d'évaluation :** stabilité de l'impression, cohérence inter-sessions
+**Limite :** peut sur-pondérer l'impression au détriment des faits — nécessite un garde-fou SI_BIAS_MAX
+
+### 3.3 NE — Intuition Extravertie
+**Nature :** Perception
+**Orientation :** Possibilités de l'environnement extérieur
+**Question de départ :** *Quelles possibilités cet objet ou cette situation ouvre-t-il ?*
+
+**Entrées :** `PerceptualFact` + graphe de connaissances actuel
+**Transformations :**
+1. Expansion des nœuds voisins dans le graphe (BFS borné, profondeur configurable)
+2. Scoring de plausibilité par co-occurrence apprise
+3. Génération d'hypothèses candidates (top-K par score)
+**Sorties :** `HypothesisSet(candidates=list[Hypothesis], plausibility_scores=dict, expansion_depth=int)`
+**Critère d'évaluation :** taux de confirmation des hypothèses retenues, diversité, non-redondance
+**Limite :** peut générer des hypothèses non réalisables — doit passer par TE ou TI pour validation
+
+### 3.4 NI — Intuition Introvertie
+**Nature :** Perception
+**Orientation :** Images et significations intérieures
+**Question de départ :** *Quelle signification ou configuration se dessine derrière l'expérience ?*
+
+**Entrées :** états internes en cours + patterns abstraits mémorisés
+**Transformations :**
+1. Activation des patterns latents (vecteurs abstraits en mémoire longue durée)
+2. Synthèse d'une représentation compressée (encodeur symbolique)
+3. Propagation à travers le graphe de sens interne
+**Sorties :** `AbstractPattern(symbol=str, confidence=float, semantic_vector=list[float], source_ref=str)`
+**Critère d'évaluation :** pouvoir prédictif du pattern sur de nouveaux cas, cohérence symbolique
+**Limite :** la représentation peut se déconnecter des faits concrets — confrontation obligatoire avec SE
+
+### 3.5 TE — Pensée Extravertie
+**Nature :** Jugement
+**Orientation :** Critères intellectuels extérieurs, données objectives
+**Question de départ :** *Quel jugement est justifié par les données et les références objectives ?*
+
+**Entrées :** `HypothesisSet` + base de faits vérifiés + critères externes chargés
+**Transformations :**
+1. Filtrage des hypothèses selon les règles formelles et les normes applicables
+2. Scoring de cohérence externe (données connues vs hypothèse)
+3. Classement par pertinence objective
+**Sorties :** `ExternalJudgment(accepted=list, rejected=list, criteria_used=list, confidence=float)`
+**Critère d'évaluation :** précision sur jeux de test labellisés, taux de rejet correct
+**Limite :** les critères extérieurs peuvent être incomplets — nécessite rafraîchissement de la base
+
+### 3.6 TI — Pensée Introvertie
+**Nature :** Jugement
+**Orientation :** Cohérence intellectuelle interne, modèle subjectif
+**Question de départ :** *Quel modèle ou principe explique la situation ?*
+
+**Entrées :** `HypothesisSet` + modèles internes actuels + historique de raisonnements
+**Transformations :**
+1. Construction d'un modèle causal minimal (recherche du principe unificateur)
+2. Test de cohérence interne (contradiction ? circularité ?)
+3. Révision du modèle si contradiction détectée
+**Sorties :** `InternalModel(principle=str, consistency_score=float, revision_count=int, contradictions=list)`
+**Critère d'évaluation :** cohérence logique, stabilité sous nouvelles données, généralisation
+**Limite :** un modèle cohérent en interne peut être faux — doit être confronté à SE/NE pour ancrage
+
+### 3.7 FE — Sentiment Extraverti
+**Nature :** Jugement
+**Orientation :** Valeurs et relations du monde extérieur
+**Question de départ :** *Quelle valeur cette décision prend-elle dans le contexte relationnel ?*
+
+**Entrées :** `ExternalJudgment` ou `InternalModel` + registre de valeurs collectives + contexte social
+**Transformations :**
+1. Évaluation par les normes partagées (chargées depuis registre externe)
+2. Calcul d'impact relationnel (qui est affecté ? quels engagements ?)
+3. Score d'acceptabilité sociale de l'action candidate
+**Sorties :** `RelationalValue(acceptability=float, affected_parties=list, norm_ref=list, justification=str)`
+**Critère d'évaluation :** alignement avec valeurs de référence, cohérence des justifications
+**Limite :** peut sur-adapter aux conventions — garde-fou FE_NORM_STALENESS_MAX
+
+### 3.8 FI — Sentiment Introverti
+**Nature :** Jugement
+**Orientation :** Valeurs intérieures profondes
+**Question de départ :** *Quelle valeur cette situation possède-t-elle selon mes critères profonds ?*
+
+**Entrées :** action candidate + registre de valeurs internes appris + historique de décisions
+**Transformations :**
+1. Projection de l'action sur les valeurs internes (distance dans l'espace des valeurs)
+2. Évaluation de conformité aux convictions profondes
+3. Génération d'un signal d'acceptabilité intime (pas nécessairement verbalisé)
+**Sorties :** `InternalValue(congruence=float, conviction_level=float, expression_needed=bool, notes=str)`
+**Critère d'évaluation :** stabilité inter-sessions des valeurs, cohérence avec les décisions passées
+**Limite :** le jugement peut rester silencieux — mécanisme d'explicitation requis pour transmission
+
+---
+
+## 4. Le noyau LuCY — architecture
+
+### 4.1 État interne (`LuCYState`)
+
+```python
+@dataclass
+class LuCYState:
+    # Perception courante
+    perceptual_buffer: list[PerceptualFact]         # SE output
+    subjective_impressions: list[SubjectiveImpression]  # SI output
+
+    # Hypothèses actives
+    hypothesis_set: HypothesisSet                   # NE output
+    abstract_patterns: list[AbstractPattern]         # NI output
+
+    # Jugements actifs
+    external_judgment: ExternalJudgment             # TE output
+    internal_model: InternalModel                   # TI output
+    relational_value: RelationalValue               # FE output
+    internal_value: InternalValue                   # FI output
+
+    # Méta
+    active_phase: str                               # PERCEIVE / JUDGE / ARBITRATE / LEARN
+    cycle_count: int
+    ts_ns: int                                      # horodatage nanoseconde
+    last_action: str
+    certified_100: bool = False                     # INVARIANT — jamais True sans preuve
+    unique_human_proven: bool = False               # INVARIANT — jamais True sans preuve
+```
+
+### 4.2 Cycle d'exécution
+
+```
+Input (stimulus)
+      │
+      ▼
+Phase PERCEIVE
+  ├── SE → PerceptualFact
+  └── SI → SubjectiveImpression
+      │
+      ▼
+Phase PERCEIVE-DEEP
+  ├── NE → HypothesisSet
+  └── NI → AbstractPattern
+      │
+      ▼
+Phase JUDGE
+  ├── TE → ExternalJudgment
+  ├── TI → InternalModel
+  ├── FE → RelationalValue
+  └── FI → InternalValue
+      │
+      ▼
+Phase ARBITRATE
+  └── Coordinator → ActionDecision
+      │
+      ▼
+Phase LEARN
+  └── MemoryUpdater → mémoire longue durée mise à jour
+      │
+      ▼
+Output (action + trace forensic)
+```
+
+### 4.3 Coordinateur et arbitrage
+
+Le coordinateur reçoit les 8 sorties et applique une politique d'arbitrage :
+
+**Politique par défaut (Phase 0) :**
+- Conflit TE vs TI → priorité TE si données externes disponibles, sinon TI
+- Conflit FE vs FI → log du conflit + escalade vers état CONFLICT_PENDING
+- Perception faible (SE confidence < seuil) → bloquer NE et TE jusqu'à confirmation
+- Consensus 6/8 opérateurs → action validée (décision majoritaire pondérée)
+
+**Poids par défaut (appris ensuite) :**
+- SE: 1.0, SI: 0.8, NE: 0.9, NI: 0.7, TE: 1.0, TI: 0.9, FE: 0.7, FI: 0.7
+
+### 4.4 Mémoire
+
+| Couche | Type | Durée | Capacité |
+|--------|------|-------|----------|
+| Working Memory | Buffer circulaire | Cycle courant | 1 024 entrées |
+| Épisodique | Liste horodatée | Persistant | Illimitée (JSONL) |
+| Sémantique | Graphe de connaissances | Persistant | Illimitée (JSON) |
+| Procédurale | Règles + poids appris | Persistant | Fichier binaire |
+
+---
+
+## 5. Log forensic perpétuel
+
+**Fichier :** `logs/forensic/lucy_forensic.jsonl`
+**Format :** JSON Lines, une entrée par événement
+**Règle absolue :** append-only, jamais tronqué, jamais supprimé
+
+**Structure d'une entrée :**
+```json
+{
+  "ts_ns": 1728864000000000000,
+  "ts_iso": "2026-10-14T00:00:00.000000000Z",
+  "event_type": "CYCLE_START | PERCEIVE | JUDGE | ARBITRATE | LEARN | ERROR | INIT",
+  "cycle_id": "lucy_c000001",
+  "phase": "PERCEIVE",
+  "function": "SE",
+  "input_hash": "sha256:abc123...",
+  "output_summary": {"exists": true, "confidence": 0.92},
+  "duration_ns": 12345,
+  "state_hash": "sha256:def456...",
+  "debug": true,
+  "certified_100": false,
+  "unique_human_proven": false
+}
+```
+
+---
+
+## 6. Apprentissage et mémoire
+
+### 6.1 Sources de vérité pour l'apprentissage
+
+1. **Résultats vérifiés** : comparaison prédiction vs réalité mesurée
+2. **Erreurs détectées** : divergence entre jugement et feedback externe
+3. **Connaissances réutilisables** : patterns ayant obtenu un score de confirmation ≥ 0.8
+4. **Adaptation mesurée** : différence de performance avant/après mise à jour
+
+### 6.2 Mécanisme de mise à jour (Phase 0 — gradient discret)
+
+```python
+def update_weights(self, feedback: float, function_id: str) -> None:
+    """
+    feedback ∈ [-1.0, +1.0]
+    -1.0 = erreur complète, 0.0 = neutre, +1.0 = succès parfait
+    """
+    delta = LEARNING_RATE * feedback
+    self.weights[function_id] = clamp(self.weights[function_id] + delta, MIN_W, MAX_W)
+    self._log_forensic("LEARN", {"function": function_id, "delta": delta, "feedback": feedback})
+```
+
+---
+
+## 7. Indépendance vis-à-vis d'un LLM
+
+### 7.1 Mode NATIVE (défaut)
+
+Les 8 opérateurs s'exécutent sans aucun appel LLM :
+- SE/SI : algorithmes de traitement de signal / similarité vectorielle
+- NE/NI : expansion de graphe + activation de patterns
+- TE/TI : évaluation logique + cohérence interne
+- FE/FI : calcul de distance dans l'espace des valeurs
+
+### 7.2 Mode AUGMENTED (optionnel)
+
+LLM externe utilisé comme outil pour :
+- Enrichir la base de faits (NE)
+- Verbaliser les jugements internes (TI → explicitation)
+- Générer des hypothèses alternatives supplémentaires (NE)
+
+**Activation :** `LUCY_LLM_ENABLED=true` + clé API dans `.env`
+**Jamais requis** pour le fonctionnement de base.
+
+---
+
+## 8. Tests et validation
+
+### 8.1 Tests unitaires (Phase 0)
+- T01–T08 : chaque opérateur isolé avec entrées/sorties connues
+- T09–T16 : paires d'opérateurs (SE→NE, TI→FI, etc.)
+- T17–T24 : cycle complet avec stimuli simples
+- T25–T32 : arbitrage en cas de conflit
+
+### 8.2 Tests d'autonomie (Phase 1)
+- A01 : LuCY résout un problème logique simple SANS LLM
+- A02 : LuCY détecte une contradiction dans ses propres jugements
+- A03 : LuCY apprend à améliorer un poids après feedback négatif
+- A04 : LuCY persiste son état entre deux sessions et retrouve le contexte
+
+### 8.3 Métriques d'évaluation
+- **Précision perceptuelle** (SE/SI) : % de faits correctement identifiés
+- **Taux d'hypothèses validées** (NE) : % d'hypothèses confirmées
+- **Cohérence des jugements** (TE/TI) : % de décisions cohérentes sur des paires équivalentes
+- **Stabilité des valeurs** (FE/FI) : variance inter-sessions des scores de valeur
+
+---
+
+## 9. Architecture technique (Phase 0)
+
+```
+LuCY/
+├── src/lucy/
+│   ├── kernel/
+│   │   ├── lucy_kernel.py       ← Noyau principal, cycle d'exécution
+│   │   ├── lucy_state.py        ← LuCYState dataclass
+│   │   └── lucy_coordinator.py  ← Arbitrage 8 opérateurs
+│   ├── functions/
+│   │   ├── sensation_ex.py      ← SE
+│   │   ├── sensation_in.py      ← SI
+│   │   ├── intuition_ex.py      ← NE
+│   │   ├── intuition_in.py      ← NI
+│   │   ├── thinking_ex.py       ← TE
+│   │   ├── thinking_in.py       ← TI
+│   │   ├── feeling_ex.py        ← FE
+│   │   └── feeling_in.py        ← FI
+│   ├── memory/
+│   │   ├── working_memory.py    ← Buffer circulaire cycle courant
+│   │   ├── episodic_memory.py   ← JSONL append-only
+│   │   ├── semantic_memory.py   ← Graphe de connaissances JSON
+│   │   └── procedural_memory.py ← Poids appris + règles
+│   ├── coordination/
+│   │   ├── arbitrator.py        ← Politique de résolution de conflits
+│   │   └── action_selector.py   ← Sélection de l'action finale
+│   ├── learning/
+│   │   ├── feedback_processor.py ← Traitement du feedback
+│   │   └── weight_updater.py     ← Mise à jour des poids
+│   └── io/
+│       ├── forensic_logger.py   ← Log perpétuel JSONL
+│       └── llm_adapter.py       ← Adaptateur LLM optionnel (mode AUGMENTED)
+├── tests/
+│   └── test_*.py
+├── logs/
+│   └── forensic/
+│       └── lucy_forensic.jsonl  ← APPEND-ONLY PERPÉTUEL
+├── rapports/
+├── docs/
+├── simulations/
+├── scripts/
+│   └── lucy_forensic_reader.py  ← Lecture/analyse du log forensic
+├── CAHIER_DES_CHARGES_LuCY
+├── ROADMAP_LuCY
+├── STANDARD_NAMES_LuCY
+└── README.md
+```
+
+---
+
+## 10. Contraintes absolues (héritées du PROTOCOLE ARTCB)
+
+| Règle | Détail |
+|-------|--------|
+| Pas de mock/stub | Chaque opérateur doit être réel — pas de placeholder |
+| Mode DEBUG | Actif jusqu'à désactivation explicite utilisateur |
+| CERTIFIED_100=false | Jamais vrai sans preuve mesurée |
+| unique_human_proven=false | Jamais vrai sans preuve biométrique |
+| Log forensic | Append-only perpétuel — jamais wipe |
+| Rapports | Jamais écraser — nouveau fichier L-NNN à chaque session |
+| Avancement | Présenter % en temps réel |
+| Langues | Code en anglais, rapports en français |
+
+---
+
+## 11. Questions ouvertes (à trancher par l'utilisateur avant Phase 1)
+
+| ID | Question | Options |
+|----|----------|---------|
+| Q-L01 | Quel format de stimulus d'entrée pour la Phase 0 ? | A) Texte brut, B) JSON structuré, C) Les deux |
+| Q-L02 | LLM externe à utiliser en mode AUGMENTED ? | A) Bob CLI, B) Ollama local, C) OpenAI, D) Aucun (natif pur) |
+| Q-L03 | Langue de l'interface LuCY (CLI/API) ? | A) Anglais, B) Français, C) Multilingue |
+| Q-L04 | Persistance de la mémoire : fichiers locaux ou SQLite ? | A) JSONL fichiers, B) SQLite, C) Les deux |
+| Q-L05 | Intégration ARTCB blockchain pour graver les cycles ? | A) Oui (preuves on-chain), B) Non (indépendant), C) Optionnel |
+
