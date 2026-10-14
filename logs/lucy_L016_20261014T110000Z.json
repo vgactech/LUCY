@@ -1,0 +1,146 @@
+{
+  "timestamp": "20261014T110000Z",
+  "report": "L-016",
+  "version": "4.1",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "corrections": {
+    "FIX-1_P0G_attribution_temporelle": {
+      "description": "pi.update() recoit maintenant prev_sid_colors (etat AVANT l'action) au lieu de curr_sid_colors (etat APRES)",
+      "fichier_source": "LuCY/src/lucy/kernel/lucy_agent_v41.py",
+      "ligne_corrigee": "self.pi.update(prev_sid_coarse, prev_sid_colors, action_id, reward, level_up)",
+      "ligne_avant_v40": "self.pi.update(curr_sid_coarse, curr_sid_colors, action_id, reward, level_up)",
+      "impact": "color_action_rewards[prev_colors][action] est maintenant alimentee correctement — l'agent apprend quelle action fonctionne quand il VOIT un etat, pas dans l'etat resultant"
+    },
+    "FIX-2_P0J_persistance_complete": {
+      "description": "_save_cognitive_state() / _load_cognitive_state() — snapshot COMPLET",
+      "fichier_source": "LuCY/src/lucy/kernel/lucy_agent_v41.py",
+      "nouveau_fichier_persistance": "/kaggle/working/lucy_cognitive_state.json",
+      "ancien_fichier_persistance": "/kaggle/working/lucy_game_patterns.json (compat conserve)",
+      "champs_nouveaux": ["q_table", "n_sa", "n_s", "pi_state.color_action_rewards", "level_count", "total_actions"],
+      "champ_avant_v40": "game_patterns uniquement",
+      "impact": "L'agent reprend son apprentissage Q-learning complet entre les runs Kaggle (pas de reinitialisation a zero)"
+    },
+    "FIX-T89_test_chemin_reel": {
+      "description": "T104 remplace T89 — test verifie le comportement via update() reel",
+      "ancien_t89": "manipulation directe _actions_since_last_checkpoint = 0 avant appel",
+      "nouveau_t104": "update(level_up=True) depuis un compteur INTERVAL-1 → verifie compteur==1 apres"
+    }
+  },
+  "tests": {
+    "new_v41": {
+      "range": "T91-T106",
+      "count": 16,
+      "status": "PASS",
+      "regressions": 0
+    },
+    "regression_v40": {
+      "range": "T75-T90",
+      "count": 16,
+      "status": "PASS",
+      "regressions": 0
+    },
+    "total": {
+      "count": 32,
+      "status": "PASS"
+    }
+  },
+  "comparaison_lucy_vs_modeles_existants": {
+    "neurones_standard_vs_lucy": {
+      "neurone_standard": {
+        "architecture": "Couche lineaire + activation (ReLU/sigmoid/softmax)",
+        "apprentissage": "Backpropagation sur gradient de perte",
+        "memoire": "Aucune (stateless entre inferences)",
+        "exploration": "Aucune (deterministe a l'inference)",
+        "explication": "Boite noire — pas d'acces aux raisons d'un choix",
+        "cout_calcul": "O(n * m) par couche, GPU requis pour les grands modeles"
+      },
+      "operateur_lucy": {
+        "architecture": "10 fonctions cognitives specialisees (SE/SI/NE/NI/TE/TI/FE/FI + PE/PI)",
+        "apprentissage": "Q-learning tabular + UCB1 + accumulation de patterns",
+        "memoire": "Stateful — q_table, n_sa, game_patterns persistent entre runs",
+        "exploration": "Epsilon-greedy adaptatif + UCB1 (explore / exploit / escape_cycle)",
+        "explication": "Chaque decision tracable — quel operateur a domine, quel bonus a ete applique",
+        "cout_calcul": "O(|actions| * log(|states|)) — CPU-only, tres rapide"
+      },
+      "differences_cles": [
+        "Les neurones standard apprennent par minimisation d'un signal global (gradient). LuCY apprend par accumulation locale (Q(s,a) mis a jour incrementalement).",
+        "Un neurone n'a pas de notion d'etat interne entre deux appels. LuCY maintient prev_sid, stuck_counter, game_patterns — un contexte persistant.",
+        "Un neurone standard ne sait pas quand il est 'bloque'. LuCY detecte les cycles via ne_detect_stuck() et bascule en mode escape_cycle.",
+        "Un neurone optimise une fonction de perte sur l'ensemble des donnees. LuCY optimise localement chaque transition (s, a, r, s') via l'equation de Bellman.",
+        "Les neurones standard n'ont pas de memoire multi-echelle. LuCY a sid_full (precision pixel), sid_coarse (invariant bruit), sid_colors (contexte couleur)."
+      ]
+    },
+    "lucy_vs_dqn": {
+      "dqn": {
+        "fonction_valeur": "Reseau de neurones — approxime Q(s,a)",
+        "exploration": "Epsilon-greedy",
+        "memoire": "Replay buffer (experience replay)",
+        "generalisation": "OUI — le reseau generalise a des etats jamais vus",
+        "donnees_requises": "Beaucoup (10^5 a 10^6 transitions pour converger)"
+      },
+      "lucy_v41": {
+        "fonction_valeur": "Table Q explicite — stocke exactement Q(s,a) pour chaque (s,a) rencontre",
+        "exploration": "UCB1 + epsilon-greedy adaptatif + escape_cycle",
+        "memoire": "State archive + q_table + game_patterns (persistants — FIX-2)",
+        "generalisation": "Partielle — sid_coarse et sid_colors permettent une abstraction legere",
+        "donnees_requises": "Peu (converge en quelques centaines d'actions par niveau)"
+      },
+      "avantage_lucy_arc": "ARC-AGI-3 a un budget d'actions limite (3000). LuCY converge plus vite qu'un DQN grace a UCB1 (exploration systematique des actions non essayees).",
+      "faiblesse_lucy_arc": "Pas de generalisation inter-puzzles (chaque sid_full est unique) — l'agent ne transfert pas ce qu'il a appris sur un puzzle A au puzzle B."
+    },
+    "lucy_vs_llm": {
+      "llm": {
+        "approach": "Sequence to sequence — le modele decode une reponse token par token",
+        "memoire_contexte": "Fenetre de contexte (4k-200k tokens) — pas de memoire persistante par defaut",
+        "raisonnement": "Pattern matching a grande echelle sur le pretraining",
+        "interaction": "Stateless (chaque appel independant sauf RAG ou tool use)",
+        "contrainte_arc": "ARC-AGI-3 est un jeu interactif — le LLM doit etre wrappe dans une boucle d'action"
+      },
+      "lucy_v41": {
+        "approach": "Agent RL tabular — decision par scoring multi-criteres (UCB1 + patterns + couleurs)",
+        "memoire": "Persistante entre actions et entre runs (FIX-2) — q_table + game_patterns",
+        "raisonnement": "Trace des patterns (coarse → action → level_up) reexploites",
+        "interaction": "Natif — concu pour la boucle action/observation/reward",
+        "contrainte_arc": "Pas de comprehension semantique des puzzles ARC (absence de raisonnement abstrait)"
+      },
+      "verdict": "LuCY est adapte a l'exploration sequentielle dans un espace d'action borne. Les LLMs ont l'avantage sur la comprehension des regles visuelles des puzzles ARC. Une architecture hybride (LLM pour comprendre la regle + LuCY pour executer les actions) serait plus efficace."
+    }
+  },
+  "anomalies_identifiees": {
+    "closes": ["ANO-007 (P0-G non branche)", "ANO-008 (click aveugle)", "ANO-009 (checkpoint manquant)", "ANO-010 (stuck_counter partiel)"],
+    "residuelles_v40_closes_v41": [
+      "BUG-R1: pi.update() recevait curr_sid_colors (etat APRES) — corrige FIX-1",
+      "BUG-R2: seul game_patterns persiste — corrige FIX-2",
+      "BUG-R3: T89 ne testait pas le chemin update() — corrige T104"
+    ],
+    "ouvertes": [
+      "A-001: explosion combinatoire — sid_full unique par frame, q_table croissante sans borne",
+      "A-002: invariance perceptive — legere perturbation visuelle = sid_full different = recommencer l'exploration",
+      "A-003: irrésolubiilte — certains niveaux ARC-AGI-3 necessitent un raisonnement abstrait que Q-learning tabular ne peut pas modeliser"
+    ]
+  },
+  "ce_qui_reussit": [
+    "Exploration systematique des actions non essayees (UCB1 — garanti ne pas sauter une action)",
+    "Detection de cycles (ne_detect_stuck + escape_cycle)",
+    "Persistance des patterns de niveau en niveau (game_patterns inter-niveaux)",
+    "Click strategique sur les pixels saillants (P0-H centroide)",
+    "Correction du bug de reset stuck_counter (P0-I)",
+    "Attribution couleur-action coherente apres FIX-1 (prev_sid_colors)",
+    "Persistance complete entre runs apres FIX-2 (q_table survit au restart)"
+  ],
+  "ce_qui_ne_reussit_pas": [
+    "Generalisation inter-puzzles (sid_full = fingerprint unique — pas de transfert entre puzzles)",
+    "Comprehension des regles visuelles abstraites ARC (pas de module de vision/perception semantique)",
+    "Convergence sur les niveaux avec espace d'etats tres grand (explosion combinatoire A-001)",
+    "Robustesse au bruit visuel (A-002 invariance perceptive)"
+  ],
+  "files_created": [
+    "LuCY/src/lucy/kernel/lucy_agent_v41.py",
+    "LuCY/tests/test_lucy_v41_corrections.py",
+    "LuCY/scripts/update_notebook_v41.py",
+    "LuCY/notebooks/arc3/lucy_arc_agi3_submission.ipynb (mis a jour v4.1)"
+  ],
+  "next_step": "Push Kaggle v4 via kaggle_push_api.py"
+}
