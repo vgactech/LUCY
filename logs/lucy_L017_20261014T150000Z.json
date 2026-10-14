@@ -1,0 +1,59 @@
+{
+  "ts": "20261014T150000Z",
+  "report": "L-017",
+  "version_agent": "5.0",
+  "CERTIFIED_100": false,
+  "unique_human_proven": false,
+  "DEBUG": true,
+  "tests": {
+    "T107_T122_v50": {"passed": 17, "failed": 0},
+    "T75_T90_v40_nonreg": {"passed": 16, "failed": 0},
+    "T91_T106_v41_nonreg": {"passed": 16, "failed": 0},
+    "total": {"passed": 49, "failed": 0}
+  },
+  "files_created": [
+    "LuCY/src/lucy/kernel/lucy_agent_v50.py",
+    "LuCY/tests/test_lucy_v50_architecture.py",
+    "LuCY/logs/lucy_L017_20261014T150000Z.json",
+    "LuCY/rapports/L-017_lucy_v50_architecture_comparaison_2026-10-14.md"
+  ],
+  "files_modified": [
+    "LuCY/notebooks/arc3/kernel-metadata.json",
+    "LuCY/scripts/kaggle_push_api.py"
+  ],
+  "kernel_metadata_changes": {
+    "is_private": {"before": false, "after": true},
+    "enable_gpu": {"before": false, "after": true},
+    "accelerator": {"before": null, "after": "gpu"},
+    "title": {"before": "LuCY Cognitive Kernel Arc Agi3", "after": "LuCY Cognitive Kernel Arc Agi3 v5.0"}
+  },
+  "architecture_v50": {
+    "level1_functions": ["SE", "SI", "NE", "NI", "TE", "TI", "FE", "FI"],
+    "level2_controllers": {
+      "PI_ctrl": ["NI", "SI"],
+      "PE_ctrl": ["NE", "SE"],
+      "DI_ctrl": ["TI", "FI"],
+      "DE_ctrl": ["TE", "FE"]
+    },
+    "level3_meta_controller": {
+      "profile": "INTP",
+      "priority_order": ["DI", "PE", "PI", "DE"],
+      "data_flows_through_meta": false,
+      "authorizations_only": true
+    }
+  },
+  "adaptive_reward": {
+    "win": 10.0,
+    "level_up_base": 2.0,
+    "level_up_max": 4.0,
+    "cycle_base": -0.05,
+    "amplification_with_progress_rate": true,
+    "stagnation_penalty": true
+  },
+  "comparison_models": {
+    "standard_neuron_dnn": "see_L017_section5",
+    "dqn": "see_L017_section5",
+    "llm_gpt4_claude": "see_L017_section5",
+    "arc_arc2_winner": "see_L017_section5"
+  }
+}

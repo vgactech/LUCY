@@ -3,6 +3,12 @@
 LuCY — Script push kernel Kaggle via API REST v1 (Basic auth)
 Endpoint correct: POST /api/v1/kernels/push
 
+RÈGLE PERMANENTE (décision utilisateur) :
+  - is_private=True    : kernel TOUJOURS en privé
+  - enable_gpu=True    : GPU TOUJOURS activé
+  - accelerator="gpu"  : accélérateur explicitement "gpu"
+
+v5.0 — architecture 3 niveaux + reward adaptatif
 CERTIFIED_100=false | unique_human_proven=false | DEBUG=true
 """
 
@@ -61,16 +67,18 @@ def push_kernel(username, key):
     with open(METADATA_FILE) as f:
         meta = json.load(f)
 
-    # Payload format KernelPushRequest (API v1 officielle)
+    # RÈGLE PERMANENTE : privacy=True + GPU activé (décision utilisateur — v5.0)
+    # is_private et enable_gpu sont FORCÉS ici indépendamment du metadata
     payload = {
         "slug": meta["id"],
         "newTitle": meta["title"],
         "text": notebook_content,
         "language": meta["language"],
         "kernelType": meta["kernel_type"],
-        "isPrivate": meta["is_private"],
-        "enableGpu": meta["enable_gpu"],
-        "enableInternet": meta["enable_internet"],
+        "isPrivate": True,           # FORCÉ — jamais public
+        "enableGpu": True,           # FORCÉ — GPU toujours activé
+        "accelerator": "gpu",        # FORCÉ — accélérateur explicite
+        "enableInternet": meta.get("enable_internet", False),
         "competitionDataSources": meta.get("competition_sources", []),
         "datasetDataSources": meta.get("dataset_sources", []),
         "kernelDataSources": meta.get("kernel_sources", []),
@@ -78,6 +86,7 @@ def push_kernel(username, key):
     }
 
     print(f"  [PUSH] kernel_id={meta['id']}")
+    print(f"  [PUSH] is_private=True (forcé) | enable_gpu=True (forcé) | accelerator=gpu")
     print(f"  [PUSH] competition={meta.get('competition_sources', [])}")
     print(f"  [PUSH] notebook_size={len(notebook_content)} chars")
 
@@ -130,7 +139,7 @@ def main():
     log["steps"].append({"step": 2, "status": "OK"})
 
     # Push kernel
-    print("\n[STEP 3] Push kernel v3.2 sur Kaggle...")
+    print("\n[STEP 3] Push kernel v5.0 sur Kaggle (privacy=True, GPU=True, accelerator=gpu)...")
     push_status, push_data = push_kernel(username, key)
     print(f"\n  [PUSH RESULT] HTTP {push_status}")
     print(f"  [PUSH RESULT] {json.dumps(push_data, indent=2)[:500]}")
