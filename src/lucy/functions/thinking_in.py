@@ -20,7 +20,8 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from .types import HypothesisSet, InternalModel
+from .contracts import CONTRACT_TI
+from .types import HypothesisSet, InternalModel, OperatorTrace
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -121,10 +122,12 @@ def _compute_consistency(
 class PenseeIntrovertie:
     """TI — Construction d'un modèle causal minimal cohérent en interne.
 
+    Phase 2 : contrat opérationnel formel intégré (CONTRACT_TI).
     Transformations :
     1. Construction du modèle causal minimal (principe unificateur)
     2. Test de cohérence interne (contradiction ? circularité ?)
     3. Révision du modèle si contradiction détectée
+    4. Vérification des limites du contrat + génération OperatorTrace
     """
 
     def __init__(self, model_store: InternalModelStore | None = None) -> None:
@@ -136,37 +139,56 @@ class PenseeIntrovertie:
             "known": ["unknown"],
             "true": ["false"],
         }
+        self.contract = CONTRACT_TI
 
     def add_contradiction(self, concept_a: str, concept_b: str) -> None:
         """Enregistrer une paire contradictoire (apprissage)."""
         self._known_contradictions.setdefault(concept_a, []).append(concept_b)
         self._known_contradictions.setdefault(concept_b, []).append(concept_a)
 
-    def process(self, hypothesis_set: HypothesisSet) -> InternalModel:
+    def process(self, hypothesis_set: HypothesisSet, cycle_ref: str = "") -> InternalModel:
         """Construire un modèle causal interne à partir des hypothèses.
 
         Args:
-            hypothesis_set: sortie de NE
+            hypothesis_set : sortie de NE
+            cycle_ref      : identifiant du cycle appelant (traçabilité Phase 2).
 
         Returns:
-            InternalModel — principe + score de cohérence + contradictions
+            InternalModel — principe + score de cohérence + contradictions.
+            Le champ `trace` contient la traçabilité complète.
         """
         t_start = time.time_ns()
+        input_hash = hypothesis_set.trace.input_hash if hypothesis_set.trace else ""
+
+        trace = OperatorTrace(
+            operator_id="TI",
+            cycle_ref=cycle_ref,
+            input_hash=input_hash,
+        )
 
         if not hypothesis_set.candidates:
-            return InternalModel(
+            trace.intermediate_steps.append("model:no_candidates")
+            result = InternalModel(
                 principle="no_hypothesis",
                 consistency_score=0.0,
                 revision_count=0,
                 contradictions=[],
                 ts_ns=t_start,
+                trace=trace,
             )
+            all_ok, violated = self.contract.check_all_limits(result)
+            trace.limits_checked = True
+            trace.limits_violated = violated
+            trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+            trace.duration_ns = time.time_ns() - t_start
+            return result
 
         candidates = [h.concept for h in hypothesis_set.candidates]
         plausibilities = {h.concept: h.plausibility for h in hypothesis_set.candidates}
 
         # --- Étape 1 : détection des contradictions ---
         contradictions = _detect_contradictions(candidates, self._known_contradictions)
+        trace.intermediate_steps.append(f"contradictions_detected:{contradictions}")
 
         revision_count = 0
 
@@ -186,9 +208,13 @@ class PenseeIntrovertie:
             contradictions = _detect_contradictions(candidates, self._known_contradictions)
             revision_count += 1
 
+        trace.intermediate_steps.append(f"revision_count:{revision_count}")
+
         # --- Étape 3 : construction du principe unificateur ---
         consistency = _compute_consistency(candidates, contradictions, plausibilities)
         principle = _build_principle(candidates, consistency)
+        trace.intermediate_steps.append(f"principle_built:{principle}")
+        trace.intermediate_steps.append(f"candidates_after_revision:{candidates}")
 
         model = InternalModel(
             principle=principle,
@@ -196,7 +222,15 @@ class PenseeIntrovertie:
             revision_count=revision_count,
             contradictions=contradictions,
             ts_ns=t_start,
+            trace=trace,
         )
+
+        # --- Phase 2 : vérification du contrat ---
+        all_ok, violated = self.contract.check_all_limits(model)
+        trace.limits_checked = True
+        trace.limits_violated = violated
+        trace.criteria_scores = self.contract.evaluate_all_criteria(model)
+        trace.duration_ns = time.time_ns() - t_start
 
         # Mémoriser le modèle
         self.model_store.store(principle, model)

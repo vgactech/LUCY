@@ -22,7 +22,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from .types import InternalValue
+from .contracts import CONTRACT_FI
+from .types import InternalValue, OperatorTrace
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -100,37 +101,61 @@ class InternalValueRegistry:
 class SentimentIntroverti:
     """FI — Évaluation par les valeurs internes profondes.
 
+    Phase 2 : contrat opérationnel formel intégré (CONTRACT_FI).
     Transformations :
     1. Projection de l'action sur les valeurs internes (distance dans l'espace des valeurs)
     2. Évaluation de conformité aux convictions profondes
     3. Génération du signal d'acceptabilité intime (+ explicitation si nécessaire)
+    4. Vérification des limites du contrat + génération OperatorTrace
     """
 
     def __init__(self, registry: InternalValueRegistry | None = None) -> None:
         self.registry = registry or InternalValueRegistry()
+        self.contract = CONTRACT_FI
 
-    def process(self, action_candidate: str, context: dict | None = None) -> InternalValue:
+    def process(self, action_candidate: str, context: dict | None = None, cycle_ref: str = "") -> InternalValue:
         """Évaluer une action candidate par rapport aux valeurs internes.
 
         Args:
-            action_candidate: description de l'action (str)
-            context: contexte optionnel (jugements précédents)
+            action_candidate : description de l'action (str)
+            context          : contexte optionnel (jugements précédents)
+            cycle_ref        : identifiant du cycle appelant (traçabilité Phase 2).
 
         Returns:
-            InternalValue — congruence, conviction, signal d'expression
+            InternalValue — congruence, conviction, signal d'expression.
+            Le champ `trace` contient la traçabilité complète.
         """
         t_start = time.time_ns()
         ctx = context or {}
 
+        import hashlib
+        import json
+        input_hash = "sha256:" + hashlib.sha256(
+            json.dumps(action_candidate, default=str).encode()
+        ).hexdigest()[:16]
+
+        trace = OperatorTrace(
+            operator_id="FI",
+            cycle_ref=cycle_ref,
+            input_hash=input_hash,
+        )
+
         values = self.registry.all_values()
         if not values:
-            return InternalValue(
+            result = InternalValue(
                 congruence=0.5,
                 conviction_level=FI_CONVICTION_MIN,
                 expression_needed=False,
                 notes="no_internal_values_loaded",
                 ts_ns=t_start,
+                trace=trace,
             )
+            trace.intermediate_steps.append("values_evaluated:none")
+            trace.limits_checked = True
+            trace.limits_violated = []
+            trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+            trace.duration_ns = time.time_ns() - t_start
+            return result
 
         # --- Étape 1 : évaluation par chaque valeur interne ---
         congruence_scores: list[float] = []
@@ -141,6 +166,9 @@ class SentimentIntroverti:
             congruence_scores.append(score * val.weight)
             if score < 0.4:
                 violation_notes.append(f"low_congruence:{val.value_id}={round(score, 3)}")
+
+        trace.intermediate_steps.append(f"values_evaluated:{[v.value_id for v in values]}")
+        trace.intermediate_steps.append(f"violation_notes:{violation_notes}")
 
         # --- Étape 2 : calcul de la congruence globale ---
         total_weight = sum(v.weight for v in values)
@@ -155,6 +183,9 @@ class SentimentIntroverti:
         deviation = abs(congruence - past_avg)
         conviction_level = round(max(FI_CONVICTION_MIN, 1.0 - deviation), 4)
 
+        trace.intermediate_steps.append(f"congruence_score:{congruence:.4f}")
+        trace.intermediate_steps.append(f"conviction_level:{conviction_level:.4f}")
+
         # --- Étape 3 : signal d'expression ---
         expression_needed = congruence < FI_EXPRESSION_THRESHOLD
 
@@ -165,13 +196,23 @@ class SentimentIntroverti:
         # Mémorisation
         self.registry.record_decision(action_candidate, congruence)
 
-        return InternalValue(
+        result = InternalValue(
             congruence=congruence,
             conviction_level=conviction_level,
             expression_needed=expression_needed,
             notes=notes,
             ts_ns=t_start,
+            trace=trace,
         )
+
+        # --- Phase 2 : vérification du contrat ---
+        all_ok, violated = self.contract.check_all_limits(result)
+        trace.limits_checked = True
+        trace.limits_violated = violated
+        trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+        trace.duration_ns = time.time_ns() - t_start
+
+        return result
 
     def _evaluate_against_value(
         self,

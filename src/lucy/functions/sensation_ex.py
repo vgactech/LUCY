@@ -5,11 +5,15 @@ Projet : LuCY (Language Unit for Cognitive Yield)
 Module : functions / sensation_ex
 Auteur : LuCY Project
 
-Question de départ : Qu'est-ce qui est effectivement présent ou en train de se produire ?
-
-Nature : Perception
-Orientation : Objet extérieur concret
-Limite : ne juge pas la valeur ni la signification — constate l'existence
+Phase 2 — Contrat opérationnel formel :
+  Opération  : Détecter les caractéristiques présentes et les changements observables.
+  Mécanisme  : Extraction heuristique de propriétés concrètes (texte/JSON/événement) +
+               score de confiance par type de source. Aucun LLM externe.
+  Sortie     : PerceptualFact (exists, properties, confidence, trace)
+  Limites    : ne juge pas la valeur ni la signification — constate l'existence.
+               confidence TOUJOURS dans [0.0, 1.0].
+  Traçabilité: source_type, detection_step, confidence_computation dans OperatorTrace.
+  Critères   : detection_rate + properties_non_empty (voir CONTRACT_SE).
 
 CERTIFIED_100=false | unique_human_proven=false
 Mode DEBUG actif
@@ -24,7 +28,8 @@ import re
 import time
 from typing import Any
 
-from .types import PerceptualFact
+from .contracts import CONTRACT_SE
+from .types import OperatorTrace, PerceptualFact
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -155,10 +160,12 @@ def _compute_confidence(source_type: str, data: Any) -> float:
 class SensationExtravertie:
     """SE — Perception de ce qui est effectivement présent.
 
+    Phase 2 : contrat opérationnel formel intégré (CONTRACT_SE).
     Transformations :
     1. Détection de présence (seuil DETECTION_THRESHOLD)
     2. Encodage des caractéristiques concrètes
-    3. Mise en tampon fenêtre glissante (via working memory externe)
+    3. Vérification des limites du contrat + génération OperatorTrace
+    4. Mise en tampon fenêtre glissante (via working memory externe)
 
     Ne juge pas, ne suppose pas — constate l'existence.
     """
@@ -166,31 +173,49 @@ class SensationExtravertie:
     def __init__(self, threshold: float = DETECTION_THRESHOLD) -> None:
         self.threshold = threshold
         self._call_count: int = 0
+        self.contract = CONTRACT_SE
 
-    def process(self, stimulus: Any) -> PerceptualFact:
+    def process(self, stimulus: Any, cycle_ref: str = "") -> PerceptualFact:
         """Traiter un stimulus et produire un PerceptualFact.
 
         Args:
-            stimulus: texte brut (str), objet JSON (dict), événement horodaté (dict
-                      avec clé 'ts_ns'), ou None.
+            stimulus  : texte brut (str), objet JSON (dict), événement horodaté (dict
+                        avec clé 'ts_ns'), ou None.
+            cycle_ref : identifiant du cycle appelant (traçabilité Phase 2).
 
         Returns:
             PerceptualFact avec exists=False si la confiance est sous le seuil.
+            Le champ `trace` contient la traçabilité complète.
         """
         t_start = time.time_ns()
         self._call_count += 1
         raw_hash = _hash_input(stimulus)
 
+        trace = OperatorTrace(
+            operator_id="SE",
+            cycle_ref=cycle_ref,
+            input_hash=raw_hash,
+        )
+
         # --- Étape 1 : détection de présence ---
         if stimulus is None:
-            return PerceptualFact(
+            trace.intermediate_steps.append("detection_step:none_stimulus")
+            trace.duration_ns = time.time_ns() - t_start
+            result = PerceptualFact(
                 exists=False,
                 properties={"type": "none"},
                 confidence=0.0,
                 ts_ns=t_start,
                 source="se",
                 raw_input_hash=raw_hash,
+                trace=trace,
             )
+            # Vérification contrat
+            all_ok, violated = self.contract.check_all_limits(result)
+            trace.limits_checked = True
+            trace.limits_violated = violated
+            trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+            return result
 
         # --- Étape 2 : encodage des caractéristiques concrètes ---
         if isinstance(stimulus, str):
@@ -204,15 +229,29 @@ class SensationExtravertie:
             source_type = "event"
             props = {"type": type(stimulus).__name__, "repr": str(stimulus)[:128]}
 
+        trace.intermediate_steps.append(f"source_type:{source_type}")
+        trace.intermediate_steps.append(f"detection_step:properties_extracted")
+
         # --- Étape 3 : calcul de la confiance ---
         confidence = _compute_confidence(source_type, stimulus)
         exists = confidence >= self.threshold
+        trace.intermediate_steps.append(f"confidence_computation:{confidence:.4f}_threshold:{self.threshold}")
 
-        return PerceptualFact(
+        result = PerceptualFact(
             exists=exists,
             properties=props,
             confidence=confidence,
             ts_ns=t_start,
             source="se",
             raw_input_hash=raw_hash,
+            trace=trace,
         )
+
+        # --- Phase 2 : vérification du contrat ---
+        all_ok, violated = self.contract.check_all_limits(result)
+        trace.limits_checked = True
+        trace.limits_violated = violated
+        trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+        trace.duration_ns = time.time_ns() - t_start
+
+        return result

@@ -23,7 +23,8 @@ import math
 import time
 from typing import Any
 
-from .types import AbstractPattern, PerceptualFact
+from .contracts import CONTRACT_NI
+from .types import AbstractPattern, OperatorTrace, PerceptualFact
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -104,10 +105,12 @@ class LatentPattern:
 class IntuitionIntrovertie:
     """NI — Synthèse des configurations et significations intérieures.
 
+    Phase 2 : contrat opérationnel formel intégré (CONTRACT_NI).
     Transformations :
     1. Activation des patterns latents par similarité vectorielle
     2. Synthèse d'une représentation compressée (encodeur symbolique)
     3. Propagation à travers le graphe de sens interne
+    4. Vérification des limites du contrat + génération OperatorTrace
 
     Confrontation avec SE obligatoire avant conclusion (garde-fou cognitif).
     """
@@ -115,6 +118,7 @@ class IntuitionIntrovertie:
     def __init__(self) -> None:
         self._patterns: list[LatentPattern] = []
         self._internal_state_vec: list[float] = [0.0] * NI_VECTOR_DIM
+        self.contract = CONTRACT_NI
 
     def add_pattern(self, symbol: str, vector: list[float], source_ref: str = "") -> None:
         """Ajouter un pattern latent en mémoire longue durée."""
@@ -131,19 +135,29 @@ class IntuitionIntrovertie:
             for fv, sv in zip(fact_vec, self._internal_state_vec)
         ]
 
-    def process(self, fact: PerceptualFact) -> AbstractPattern:
+    def process(self, fact: PerceptualFact, cycle_ref: str = "") -> AbstractPattern:
         """Synthétiser un AbstractPattern depuis l'état interne et les patterns latents.
 
         Args:
-            fact: sortie de SE pour ancrage dans les faits
+            fact      : sortie de SE pour ancrage dans les faits
+            cycle_ref : identifiant du cycle appelant (traçabilité Phase 2).
 
         Returns:
-            AbstractPattern — configuration symbolique interne
+            AbstractPattern — configuration symbolique interne.
+            Le champ `trace` contient la traçabilité complète.
         """
         t_start = time.time_ns()
+        input_hash = fact.raw_input_hash or ""
+
+        trace = OperatorTrace(
+            operator_id="NI",
+            cycle_ref=cycle_ref,
+            input_hash=input_hash,
+        )
 
         # Mise à jour de l'état interne avec le fait courant
         self.update_internal_state(fact)
+        trace.intermediate_steps.append("internal_state_updated:yes")
 
         # --- Étape 1 : activation des patterns latents ---
         best_pattern: LatentPattern | None = None
@@ -155,28 +169,44 @@ class IntuitionIntrovertie:
                 best_sim = sim
                 best_pattern = pattern
 
+        trace.intermediate_steps.append(f"best_similarity:{best_sim:.4f}")
+
         # --- Étape 2 : synthèse symbolique ---
         if best_pattern is not None and best_sim >= NI_PATTERN_THRESHOLD:
             symbol = best_pattern.symbol
             source_ref = best_pattern.source_ref
             confidence = round(best_sim * fact.confidence, 4)
             best_pattern.activation_count += 1
+            trace.intermediate_steps.append(f"best_pattern_ref:{best_pattern.source_ref}")
         else:
             # Pas de pattern connu — synthèse nouvelle
             symbol = _symbol_from_vector(self._internal_state_vec)
             source_ref = fact.raw_input_hash or ""
             confidence = round(0.4 * fact.confidence, 4)  # confiance réduite sans ancrage
+            trace.intermediate_steps.append("best_pattern_ref:none_new_synthesis")
+
+        trace.intermediate_steps.append(f"symbol_generated:{symbol}")
 
         # --- Étape 3 : vecteur sémantique de sortie ---
         semantic_vector = list(self._internal_state_vec)
 
-        return AbstractPattern(
+        result = AbstractPattern(
             symbol=symbol,
             confidence=confidence,
             semantic_vector=semantic_vector,
             source_ref=source_ref,
             ts_ns=t_start,
+            trace=trace,
         )
+
+        # --- Phase 2 : vérification du contrat ---
+        all_ok, violated = self.contract.check_all_limits(result)
+        trace.limits_checked = True
+        trace.limits_violated = violated
+        trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+        trace.duration_ns = time.time_ns() - t_start
+
+        return result
 
     def confirm_pattern(self, symbol: str) -> None:
         """Incrémenter le compteur de confirmation d'un pattern (feedback SE)."""

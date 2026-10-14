@@ -21,7 +21,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from .types import ExternalJudgment, InternalModel, RelationalValue
+from .contracts import CONTRACT_FE
+from .types import ExternalJudgment, InternalModel, OperatorTrace, RelationalValue
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -95,26 +96,38 @@ class CollectiveValueRegistry:
 class SentimentExtraverti:
     """FE — Évaluation par les valeurs et normes du monde extérieur.
 
+    Phase 2 : contrat opérationnel formel intégré (CONTRACT_FE).
     Transformations :
     1. Évaluation par les normes partagées (registre externe)
     2. Calcul de l'impact relationnel (qui est affecté ?)
     3. Score d'acceptabilité sociale de l'action candidate
+    4. Vérification des limites du contrat + génération OperatorTrace
     """
 
     def __init__(self, registry: CollectiveValueRegistry | None = None) -> None:
         self.registry = registry or CollectiveValueRegistry()
+        self.contract = CONTRACT_FE
 
-    def process(self, judgment: ExternalJudgment | InternalModel) -> RelationalValue:
+    def process(self, judgment: ExternalJudgment | InternalModel, cycle_ref: str = "") -> RelationalValue:
         """Évaluer la valeur relationnelle d'un jugement.
 
         Args:
-            judgment: sortie de TE ou TI
+            judgment  : sortie de TE ou TI
+            cycle_ref : identifiant du cycle appelant (traçabilité Phase 2).
 
         Returns:
-            RelationalValue — acceptabilité sociale + parties affectées + normes
+            RelationalValue — acceptabilité sociale + parties affectées + normes.
+            Le champ `trace` contient la traçabilité complète.
         """
         t_start = time.time_ns()
         self.registry.tick()
+
+        input_hash = judgment.trace.input_hash if hasattr(judgment, "trace") and judgment.trace else ""
+        trace = OperatorTrace(
+            operator_id="FE",
+            cycle_ref=cycle_ref,
+            input_hash=input_hash,
+        )
 
         # Extraire les éléments à évaluer
         if isinstance(judgment, ExternalJudgment):
@@ -134,6 +147,10 @@ class SentimentExtraverti:
         if stale:
             norm_refs.append(f"WARNING:stale_norms={stale}")
 
+        trace.intermediate_steps.append(f"norms_used:{[n.norm_id for n in active_norms]}")
+        if stale:
+            trace.intermediate_steps.append(f"stale_norms_detected:{stale}")
+
         # --- Étape 1 : évaluation par les normes ---
         acceptability_scores: list[float] = []
         for norm in active_norms:
@@ -151,6 +168,9 @@ class SentimentExtraverti:
         if not affected_parties:
             affected_parties = ["system"]
 
+        trace.intermediate_steps.append(f"affected_parties:{affected_parties}")
+        trace.intermediate_steps.append(f"scoring_method:weighted_norm_registry")
+
         # --- Étape 3 : justification ---
         justification = (
             f"{justification_prefix}:accepted={len(items)} items, "
@@ -158,13 +178,23 @@ class SentimentExtraverti:
             f"acceptability={round(acceptability, 3)}"
         )
 
-        return RelationalValue(
+        result = RelationalValue(
             acceptability=round(max(0.0, min(1.0, acceptability)), 4),
             affected_parties=affected_parties,
             norm_ref=norm_refs,
             justification=justification,
             ts_ns=t_start,
+            trace=trace,
         )
+
+        # --- Phase 2 : vérification du contrat ---
+        all_ok, violated = self.contract.check_all_limits(result)
+        trace.limits_checked = True
+        trace.limits_violated = violated
+        trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+        trace.duration_ns = time.time_ns() - t_start
+
+        return result
 
     def _evaluate_against_norm(
         self,

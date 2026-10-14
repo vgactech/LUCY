@@ -5,11 +5,14 @@ Projet : LuCY (Language Unit for Cognitive Yield)
 Module : functions / sensation_in
 Auteur : LuCY Project
 
-Question de départ : Comment cette expérience concrète est-elle assimilée intérieurement ?
-
-Nature : Perception
-Orientation : Facteur subjectif — impression intérieure
-Limite : peut sur-pondérer l'impression — garde-fou SI_BIAS_MAX
+Phase 2 — Contrat opérationnel formel :
+  Opération  : Comparer l'expérience présente avec les représentations conservées.
+  Mécanisme  : Vectorisation 8D + similarité cosinus avec banque mémoire épisodique.
+               Poids d'assimilation borné par SI_BIAS_MAX=0.95.
+  Sortie     : SubjectiveImpression (fact_ref, similarity, assimilation_weight, trace)
+  Limites    : assimilation_weight <= SI_BIAS_MAX=0.95 (vérifiable).
+  Traçabilité: fact_ref, closest_memory_ref, similarity_score, assimilation_weight.
+  Critères   : similarity_computed (voir CONTRACT_SI).
 
 CERTIFIED_100=false | unique_human_proven=false
 Mode DEBUG actif
@@ -23,7 +26,8 @@ import math
 import time
 from typing import Any
 
-from .types import PerceptualFact, SubjectiveImpression
+from .contracts import CONTRACT_SI
+from .types import OperatorTrace, PerceptualFact, SubjectiveImpression
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -92,16 +96,19 @@ def _fact_ref(fact: PerceptualFact) -> str:
 class SensationIntrovertie:
     """SI — Assimilation subjective d'une expérience concrète.
 
+    Phase 2 : contrat opérationnel formel intégré (CONTRACT_SI).
     Transformations :
     1. Comparaison vectorielle du PerceptualFact entrant avec les expériences mémorisées
     2. Calcul de similarité cosinus (embedding 8D)
     3. Pondération par poids d'assimilation appris (garde-fou SI_BIAS_MAX)
+    4. Vérification des limites du contrat + génération OperatorTrace
     """
 
     def __init__(self) -> None:
         # Banque d'expériences mémorisées (vecteurs) — alimentation externe via mémoire épisodique
         self._memory_vectors: list[tuple[str, list[float]]] = []
         self._assimilation_weight: float = 0.7  # poids appris, modifiable par learning
+        self.contract = CONTRACT_SI
 
     def add_memory(self, ref: str, vector: list[float]) -> None:
         """Ajouter une expérience mémorisée (vecteur 8D)."""
@@ -114,26 +121,36 @@ class SensationIntrovertie:
             ref = _fact_ref(fact)
             self._memory_vectors.append((ref, vec))
 
-    def process(self, fact: PerceptualFact) -> SubjectiveImpression:
+    def process(self, fact: PerceptualFact, cycle_ref: str = "") -> SubjectiveImpression:
         """Assimiler un PerceptualFact et produire une SubjectiveImpression.
 
         Args:
-            fact: sortie de SE
+            fact      : sortie de SE
+            cycle_ref : identifiant du cycle appelant (traçabilité Phase 2).
 
         Returns:
-            SubjectiveImpression — comment cette expérience est intériorisée
+            SubjectiveImpression — comment cette expérience est intériorisée.
+            Le champ `trace` contient la traçabilité complète.
         """
         t_start = time.time_ns()
         fact_vec = _vectorize_fact(fact)
         ref = _fact_ref(fact)
 
+        trace = OperatorTrace(
+            operator_id="SI",
+            cycle_ref=cycle_ref,
+            input_hash=ref,
+        )
+
         notes: list[str] = []
+        best_ref = ""
 
         # --- Étape 1 : comparaison avec mémoire épisodique ---
         if not self._memory_vectors:
             # Aucun souvenir — première expérience
             similarity = 0.0
             notes.append("first_experience_no_memory")
+            trace.intermediate_steps.append("closest_memory:none")
         else:
             similarities = [
                 _cosine_similarity(fact_vec, mem_vec)
@@ -143,6 +160,8 @@ class SensationIntrovertie:
             best_idx = similarities.index(similarity)
             best_ref = self._memory_vectors[best_idx][0]
             notes.append(f"closest_memory={best_ref}")
+            trace.intermediate_steps.append(f"closest_memory:{best_ref}")
+            trace.intermediate_steps.append(f"similarity_score:{similarity:.4f}")
 
             if similarity > 0.9:
                 notes.append("very_familiar_experience")
@@ -160,13 +179,25 @@ class SensationIntrovertie:
         if modulated_weight > 0.85:
             notes.append("high_assimilation_weight_warning")
 
-        return SubjectiveImpression(
+        trace.intermediate_steps.append(f"assimilation_weight:{modulated_weight:.4f}")
+
+        result = SubjectiveImpression(
             fact_ref=ref,
             similarity=round(similarity, 4),
             assimilation_weight=round(modulated_weight, 4),
             notes=notes,
             ts_ns=t_start,
+            trace=trace,
         )
+
+        # --- Phase 2 : vérification du contrat ---
+        all_ok, violated = self.contract.check_all_limits(result)
+        trace.limits_checked = True
+        trace.limits_violated = violated
+        trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+        trace.duration_ns = time.time_ns() - t_start
+
+        return result
 
     def update_assimilation_weight(self, delta: float) -> None:
         """Mise à jour du poids d'assimilation par le mécanisme d'apprentissage."""

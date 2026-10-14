@@ -5,11 +5,14 @@ Projet : LuCY (Language Unit for Cognitive Yield)
 Module : functions / intuition_ex
 Auteur : LuCY Project
 
-Question de départ : Quelles possibilités cet objet ou cette situation ouvre-t-il ?
-
-Nature : Perception
-Orientation : Possibilités de l'environnement extérieur
-Limite : peut générer des hypothèses non réalisables — doit passer par TE ou TI
+Phase 2 — Contrat opérationnel formel :
+  Opération  : Générer de nouvelles associations et plusieurs prolongements possibles.
+  Mécanisme  : Expansion BFS bornée (max_depth=3, top_k=5) dans le graphe de connaissances.
+               Scoring de plausibilité par co-occurrence apprise. Sans LLM externe.
+  Sortie     : HypothesisSet (candidates, plausibility_scores, expansion_depth, trace)
+  Limites    : max 5 hypothèses (NE_TOP_K), plausibilités dans [0.0, 1.0].
+  Traçabilité: seed_concepts, bfs_depth, candidates_before_filter, top_k_selected.
+  Critères   : expansion_attempted (voir CONTRACT_NE).
 
 CERTIFIED_100=false | unique_human_proven=false
 Mode DEBUG actif
@@ -21,7 +24,8 @@ import time
 from collections import deque
 from typing import Any
 
-from .types import Hypothesis, HypothesisSet, PerceptualFact
+from .contracts import CONTRACT_NE
+from .types import Hypothesis, HypothesisSet, OperatorTrace, PerceptualFact
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -85,10 +89,12 @@ class KnowledgeGraph:
 class IntuitionExtravertie:
     """NE — Perception des possibilités ouvertes par l'environnement.
 
+    Phase 2 : contrat opérationnel formel intégré (CONTRACT_NE).
     Transformations :
     1. Expansion BFS bornée dans le graphe de connaissances
     2. Scoring de plausibilité par co-occurrence apprise
     3. Sélection top-K hypothèses candidates
+    4. Vérification des limites du contrat + génération OperatorTrace
     """
 
     def __init__(
@@ -100,37 +106,64 @@ class IntuitionExtravertie:
         self.graph = graph or KnowledgeGraph()
         self.max_depth = max_depth
         self.top_k = top_k
+        self.contract = CONTRACT_NE
 
-    def process(self, fact: PerceptualFact) -> HypothesisSet:
+    def process(self, fact: PerceptualFact, cycle_ref: str = "") -> HypothesisSet:
         """Explorer les possibilités ouvertes par un PerceptualFact.
 
         Args:
-            fact: sortie de SE
+            fact      : sortie de SE
+            cycle_ref : identifiant du cycle appelant (traçabilité Phase 2).
 
         Returns:
-            HypothesisSet — ensemble d'hypothèses classées par plausibilité
+            HypothesisSet — ensemble d'hypothèses classées par plausibilité.
+            Le champ `trace` contient la traçabilité complète.
         """
         t_start = time.time_ns()
+        input_hash = fact.raw_input_hash or ""
+
+        trace = OperatorTrace(
+            operator_id="NE",
+            cycle_ref=cycle_ref,
+            input_hash=input_hash,
+        )
 
         # Pas de perception → pas d'hypothèse
         if not fact.exists or fact.confidence < 0.3:
-            return HypothesisSet(
+            trace.intermediate_steps.append("expansion:skipped_no_perception")
+            result = HypothesisSet(
                 candidates=[],
                 plausibility_scores={},
                 expansion_depth=0,
                 ts_ns=t_start,
+                trace=trace,
             )
+            all_ok, violated = self.contract.check_all_limits(result)
+            trace.limits_checked = True
+            trace.limits_violated = violated
+            trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+            trace.duration_ns = time.time_ns() - t_start
+            return result
 
         # --- Étape 1 : extraire les concepts d'ancrage depuis SE ---
         seed_concepts = self._extract_seeds(fact)
+        trace.intermediate_steps.append(f"seed_concepts:{seed_concepts}")
 
         if not seed_concepts:
-            return HypothesisSet(
+            trace.intermediate_steps.append("expansion:no_seed_concepts")
+            result = HypothesisSet(
                 candidates=[],
                 plausibility_scores={"reason": "no_seed_concepts"},
                 expansion_depth=0,
                 ts_ns=t_start,
+                trace=trace,
             )
+            all_ok, violated = self.contract.check_all_limits(result)
+            trace.limits_checked = True
+            trace.limits_violated = violated
+            trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+            trace.duration_ns = time.time_ns() - t_start
+            return result
 
         # --- Étape 2 : expansion BFS dans le graphe ---
         candidates_raw: dict[str, tuple[float, list[str], int]] = {}
@@ -138,6 +171,9 @@ class IntuitionExtravertie:
 
         for seed in seed_concepts:
             self._bfs_expand(seed, candidates_raw, fact)
+
+        trace.intermediate_steps.append(f"candidates_before_filter:{len(candidates_raw)}")
+        trace.intermediate_steps.append(f"bfs_depth:{self.max_depth}")
 
         # --- Étape 3 : filtrage et classement top-K ---
         filtered = {
@@ -159,13 +195,24 @@ class IntuitionExtravertie:
         ]
 
         plausibility_scores = {h.concept: h.plausibility for h in hypotheses}
+        trace.intermediate_steps.append(f"top_k_selected:{len(hypotheses)}")
 
-        return HypothesisSet(
+        result = HypothesisSet(
             candidates=hypotheses,
             plausibility_scores=plausibility_scores,
             expansion_depth=self.max_depth,
             ts_ns=t_start,
+            trace=trace,
         )
+
+        # --- Phase 2 : vérification du contrat ---
+        all_ok, violated = self.contract.check_all_limits(result)
+        trace.limits_checked = True
+        trace.limits_violated = violated
+        trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+        trace.duration_ns = time.time_ns() - t_start
+
+        return result
 
     # ------------------------------------------------------------------
     # Méthodes internes

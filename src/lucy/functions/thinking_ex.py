@@ -21,7 +21,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from .types import ExternalJudgment, HypothesisSet
+from .contracts import CONTRACT_TE
+from .types import ExternalJudgment, HypothesisSet, OperatorTrace
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -82,10 +83,12 @@ class ExternalFactBase:
 class PenseeExtravertie:
     """TE — Jugement par les critères et données objectifs extérieurs.
 
+    Phase 2 : contrat opérationnel formel intégré (CONTRACT_TE).
     Transformations :
     1. Filtrage des hypothèses selon les règles formelles et normes
     2. Scoring de cohérence externe (données connues vs hypothèse)
     3. Classement par pertinence objective → accepted / rejected
+    4. Vérification des limites du contrat + génération OperatorTrace
     """
 
     def __init__(self, fact_base: ExternalFactBase | None = None) -> None:
@@ -94,26 +97,44 @@ class PenseeExtravertie:
         self.fact_base.add_criterion("empirical_consistency")
         self.fact_base.add_criterion("logical_coherence")
         self.fact_base.add_criterion("source_reliability")
+        self.contract = CONTRACT_TE
 
-    def process(self, hypothesis_set: HypothesisSet) -> ExternalJudgment:
+    def process(self, hypothesis_set: HypothesisSet, cycle_ref: str = "") -> ExternalJudgment:
         """Juger les hypothèses selon les faits et critères objectifs.
 
         Args:
-            hypothesis_set: sortie de NE
+            hypothesis_set : sortie de NE
+            cycle_ref      : identifiant du cycle appelant (traçabilité Phase 2).
 
         Returns:
-            ExternalJudgment — hypothèses acceptées / rejetées + critères utilisés
+            ExternalJudgment — hypothèses acceptées / rejetées + critères utilisés.
+            Le champ `trace` contient la traçabilité complète.
         """
         t_start = time.time_ns()
+        input_hash = hypothesis_set.trace.input_hash if hypothesis_set.trace else ""
+
+        trace = OperatorTrace(
+            operator_id="TE",
+            cycle_ref=cycle_ref,
+            input_hash=input_hash,
+        )
 
         if not hypothesis_set.candidates:
-            return ExternalJudgment(
+            trace.intermediate_steps.append("judgment:no_candidates")
+            result = ExternalJudgment(
                 accepted=[],
                 rejected=[],
                 criteria_used=self.fact_base.all_criteria(),
                 confidence=0.0,
                 ts_ns=t_start,
+                trace=trace,
             )
+            all_ok, violated = self.contract.check_all_limits(result)
+            trace.limits_checked = True
+            trace.limits_violated = violated
+            trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+            trace.duration_ns = time.time_ns() - t_start
+            return result
 
         accepted: list[str] = []
         rejected: list[str] = []
@@ -129,6 +150,11 @@ class PenseeExtravertie:
             else:
                 rejected.append(hypothesis.concept)
 
+        trace.intermediate_steps.append(f"criteria_used:{criteria_used}")
+        trace.intermediate_steps.append(f"accepted_concepts:{accepted}")
+        trace.intermediate_steps.append(f"rejected_concepts:{rejected}")
+        trace.intermediate_steps.append(f"scoring_method:fact_base_coherence")
+
         # Confiance globale = moyenne des scores des hypothèses acceptées
         if accepted and scores:
             accepted_scores = [
@@ -139,13 +165,23 @@ class PenseeExtravertie:
         else:
             confidence = 0.0
 
-        return ExternalJudgment(
+        result = ExternalJudgment(
             accepted=accepted,
             rejected=rejected,
             criteria_used=criteria_used,
             confidence=confidence,
             ts_ns=t_start,
+            trace=trace,
         )
+
+        # --- Phase 2 : vérification du contrat ---
+        all_ok, violated = self.contract.check_all_limits(result)
+        trace.limits_checked = True
+        trace.limits_violated = violated
+        trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+        trace.duration_ns = time.time_ns() - t_start
+
+        return result
 
     def _score_hypothesis(self, concept: str, base_plausibility: float) -> float:
         """Calculer le score de cohérence externe d'une hypothèse.
