@@ -1,0 +1,78 @@
+{
+  "version": "11.0",
+  "report_ref": "L-030",
+  "timestamp": "2026-10-15T00:00:00Z",
+  "run_type": "play-local 25 games",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "program_synthesis": true,
+  "cognitive_engine": true,
+  "external_llm": false,
+  "architecture": {
+    "modules_new_v11": [
+      "_TransformDetector",
+      "_RuleHypothesizer",
+      "_CrossGameMemory"
+    ],
+    "modules_carried_v10": [
+      "_GridPerceptor",
+      "_EpisodicMemory",
+      "_KaggleForensicLogger"
+    ],
+    "modules_upgraded_v11": [
+      "_CognitiveEngine (5 signals: +W_RULE=4.0)"
+    ],
+    "phases": ["explore", "synth", "exploit", "recover"],
+    "scoring_weights": {
+      "W_MEMORY": 2.0,
+      "W_PROGRESS": 1.5,
+      "W_DIVERSITY": 0.8,
+      "W_PERCEPTION": 1.0,
+      "W_RULE": 4.0
+    },
+    "hypothesis_confirm_threshold": 0.70,
+    "hypothesis_min_trials": 3
+  },
+  "results": {
+    "games_played": 25,
+    "games_completed_error_free": 25,
+    "total_events_per_game": 320,
+    "actions_per_game": 79,
+    "levels_completed": 0,
+    "reason": "BUDGET_EXHAUSTED x25"
+  },
+  "new_events_vs_v10": {
+    "TRANSFORM_DETECTED": "emitted on every action where delta>0",
+    "RULE_CONFIRMED": "emitted when confidence>=0.70 AND n_obs>=3",
+    "RULE_HYPOTHESIS": "emitted in SYNTH phase every 5 actions",
+    "phase_synth_observed": true,
+    "confirmed_rules_observed": {
+      "tn36": {"action": "ACTION6", "confidence": 0.71, "dominant_sig": "fd0.00cs0mb4hssvsscf0.00"},
+      "note": "Rule confirmed but ACTION6 repetition alone does not complete levels"
+    }
+  },
+  "bugs_corrected_vs_v10": [
+    "BUG-removed-on_state_change-attribute-hack (v10 had getattr fallback for missing method)"
+  ],
+  "bugs_inherited_active": [
+    "BUG-B1-fix", "BUG-B2-fix", "BUG-B3-fix",
+    "BUG-C1-fix", "BUG-C3-fix", "BUG-C4-fix", "BUG-C5-fix", "BUG-C7-fix",
+    "BUG-D1-fix"
+  ],
+  "diagnostic": {
+    "program_synthesis_engine_works": true,
+    "rule_confirmed_observed": true,
+    "synth_phase_entered": true,
+    "root_cause_levels_zero": "The dominant transform signature fd0.00cs0mb4hssvsscf0.00 (no fill change, stable symmetry, ~0% cells changed) is shared by ALL actions. This means every action appears to confirm the same non-transformation rule. The SYNTH phase correctly activates but repeating the confirmed action (e.g. ACTION6) produces the same near-zero-change signature — no level completion occurs.",
+    "fundamental_limit": "ARC-AGI-3 puzzles require understanding the GOAL STATE (shown in puzzle examples at game start), not just tracking what changes occur. The agent needs access to puzzle input/output examples from the FrameData structure to compare current state against the target.",
+    "next_step_v12": "Inspect FrameData structure for goal/target attributes. If goal_frame or example pairs exist in latest_frame, use them to compute a goal_delta (distance to solution) and select actions that minimise it."
+  },
+  "comparison_vs_v10": {
+    "levels_completed": {"v10": 0, "v11": 0},
+    "new_forensic_events": {"v10": 244, "v11": 320},
+    "rule_confirmed": {"v10": "N/A", "v11": "YES — ACTION6 conf=0.71 on tn36"},
+    "synth_phase": {"v10": "N/A", "v11": "YES — activated on tn36 and others"},
+    "errors": {"v10": 0, "v11": 0}
+  }
+}
