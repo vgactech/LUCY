@@ -1,0 +1,38 @@
+{
+  "rapport": "L-021",
+  "date": "2026-10-14",
+  "agent_version": "7.0",
+  "CERTIFIED_100": false,
+  "unique_human_proven": false,
+  "mode_debug": true,
+  "test_local": {
+    "games_tested": ["ls20"],
+    "max_steps": 200,
+    "result": {
+      "ls20": {"levels_completed": 0, "actions": 201, "state": "NOT_FINISHED", "stuck_streak_max": 0}
+    },
+    "score_local": 0.0,
+    "commentaire": "Agent v7.0 navigue sans se bloquer (stuck=0). Fingerprint SHA1 opérationnel. UCB1 actif."
+  },
+  "bugs_corriges": {
+    "BUG-A3": "Q-table MD5 non-généralisable — corrigé v6",
+    "BUG-A4": "available_actions ignoré (v6) — corrigé v7",
+    "BUG-A5": "available_actions retourne des int non des GameAction — corrigé v7",
+    "BUG-A6": "frame fingerprint sur numpy array imbriqué toujours identique — corrigé v7 (SHA1 full frame)"
+  },
+  "architecture_v7": {
+    "Fix1": "latest_frame.available_actions utilisé, conversion int->GameAction",
+    "Fix2": "UCB1 (C=1.4) au lieu de ranking simple",
+    "Fix3": "reasoning stocké en variable locale, pas sur l'enum GameAction",
+    "Fix4": "SHA1 full-frame fingerprint détecte tout changement de pixel",
+    "Fix5": "budget adaptatif par niveau"
+  },
+  "format_soumission": {
+    "artefact": "submission.parquet via make submit",
+    "notebook": "notebooks/submission.ipynb (build_notebook.py)",
+    "username": "ndarray2000",
+    "kernel_id": "ndarray2000/lucy-arc-agi3-v60",
+    "competition": "arc-prize-2026-arc-agi-3"
+  },
+  "prochaine_action": "make submit → push Kaggle → score officiel"
+}
