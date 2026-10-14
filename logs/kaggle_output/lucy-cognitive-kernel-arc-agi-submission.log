@@ -1,0 +1,95 @@
+[{"stream_name":"stderr","time":7.918252154,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.918311544,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.918316754,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.918320524,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.578769416,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.578803406,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.578808096,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.578811776,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":9.694990236,"data":"LuCY ARC-AGI Submission — 20261014T013323Z\n"}
+,{"stream_name":"stdout","time":9.695034636,"data":"CERTIFIED_100=False | unique_human_proven=False | DEBUG=True\n"}
+,{"stream_name":"stdout","time":9.695039386,"data":"Python: 3.13.15 (main, Aug  6 2026, 11:06:22) [GCC 13.3.0]\n"}
+,{"stream_name":"stdout","time":9.736805013,"data":"=== Input directory contents ===\n"}
+,{"stream_name":"stdout","time":9.736839763,"data":"  competitions/arc-prize-2026-arc-agi-2/arc-agi_evaluation_challenges.json (984,679 bytes)\n"}
+,{"stream_name":"stdout","time":9.736843103,"data":"  competitions/arc-prize-2026-arc-agi-2/arc-agi_evaluation_solutions.json (223,838 bytes)\n"}
+,{"stream_name":"stdout","time":9.736845373,"data":"  competitions/arc-prize-2026-arc-agi-2/arc-agi_test_challenges.json (1,015,295 bytes)\n"}
+,{"stream_name":"stdout","time":9.736847303,"data":"  competitions/arc-prize-2026-arc-agi-2/arc-agi_training_challenges.json (4,010,050 bytes)\n"}
+,{"stream_name":"stdout","time":9.736849203,"data":"  competitions/arc-prize-2026-arc-agi-2/arc-agi_training_solutions.json (658,743 bytes)\n"}
+,{"stream_name":"stdout","time":9.736851623,"data":"  competitions/arc-prize-2026-arc-agi-2/sample_submission.json (19,936 bytes)\n"}
+,{"stream_name":"stdout","time":9.736853632999999,"data":"\n"}
+,{"stream_name":"stdout","time":9.736855533,"data":"Test files found: 1\n"}
+,{"stream_name":"stdout","time":9.736857483,"data":"  /kaggle/input/competitions/arc-prize-2026-arc-agi-2/arc-agi_test_challenges.json\n"}
+,{"stream_name":"stdout","time":9.736859583,"data":"\n"}
+,{"stream_name":"stdout","time":9.736861453,"data":"Sample submission files found: 1\n"}
+,{"stream_name":"stdout","time":9.736863443,"data":"  /kaggle/input/competitions/arc-prize-2026-arc-agi-2/sample_submission.json\n"}
+,{"stream_name":"stdout","time":9.864828207,"data":"[OK] Loaded test puzzles from: /kaggle/input/competitions/arc-prize-2026-arc-agi-2/arc-agi_evaluation_challenges.json\n"}
+,{"stream_name":"stdout","time":9.864863578,"data":"     Puzzles count: 120\n"}
+,{"stream_name":"stdout","time":9.864866908,"data":"[OK] Sample submission loaded from: /kaggle/input/competitions/arc-prize-2026-arc-agi-2/sample_submission.json\n"}
+,{"stream_name":"stdout","time":9.864869318,"data":"     Keys: ['00576224', '007bbfb7', '009d5c81']...\n"}
+,{"stream_name":"stdout","time":9.864871468,"data":"\n"}
+,{"stream_name":"stdout","time":9.864873457,"data":"Test puzzles loaded: 120\n"}
+,{"stream_name":"stdout","time":9.864875477,"data":"First puzzle ID: 0934a4d8\n"}
+,{"stream_name":"stdout","time":9.864877928,"data":"Keys: ['train', 'test']\n"}
+,{"stream_name":"stdout","time":9.895096876,"data":"[LuCY] Kernel initialized | CERTIFIED_100=false | DEBUG=true\n"}
+,{"stream_name":"stdout","time":9.895133925,"data":"Solver ready | cycles=0 | CERTIFIED_100=False\n"}
+,{"stream_name":"stdout","time":9.958850768,"data":"Solving all test puzzles...\n"}
+,{"stream_name":"stdout","time":9.958886248,"data":"  [1%] 1/120 — 0934a4d8\n"}
+,{"stream_name":"stdout","time":9.958892378,"data":"  [42%] 50/120 — 67e490f4\n"}
+,{"stream_name":"stdout","time":9.959609628,"data":"  [83%] 100/120 — d35bdbdc\n"}
+,{"stream_name":"stdout","time":9.959629477,"data":"\n"}
+,{"stream_name":"stdout","time":9.959637288,"data":"=== Solve stats ===\n"}
+,{"stream_name":"stdout","time":9.959640217,"data":"  Total puzzles: 120\n"}
+,{"stream_name":"stdout","time":9.959643208,"data":"  With color patterns: 83 (69.2%)\n"}
+,{"stream_name":"stdout","time":9.959646077,"data":"  FE/FI conflict: 120 (100.0%)\n"}
+,{"stream_name":"stdout","time":9.959648916999999,"data":"\n"}
+,{"stream_name":"stdout","time":9.959652057,"data":"Submission built: 120 puzzles\n"}
+,{"stream_name":"stdout","time":9.959653968,"data":"Sample [0934a4d8]: 1 test cases\n"}
+,{"stream_name":"stdout","time":9.959655937,"data":"  attempt_1 shape: 9 x 4\n"}
+,{"stream_name":"stdout","time":10.030895102,"data":"[OK] submission.json written: 422,630 bytes\n"}
+,{"stream_name":"stdout","time":10.030925252,"data":"     Path: /kaggle/working/submission.json\n"}
+,{"stream_name":"stdout","time":10.030929592,"data":"     Puzzles: 120\n"}
+,{"stream_name":"stdout","time":10.030932982,"data":"\n"}
+,{"stream_name":"stdout","time":10.030936272,"data":"=== Format validation ===\n"}
+,{"stream_name":"stdout","time":10.030939942,"data":"  Format OK — 0 errors on 120 puzzles\n"}
+,{"stream_name":"stdout","time":10.030943712,"data":"\n"}
+,{"stream_name":"stdout","time":10.030946782,"data":"CERTIFIED_100=False | unique_human_proven=False\n"}
+,{"stream_name":"stdout","time":10.045473477,"data":"============================================================\n"}
+,{"stream_name":"stdout","time":10.045516667,"data":"LuCY ARC-AGI Evaluation Summary\n"}
+,{"stream_name":"stdout","time":10.045521247,"data":"============================================================\n"}
+,{"stream_name":"stdout","time":10.045524547,"data":"Timestamp: 20261014T013323Z\n"}
+,{"stream_name":"stdout","time":10.045527737,"data":"CERTIFIED_100: False\n"}
+,{"stream_name":"stdout","time":10.045530527,"data":"unique_human_proven: False\n"}
+,{"stream_name":"stdout","time":10.045532487,"data":"\n"}
+,{"stream_name":"stdout","time":10.045534667,"data":"=== Architecture ===\n"}
+,{"stream_name":"stdout","time":10.045536747,"data":"Phase 4 kernel: 8 operators (SE/SI/NE/NI/TE/TI/FE/FI) + Arbitrator\n"}
+,{"stream_name":"stdout","time":10.045538767,"data":"Bridge layer: PE (Pattern Extraction) — rule-based color/size mapping\n"}
+,{"stream_name":"stdout","time":10.045541367,"data":"Limitation: FE/FI conflict systematic on abstract numeric grids\n"}
+,{"stream_name":"stdout","time":10.045543347,"data":"           (no emotional/value context in ARC puzzles)\n"}
+,{"stream_name":"stdout","time":10.045545287,"data":"\n"}
+,{"stream_name":"stdout","time":10.045547117,"data":"=== Known limits of Phase 4 on ARC-AGI ===\n"}
+,{"stream_name":"stdout","time":10.045549007,"data":"1. Systematic FE/FI conflict → cognitive composite score ~0.125\n"}
+,{"stream_name":"stdout","time":10.045550987,"data":"2. No native pattern induction (PE operator not yet implemented)\n"}
+,{"stream_name":"stdout","time":10.045568336,"data":"3. Color mapping by position: works for simple transformations only\n"}
+,{"stream_name":"stdout","time":10.045572176,"data":"4. No spatial reasoning (rotation, reflection, translation)\n"}
+,{"stream_name":"stdout","time":10.045575547,"data":"5. No object detection or segmentation\n"}
+,{"stream_name":"stdout","time":10.045579187,"data":"\n"}
+,{"stream_name":"stdout","time":10.045582367,"data":"=== Phase 5 roadmap (not yet implemented) ===\n"}
+,{"stream_name":"stdout","time":10.045585476,"data":"- PE operator: Pattern Extraction (visual/grid native)\n"}
+,{"stream_name":"stdout","time":10.045588636,"data":"- PI operator: Pattern Induction (generalize from examples)\n"}
+,{"stream_name":"stdout","time":10.045592116,"data":"- Spatial memory integration\n"}
+,{"stream_name":"stdout","time":10.045595316,"data":"- FE/FI adaptation for abstract non-verbal stimuli\n"}
+,{"stream_name":"stdout","time":10.045598376,"data":"\n"}
+,{"stream_name":"stdout","time":10.045601537,"data":"Total cognitive cycles: 120\n"}
+,{"stream_name":"stdout","time":10.045604717,"data":"FE/FI conflicts: 120 / 120\n"}
+,{"stream_name":"stdout","time":10.045607987,"data":"Conflict rate: 100.0%\n"}
+,{"stream_name":"stdout","time":10.045611067,"data":"\n"}
+,{"stream_name":"stdout","time":10.045614317,"data":"submission.json: 120 puzzles — ready for evaluation\n"}
+,{"stream_name":"stderr","time":12.946956712,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":12.946993211,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":13.10916593,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":13.10920055,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":13.985761864,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":14.053444342,"data":"[NbConvertApp] Writing 35966 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":16.667458221,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":17.185796353,"data":"[NbConvertApp] Writing 367742 bytes to __results__.html\n"}
+]

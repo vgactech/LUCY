@@ -1,0 +1,60 @@
+{
+  "eval_timestamp": "20261014T012959Z",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug_mode": true,
+  "total_puzzles_evaluated": 70,
+  "max_training_puzzles": 50,
+  "max_eval_puzzles": 20,
+  "global_mean_composite_score": 0.125244,
+  "arc_exact_match_rate": 0.0,
+  "arc_exact_match_note": "LuCY produces cognitive decisions, not grid outputs. Exact match rate = N/A for this evaluation.",
+  "subsets": {
+    "training": {
+      "subset": "training",
+      "count": 50,
+      "mean_composite_score": 0.125244,
+      "std_composite_score": 1.9e-05,
+      "min_composite_score": 0.125188,
+      "max_composite_score": 0.12525,
+      "mean_cognitive_confidence": 0.68039,
+      "mean_consensus_score": 0.625,
+      "quality_distribution": {
+        "ADEQUATE": 0,
+        "PARTIAL": 0,
+        "INSUFFICIENT": 50
+      },
+      "conflict_rate": 1.0,
+      "adequate_rate": 0.0,
+      "partial_rate": 0.0,
+      "insufficient_rate": 1.0
+    },
+    "evaluation": {
+      "subset": "evaluation",
+      "count": 20,
+      "mean_composite_score": 0.125244,
+      "std_composite_score": 1.9e-05,
+      "min_composite_score": 0.125188,
+      "max_composite_score": 0.12525,
+      "mean_cognitive_confidence": 0.68039,
+      "mean_consensus_score": 0.625,
+      "quality_distribution": {
+        "ADEQUATE": 0,
+        "PARTIAL": 0,
+        "INSUFFICIENT": 20
+      },
+      "conflict_rate": 1.0,
+      "adequate_rate": 0.0,
+      "partial_rate": 0.0,
+      "insufficient_rate": 1.0
+    }
+  },
+  "forensic_log": "/Users/deyi/.bob/playground/LuCY/logs/arc3_eval/lucy_arc3_forensic_20261014T012959Z.jsonl",
+  "summary_log": "/Users/deyi/.bob/playground/LuCY/logs/arc3_eval/lucy_arc3_summary_20261014T012959Z.json",
+  "interpretation": {
+    "composite_score_meaning": "Weighted cognitive quality: confidence × consensus - conflict_penalty",
+    "adequate_threshold": "composite_score >= 0.5",
+    "partial_threshold": "0.3 <= composite_score < 0.5",
+    "insufficient_threshold": "composite_score < 0.3"
+  }
+}
