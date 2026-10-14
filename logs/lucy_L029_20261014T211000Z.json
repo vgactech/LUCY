@@ -1,0 +1,46 @@
+{
+  "version": "10.0",
+  "report_ref": "L-029",
+  "timestamp": "2026-10-14T21:10:00Z",
+  "run_type": "play-local 25 games",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "cognitive_engine": true,
+  "external_llm": false,
+  "architecture": {
+    "modules": ["_GridPerceptor", "_EpisodicMemory", "_CognitiveEngine", "_KaggleForensicLogger"],
+    "scoring_weights": {"W_MEMORY": 3.0, "W_PROGRESS": 2.0, "W_DIVERSITY": 1.0, "W_PERCEPTION": 1.5},
+    "no_ucb1": true,
+    "no_external_llm": true
+  },
+  "results": {
+    "games_played": 25,
+    "games_completed_error_free": 25,
+    "total_events_per_game": 244,
+    "actions_per_game": 79,
+    "levels_completed": 0,
+    "reason": "BUDGET_EXHAUSTED x25"
+  },
+  "features_detected_ls20": {
+    "symmetry_h": 0.0,
+    "symmetry_v": 0.625,
+    "dominant_colour": 5,
+    "complexity": 2,
+    "active_ratio": 1.0,
+    "colour_count": 2,
+    "grid_valid": true
+  },
+  "cognitive_score_ls20_n10": {
+    "ACTION3": 2.75,
+    "ACTION4": 2.75,
+    "ACTION2": 2.083
+  },
+  "bugs_corrected_vs_v9": ["BUG-frame-unhashable-cells"],
+  "bugs_inherited_active": ["BUG-B1-fix", "BUG-B2-fix", "BUG-B3-fix", "BUG-C1-fix", "BUG-C3-fix", "BUG-C4-fix", "BUG-C5-fix", "BUG-C7-fix"],
+  "diagnostic": {
+    "root_cause_levels_zero": "ARC-AGI-3 requires semantic understanding of puzzle rules. A scoring engine without prior knowledge of specific game rules cannot complete levels in 79 actions. This is not an algorithmic bug — it is a knowledge gap.",
+    "what_works": "PERCEPTION events emit valid grid features. COGNITIVE_SCORE selects meaningful candidates. No errors on 25/25 games.",
+    "what_is_missing": "A rule-inference module that can identify which specific sequence of actions solves a given puzzle type."
+  }
+}
