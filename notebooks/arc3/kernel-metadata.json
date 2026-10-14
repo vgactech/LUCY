@@ -1,6 +1,6 @@
 {
   "id": "ndarray2000/lucy-cognitive-kernel-arc-agi3",
-  "title": "LuCY Cognitive Kernel — ARC-AGI-3 Submission",
+  "title": "LuCY Cognitive Kernel Arc Agi3",
   "code_file": "lucy_arc_agi3_submission.ipynb",
   "language": "python",
   "kernel_type": "notebook",
@@ -8,6 +8,8 @@
   "enable_gpu": false,
   "enable_internet": false,
   "dataset_sources": [],
-  "competition_sources": ["arc-prize-2026-arc-agi-3"],
+  "competition_sources": [
+    "arc-prize-2026-arc-agi-3"
+  ],
   "kernel_sources": []
 }

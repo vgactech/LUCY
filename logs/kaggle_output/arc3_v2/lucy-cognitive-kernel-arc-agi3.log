@@ -1,0 +1,57 @@
+[{"stream_name":"stderr","time":9.385714496,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":9.385895953,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":9.385903385,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":9.385906193,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":10.170433546,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":10.17047103,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":10.170476681,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":10.170481434,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":17.070715095,"data":"[OK] arc-agi + python-dotenv installés depuis les wheels locaux\n"}
+,{"stream_name":"stdout","time":17.07075044,"data":"CERTIFIED_100=False | unique_human_proven=False | DEBUG=True\n"}
+,{"stream_name":"stdout","time":17.091220464,"data":"Writing /kaggle/working/lucy_agent.py\n"}
+,{"stream_name":"stdout","time":49.127901049,"data":"[Mode] KAGGLE_IS_COMPETITION_RERUN env = False\n"}
+,{"stream_name":"stdout","time":49.127937102,"data":"[Mode] Gateway sidecar reachable     = False\n"}
+,{"stream_name":"stdout","time":49.127943829,"data":"[Mode] IS_RERUN                      = False\n"}
+,{"stream_name":"stdout","time":49.127949485,"data":"\n"}
+,{"stream_name":"stdout","time":49.127954412,"data":"CERTIFIED_100=False | unique_human_proven=False | DEBUG=True\n"}
+,{"stream_name":"stdout","time":49.146424525,"data":"[INITIAL RUN] Mode initial — pas de gateway\n"}
+,{"stream_name":"stdout","time":49.146467632,"data":"[INITIAL RUN] Le notebook sera soumis avec submission.parquet vide\n"}
+,{"stream_name":"stdout","time":49.146474502,"data":"[INITIAL RUN] La vraie soumission sera produite lors du rerun de compétition\n"}
+,{"stream_name":"stdout","time":50.42600956,"data":"[OK] submission.parquet (initial run placeholder) écrit: 2648 bytes\n"}
+,{"stream_name":"stdout","time":50.426045526,"data":"\n"}
+,{"stream_name":"stdout","time":50.426052213,"data":"CERTIFIED_100=False | unique_human_proven=False | DEBUG=True\n"}
+,{"stream_name":"stdout","time":50.426055808,"data":"Fichiers dans /kaggle/working:\n"}
+,{"stream_name":"stdout","time":50.426058887,"data":"  __notebook__.ipynb (32,423 bytes)\n"}
+,{"stream_name":"stdout","time":50.426062112,"data":"  lucy_agent.py (13,279 bytes)\n"}
+,{"stream_name":"stdout","time":50.426065261,"data":"  submission.parquet (2,648 bytes)\n"}
+,{"stream_name":"stdout","time":50.443665732,"data":"============================================================\n"}
+,{"stream_name":"stdout","time":50.443710973,"data":"LuCY ARC-AGI-3 Agent v2 — 20261014T020220Z\n"}
+,{"stream_name":"stdout","time":50.443734216,"data":"============================================================\n"}
+,{"stream_name":"stdout","time":50.443739713,"data":"Mode          : INITIAL RUN (commit)\n"}
+,{"stream_name":"stdout","time":50.44374416,"data":"CERTIFIED_100 : False\n"}
+,{"stream_name":"stdout","time":50.443748458,"data":"unique_human  : False\n"}
+,{"stream_name":"stdout","time":50.443752946,"data":"DEBUG         : True\n"}
+,{"stream_name":"stdout","time":50.443757645,"data":"\n"}
+,{"stream_name":"stdout","time":50.443837372,"data":"Architecture  :\n"}
+,{"stream_name":"stdout","time":50.443885773,"data":"  - 8 opérateurs cognitifs (SE/SI/NE/NI/TE/TI/FE/FI)\n"}
+,{"stream_name":"stdout","time":50.443891497,"data":"  - Arbitrateur cognitif multi-critères\n"}
+,{"stream_name":"stdout","time":50.443895319,"data":"  - Mémoire d'états : graphe de transitions déterministe\n"}
+,{"stream_name":"stdout","time":50.443899382,"data":"  - Exploration → Exploitation adaptative\n"}
+,{"stream_name":"stdout","time":50.443903102,"data":"\n"}
+,{"stream_name":"stdout","time":50.443906477,"data":"Stratégie     :\n"}
+,{"stream_name":"stdout","time":50.443910029,"data":"  - Phase explore : actions non essayées en priorité\n"}
+,{"stream_name":"stdout","time":50.443918892,"data":"  - Phase exploit : meilleure action connue\n"}
+,{"stream_name":"stdout","time":50.443962206,"data":"  - Phase escape  : sortie de cycle improductif\n"}
+,{"stream_name":"stdout","time":50.443970001,"data":"\n"}
+,{"stream_name":"stdout","time":50.443972927,"data":"Soumission    : placeholder pour commit initial\n"}
+,{"stream_name":"stdout","time":50.44397578,"data":"               La vraie soumission est produite lors du rerun de compétition\n"}
+,{"stream_name":"stdout","time":50.443978801,"data":"============================================================\n"}
+,{"stream_name":"stderr","time":53.86904637,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":53.869159192,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":54.072988672,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":54.073017478,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":55.169702245,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":55.265482203,"data":"[NbConvertApp] Writing 34686 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":58.717359074,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":59.431958681,"data":"[NbConvertApp] Writing 360457 bytes to __results__.html\n"}
+]
