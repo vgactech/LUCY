@@ -1,0 +1,74 @@
+{
+  "session": "L-025",
+  "ts_iso": "2026-10-14T18:00:04Z",
+  "version_from": "7.0",
+  "version_to": "8.0",
+  "project": "LuCY",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "changes": [
+    {
+      "id": "BUG-B1-FIX",
+      "severity": "CRITIQUE",
+      "file": "LuCY/agent/my_agent_v80.py",
+      "description": "MAX_ACTIONS_TOTAL was 500, real ARC-AGI-3 framework budget ~80 — corrected to 80",
+      "before": "MAX_ACTIONS_TOTAL = 500",
+      "after": "MAX_ACTIONS_TOTAL = 80",
+      "line_before": 54,
+      "line_after": 56
+    },
+    {
+      "id": "BUG-B2-FIX",
+      "severity": "MAJEUR",
+      "file": "LuCY/agent/my_agent_v80.py",
+      "description": "is_done() checked WIN state only — now also stops on BUDGET_EXHAUSTED (action_count >= MAX_ACTIONS_TOTAL)",
+      "before": "return latest_frame.state is GameState.WIN",
+      "after": "if latest_frame.state is GameState.WIN: ... if self._action_count >= MAX_ACTIONS_TOTAL: return True",
+      "line_before": 251,
+      "line_after": "260-274"
+    },
+    {
+      "id": "BUG-B3-FIX",
+      "severity": "MODERE",
+      "file": "LuCY/agent/my_agent_v80.py",
+      "description": "_frame_delta was truncating to 256 elements — now uses full frame comparison",
+      "before": "fa = _flatten(frame_a)[:256]",
+      "after": "fa = _flatten(frame_a)",
+      "line_before": 126,
+      "line_after": "223"
+    },
+    {
+      "id": "FORENSIC-NS-NEW",
+      "severity": "NEW",
+      "file": "LuCY/agent/my_agent_v80.py",
+      "description": "_KaggleForensicLogger inline class — nanosecond timestamps, print() stdout. Events: GAME_INIT, ACTION_BEFORE (BEFORE action selection), ACTION_AFTER (AFTER, with selection_dur_ns), LEVEL_UP, STUCK, RESET, STATE_CHANGE, MODEL_UPDATE, GAME_DONE, SUMMARY",
+      "lines": "64-159",
+      "key_invariants": [
+        "certified_100=false in every GAME_INIT",
+        "unique_human_proven=false in every GAME_INIT",
+        "ACTION_BEFORE fired BEFORE choose phase dispatch",
+        "ACTION_AFTER fired immediately AFTER action chosen with selection_dur_ns",
+        "GAME_DONE + SUMMARY printed at budget exhaustion AND WIN"
+      ]
+    }
+  ],
+  "files_modified": [
+    "LuCY/agent/my_agent_v80.py",
+    "LuCY/vendor/ARC-AGI-3-Kaggle-Starter/agent/my_agent.py",
+    "LuCY/vendor/ARC-AGI-3-Kaggle-Starter/notebooks/kernel-metadata.json"
+  ],
+  "files_created": [
+    "LuCY/agent/my_agent_v80.py",
+    "LuCY/logs/lucy_L025_20261014T180004Z.json",
+    "LuCY/rapports/L-025_lucy_v80_forensic_ns_budget_fix_2026-10-14.md"
+  ],
+  "ast_parse": "OK",
+  "classes_verified": ["_KaggleForensicLogger", "_ActionModel", "MyAgent"],
+  "max_actions_total_verified": 80,
+  "certified_100_in_source": true,
+  "kernel_metadata_updated": {
+    "id": "ndarray2000/lucy-v8-0-arc-agi-3-forensic-ns",
+    "title": "LuCY v8.0 — ARC-AGI-3 Forensic-NS + Budget-Fix"
+  }
+}
