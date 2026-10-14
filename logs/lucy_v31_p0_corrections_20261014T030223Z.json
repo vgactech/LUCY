@@ -1,0 +1,33 @@
+{
+  "session": "L-011",
+  "ts": "20261014T030223Z",
+  "version": "3.1",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "tests": {
+    "new": {
+      "count": 21,
+      "pass": 21,
+      "fail": 0,
+      "label": "T35-T54 (P0-A..P0-F)"
+    },
+    "regression": {
+      "count": 133,
+      "pass": 133,
+      "fail": 0,
+      "label": "all tests"
+    }
+  },
+  "corrections": {
+    "P0-A": "UCB1 invariant n_s>=n_sa garanti + log(1)=0 guard",
+    "P0-B": "PE hash sur TOUS les bytes (pas de troncature[:8192])",
+    "P0-C": "REWARD_STATE_CHANGE supprim\u00e9 (signal parasite boucles A-B-A)",
+    "P0-D": "Exploration non-essayees en ordre stable (index-based)",
+    "P0-E": "game_patterns persist\u00e9/recharg\u00e9 sur disque JSON",
+    "P0-F": "RESET enregistr\u00e9 dans Q-table + n_sa pour apprentissage r\u00e9el"
+  },
+  "source_file": "src/lucy/kernel/lucy_agent_v31.py",
+  "source_sha256": "18f9aba8d1ed7099a23b7fab7e5f76534cc0065ba014526c4d428c74b9800e15",
+  "tests_file": "tests/test_lucy_v31_p0_corrections.py"
+}
