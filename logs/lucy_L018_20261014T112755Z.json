@@ -1,0 +1,82 @@
+{
+  "ts": "20261014T112755Z",
+  "rapport": "L-018",
+  "CERTIFIED_100": false,
+  "unique_human_proven": false,
+  "DEBUG": true,
+  "version_agent": "5.0",
+  "notebook_update": {
+    "avant": "LuCY Cognitive Agent v4.1 (41097 chars)",
+    "apres": "LuCY Cognitive Agent v5.0 (38057 chars)",
+    "v50_present": true
+  },
+  "kaggle_push": {
+    "status": "PUSH_OK",
+    "http": 200,
+    "version_number": 5,
+    "kernel_id": 138593354,
+    "url": "https://www.kaggle.com/ndarray2000/lucy-cognitive-kernel-arc-agi3-v5-0",
+    "is_private": true,
+    "enable_gpu": true,
+    "accelerator": "gpu"
+  },
+  "submission_analysis": {
+    "source": "LuCY/logs/kaggle_output/submission.json (exécution Kaggle précédente)",
+    "total_puzzles": 120,
+    "attempt1_unique": 120,
+    "attempt2_unique": 120,
+    "attempts_identical": 12,
+    "attempts_really_distinct": 108,
+    "anomalies": {
+      "attempt2_over20pct_8": 27,
+      "attempt2_no_8": 35,
+      "small_grids_under3": 4
+    },
+    "value_distribution": {
+      "0": 23018,
+      "1": 10467,
+      "2": 5036,
+      "3": 9316,
+      "4": 13313,
+      "5": 3643,
+      "6": 4868,
+      "7": 5748,
+      "8": 16903,
+      "9": 4469
+    },
+    "pct_value_8": 17.5,
+    "pct_value_0": 23.8
+  },
+  "bugs_identifies": [
+    {
+      "id": "BUG-H1",
+      "desc": "_maybe_checkpoint ne sauvegarde pas si q_table vide mais coarse_history non-vide",
+      "priority": "Mineur"
+    },
+    {
+      "id": "BUG-H2",
+      "desc": "MetaController._granted_shortcuts non persisté entre runs",
+      "priority": "Mineur"
+    },
+    {
+      "id": "BUG-H3",
+      "desc": "_actions_no_progress non sauvegardé dans cognitive_state.json",
+      "priority": "Mineur"
+    },
+    {
+      "id": "BUG-A1",
+      "desc": "17.5% de pixels valeur 8 dans attempt_2 — signe de patterns non résolus par LuCY",
+      "priority": "Analyse"
+    },
+    {
+      "id": "BUG-A2",
+      "desc": "12/120 puzzles ont attempt_1 == attempt_2 — pas de diversification de la 2e tentative",
+      "priority": "Analyse"
+    },
+    {
+      "id": "BUG-A3",
+      "desc": "LuCY utilise reward RL interne mais les grilles de sortie ARC ne viennent pas du RL",
+      "priority": "Architecturel"
+    }
+  ]
+}
