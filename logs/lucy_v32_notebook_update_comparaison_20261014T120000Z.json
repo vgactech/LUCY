@@ -1,0 +1,119 @@
+{
+  "session": "L-013",
+  "timestamp": "20261014T120000Z",
+  "version": "3.2",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "rapport": "L-013_lucy_v32_notebook_update_comparaison_neurones_2026-10-14.md",
+  "notebook_update": {
+    "fichier": "LuCY/notebooks/arc3/lucy_arc_agi3_submission.ipynb",
+    "version_avant": "3.1",
+    "version_apres": "3.2",
+    "taille_bytes": 49209,
+    "cell_agent_lignes": 794,
+    "action": "UPDATED — code v3.2 (6 corrections P0-A..P0-F v2) injecté dans Cell 2 via %%writefile"
+  },
+  "tests": {
+    "suite": "153/153 PASS",
+    "duree_secondes": 1.57,
+    "regression": "NONE"
+  },
+  "historique_versions": {
+    "Phase_4_v1": {
+      "tests_locaux": "112/112 PASS",
+      "score_arc_agi2": 0.125244,
+      "score_arc_agi3": "0 puzzles (soumission vide — incompatibilité JSON vs env interactif)",
+      "taux_adequate": "0.0%",
+      "conflit_FE_FI": "100%"
+    },
+    "Phase_5_v3": {
+      "tests_locaux": "34/34 PASS",
+      "score_estime": "0.05-0.15",
+      "apports": "UCB1, PE multi-résolution, PI cycles, Q-learning, mémoire inter-niveaux",
+      "limites_restantes": "6 défauts P0 identifiés audit L-010"
+    },
+    "Phase_5_1_v3_1": {
+      "tests_locaux": "133/133 PASS",
+      "score_estime": "légère amélioration vs v3",
+      "corrections": ["P0-A UCB1 invariant", "P0-B hash complet", "P0-C REWARD_STATE_CHANGE retiré", "P0-D tri stable", "P0-E persistance patterns", "P0-F RESET Q-table"],
+      "bug_residuel": "P0-A v2 RESET toujours exclu du n_sa_sum, P0-B v2 hash sans dimensions, P0-C v2 REWARD_CYCLE appliqué même aux états nouveaux, P0-D v2 tri par index env non-canonique, P0-E v2 game_patterns jamais consultés dans arbitrate(), P0-F v2 max_next_q sur liste fixe"
+    },
+    "Phase_5_2_v3_2": {
+      "tests_locaux": "153/153 PASS",
+      "corrections_v2": ["P0-A v2 n_sa_sum inclut RESET", "P0-B v2 hash inclut shape_prefix", "P0-C v2 3 niveaux reward (CYCLE/PROGRESS/LEVEL_UP)", "P0-D v2 tri par action_id canonique", "P0-E v2 game_patterns consultés dans arbitrate()", "P0-F v2 max_next_q sur next_available_actions"],
+      "score_estime": "amélioration vs v3.1 (non quantifiable sans rerun Kaggle)"
+    }
+  },
+  "comparaison_neurones": {
+    "neurones_standard_DNN": {
+      "type": "réseau de neurones artificiels (Deep Neural Network)",
+      "apprentissage": "gradient descent sur millions d'exemples labellisés",
+      "representation": "vecteurs de poids flottants continus dans une matrice de poids W",
+      "generalisation": "interpolation latente dans l'espace appris",
+      "opacite": "boîte noire — pas d'explication causale des décisions",
+      "memoire": "dans les poids W — pas de mémoire épisodique explicite",
+      "score_arc_agi_typique": "GPT-4o: ~5%, Claude 3.5 Sonnet: ~21%, o3-mini-high: ~73%",
+      "limite_arc_agi": "requiert beaucoup de données d'entraînement ; ARC = généralisation à partir de peu d'exemples (few-shot)",
+      "avantage_arc_agi": "reconnaissance de patterns par similarité vectorielle si entraîné sur des puzzles similaires"
+    },
+    "neurones_lucy": {
+      "type": "noyau cognitif symbolique (opérateurs Jungiens SE/SI/NE/NI/TE/TI/FE/FI + PE/PI)",
+      "apprentissage": "Q-learning tabular (q_table[(sid, action)]) + UCB1 exploration",
+      "representation": "états discrets (sid_full = hash MD5 de la grille + dimensions)",
+      "generalisation": "patterns coarse-grained (sid_coarse 4×4 pool) + transfert inter-niveaux (game_patterns)",
+      "opacite": "interprétable — chaque décision traçable via opérateur (TE→UCB1, FI→epsilon, NE→stuck)",
+      "memoire": {
+        "episodique": "state_archive[sid] — visites, actions_tried, reward_sum",
+        "semantique": "game_patterns inter-niveaux persistés sur disque",
+        "travail": "prev_sid, prev_action_id, stuck_counter",
+        "procedurale": "q_table[(sid, action)] — apprentissage par renforcement"
+      },
+      "score_arc_agi": {
+        "arc_agi2_phase4": "0.125 (100% INSUFFICIENT — conflit FE/FI sur stimuli abstraits)",
+        "arc_agi3_phase5": "non mesuré — Kaggle push bloqué (clé 401)",
+        "estimation_v3_2": "0.05-0.15 (amélioration progressive, non certifiée sans run Kaggle)"
+      },
+      "avantage": "interprétabilité totale, mémoire épisodique, few-shot par Q-learning sans pré-entraînement massif",
+      "limite": "Q-learning tabular ne généralise pas hors des états vus ; sid_full est sensible aux petits bruits de grille même avec P0-B corrigé"
+    }
+  },
+  "anomalies_cachees_identifiees": {
+    "ANO-001": {
+      "module": "pe_encode_frame (v3.1 → v3.2)",
+      "description": "np.full((4,8), 42).tobytes() == np.full((8,4), 42).tobytes() — deux grilles de formes différentes mais mêmes valeurs produisaient le même sid_full en v3.1 (collision silencieuse)",
+      "impact": "états distincts traités comme identiques → Q-table corrompue pour les puzzles avec grilles transposées",
+      "correction": "shape_prefix = rows.to_bytes(2,'little') + cols.to_bytes(2,'little') ajouté en préfixe"
+    },
+    "ANO-002": {
+      "module": "te_ucb1_score_actions (v3.1 → v3.2)",
+      "description": "RESET exclu de n_sa_sum → si RESET joué N fois, n_sa[(sid, RESET)]=N mais n_total pouvait être < N → invariant UCB1 cassé → log(n_total/n_action) pouvait être négatif",
+      "impact": "score UCB1 potentiellement négatif pour RESET → sous-sélection du RESET même quand nécessaire",
+      "correction": "n_sa_sum inclut TOUTES les actions (y compris RESET)"
+    },
+    "ANO-003": {
+      "module": "update() reward (v3.1 → v3.2)",
+      "description": "REWARD_CYCLE=-0.05 appliqué à TOUT ce qui n'est pas win/level_up/reset — y compris les états nouveaux utiles (curr_sid != prev_sid sans level_up). Agent pénalisé pour avoir progressé.",
+      "impact": "signal d'apprentissage biaisé contre l'exploration productive → l'agent évitait les nouvelles transitions même bénéfiques",
+      "correction": "3 niveaux: CYCLE (curr_sid==prev_sid), PROGRESS +0.05 (curr_sid!=prev_sid), LEVEL_UP"
+    },
+    "ANO-004": {
+      "module": "te_ucb1_score_actions — tri (v3.1 → v3.2)",
+      "description": "scored_inf.sort(key=lambda x: x[0]) où x[0]=idx dans available_actions — ordre dépendait de l'ordre de l'environnement (non déterministe inter-runs si l'env permute les actions)",
+      "impact": "exploration non reproductible — deux runs identiques pouvaient explorer les actions dans un ordre différent",
+      "correction": "tri par action_id canonique (x[1]=aid)"
+    },
+    "ANO-005": {
+      "module": "arbitrate() — game_patterns (v3.1 → v3.2)",
+      "description": "game_patterns persistés sur disque via _save_patterns() mais JAMAIS relus dans arbitrate(). La persistance n'avait aucun effet comportemental.",
+      "impact": "mémoire morte — les patterns de succès inter-niveaux n'influençaient pas les décisions futures (P0-E v1 corrigeait la persistance mais pas l'utilisation)",
+      "correction": "_lookup_pattern_action(sid_coarse) appelé dans arbitrate() + PATTERN_BIAS_BONUS=0.35"
+    },
+    "ANO-006": {
+      "module": "update() max_next_q (v3.1 → v3.2)",
+      "description": "max_next_q calculé sur STANDARD_ACTIONS + [RESET_ACTION_ID] fixe — ignorait les contraintes légales de l'état suivant (l'env peut restreindre les actions disponibles)",
+      "impact": "Q-learning surestimait max_next_q si l'état suivant avait un sous-ensemble d'actions légales → taux d'apprentissage effectif dégradé",
+      "correction": "next_available_actions passé comme paramètre à update()"
+    }
+  }
+}

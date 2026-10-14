@@ -1,0 +1,60 @@
+{
+  "session": "L-012",
+  "timestamp": "20261014T080009Z",
+  "version": "3.2",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "corrections": {
+    "P0-A_v2": {
+      "defaut_v31": "n_sa_sum excluait RESET_ACTION_ID → n_total pouvait être < n_sa[(sid, RESET)]",
+      "correction_v32": "n_sa_sum inclut TOUTES les actions (y compris RESET) dans le calcul",
+      "tests": ["T55", "T56", "T57"],
+      "resultat": "PASS"
+    },
+    "P0-B_v2": {
+      "defaut_v31": "hash sans dimensions → collision si même bytes, formes différentes (ex: 4×8 vs 8×4)",
+      "correction_v32": "shape_prefix = rows.to_bytes(2,'little') + cols.to_bytes(2,'little') ajouté avant tobytes()",
+      "tests": ["T58", "T59", "T60", "T61"],
+      "resultat": "PASS"
+    },
+    "P0-C_v2": {
+      "defaut_v31": "REWARD_CYCLE=-0.05 appliqué à tout (y compris états nouveaux utiles sans level_up)",
+      "correction_v32": "3 niveaux: REWARD_CYCLE=-0.05 (curr_sid==prev_sid) / REWARD_PROGRESS=+0.05 (curr_sid!=prev_sid) / REWARD_LEVEL_UP=2.0",
+      "tests": ["T62", "T63", "T64"],
+      "resultat": "PASS"
+    },
+    "P0-D_v2": {
+      "defaut_v31": "tri par x[0]=idx dans available_actions → dépendait de l'ordre reçu par l'env",
+      "correction_v32": "tri par x[1]=action_id canonique → ordre stable et déterministe indépendant de l'env",
+      "tests": ["T65", "T66", "T67"],
+      "resultat": "PASS"
+    },
+    "P0-E_v2": {
+      "defaut_v31": "game_patterns persistés sur disque mais JAMAIS consultés dans arbitrate()",
+      "correction_v32": "_lookup_pattern_action(sid_coarse) appelé dans arbitrate() → PATTERN_BIAS_BONUS=0.35 si match",
+      "tests": ["T68", "T69", "T70"],
+      "resultat": "PASS"
+    },
+    "P0-F_v2": {
+      "defaut_v31": "max_next_q calculé sur STANDARD_ACTIONS+[RESET] fixe (pas les actions légales de l'état suivant)",
+      "correction_v32": "next_available_actions passé à update() → max_next_q calculé sur les actions réelles disponibles",
+      "tests": ["T71", "T72", "T73"],
+      "resultat": "PASS"
+    }
+  },
+  "tests": {
+    "nouveaux_T55_T74": 20,
+    "nouveaux_resultat": "20/20 PASS",
+    "regression_anciens": 133,
+    "regression_resultat": "133/133 PASS",
+    "total": 153,
+    "total_resultat": "153/153 PASS",
+    "duree_secondes": 1.68
+  },
+  "fichiers": {
+    "agent_v32": "src/lucy/kernel/lucy_agent_v32.py",
+    "tests_v32": "tests/test_lucy_v32_p0_corrections_v2.py",
+    "rapport": "rapports/L-012_lucy_v32_corrections_p0_v2_2026-10-14.md"
+  }
+}
