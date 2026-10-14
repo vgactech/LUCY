@@ -1,0 +1,61 @@
+{
+  "ts": "20261014T084500Z",
+  "script": "L-014 rapport final",
+  "DEBUG": true,
+  "CERTIFIED_100": false,
+  "rapport": "L-014_lucy_v32_push_kaggle_analyse_complete_2026-10-14.md",
+  "push_kaggle": {
+    "status": "PUSH_OK",
+    "version_number": 3,
+    "kernel_id": 138593354,
+    "kernel_url": "https://www.kaggle.com/code/ndarray2000/lucy-cognitive-kernel-arc-agi3",
+    "endpoint_used": "POST /api/v1/kernels/push",
+    "auth": "Basic (username:key)",
+    "cle_utilisee": "kaggle (1).json - 46377bf7...",
+    "cle_ancienne_invalidee": "cca957b5... (401)"
+  },
+  "anomalies_trouvees": {
+    "corrigees_v32": [
+      "ANO-001",
+      "ANO-002",
+      "ANO-003",
+      "ANO-004",
+      "ANO-005",
+      "ANO-006"
+    ],
+    "residuelles_phase6": [
+      "ANO-007 (sid_colors ignoré)",
+      "ANO-008 (click fixe x=32,y=32)",
+      "ANO-009 (patterns perdus sur crash)",
+      "ANO-010 (stuck_counter non reset)"
+    ]
+  },
+  "limites_architecturales": [
+    "A-001 (explosion combinatoire)",
+    "A-002 (invariance perceptive manquante)",
+    "A-003 (pas de détection irrésolubilité)"
+  ],
+  "ameliorations_phase6": {
+    "court_terme": [
+      "P0-G (sid_colors UCB1)",
+      "P0-H (click centroïde)",
+      "P0-I (stuck_counter reset)",
+      "P0-J (checkpoint patterns)"
+    ],
+    "moyen_terme": [
+      "PE v2 géométrique",
+      "Q-table compressée",
+      "LLM hybride",
+      "abstraction compositionnelle"
+    ],
+    "long_terme": [
+      "Phase 7 neurosymbolique (ResNet-6 + arbitrateur LuCY)"
+    ]
+  },
+  "tests": {
+    "total": 153,
+    "pass": 153,
+    "fail": 0
+  },
+  "git_head": "8f54ba4"
+}
