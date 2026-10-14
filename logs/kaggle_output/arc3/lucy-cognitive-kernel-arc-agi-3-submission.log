@@ -1,0 +1,220 @@
+[{"stream_name":"stderr","time":7.29164396,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.29169969,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.291706556,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.2917106480000005,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":7.966083149,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.966121484,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.966127506,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.96613201,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":9.156527439,"data":"LuCY ARC-AGI-3 Submission — 20261014T015130Z\n"}
+,{"stream_name":"stdout","time":9.156559219,"data":"CERTIFIED_100=False | unique_human_proven=False | DEBUG=True\n"}
+,{"stream_name":"stdout","time":9.156564527,"data":"Python: 3.13.15 (main, Aug  6 2026, 11:06:22) [GCC 13.3.0]\n"}
+,{"stream_name":"stdout","time":9.900837129,"data":"=== Input directory contents ===\n"}
+,{"stream_name":"stdout","time":9.900874575,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.env.example (599 bytes)\n"}
+,{"stream_name":"stdout","time":9.900880422,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/HEAD (21 bytes)\n"}
+,{"stream_name":"stdout","time":9.900884375,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/config (265 bytes)\n"}
+,{"stream_name":"stdout","time":9.90088833,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/description (73 bytes)\n"}
+,{"stream_name":"stdout","time":9.900892659,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/applypatch-msg.sample (478 bytes)\n"}
+,{"stream_name":"stdout","time":9.900896433,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/commit-msg.sample (896 bytes)\n"}
+,{"stream_name":"stdout","time":9.900900358,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/fsmonitor-watchman.sample (4,726 bytes)\n"}
+,{"stream_name":"stdout","time":9.900904463,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/post-update.sample (189 bytes)\n"}
+,{"stream_name":"stdout","time":9.900908591,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/pre-applypatch.sample (424 bytes)\n"}
+,{"stream_name":"stdout","time":9.900912597,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/pre-commit.sample (1,649 bytes)\n"}
+,{"stream_name":"stdout","time":9.900916836,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/pre-merge-commit.sample (416 bytes)\n"}
+,{"stream_name":"stdout","time":9.900920907,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/pre-push.sample (1,374 bytes)\n"}
+,{"stream_name":"stdout","time":9.900925222,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/pre-rebase.sample (4,941 bytes)\n"}
+,{"stream_name":"stdout","time":9.900929322,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/pre-receive.sample (544 bytes)\n"}
+,{"stream_name":"stdout","time":9.900933427,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/prepare-commit-msg.sample (1,621 bytes)\n"}
+,{"stream_name":"stdout","time":9.900952294,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/push-to-checkout.sample (2,783 bytes)\n"}
+,{"stream_name":"stdout","time":9.900957016,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/sendemail-validate.sample (2,308 bytes)\n"}
+,{"stream_name":"stdout","time":9.900960532,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/hooks/update.sample (3,650 bytes)\n"}
+,{"stream_name":"stdout","time":9.900964244,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/index (3,795 bytes)\n"}
+,{"stream_name":"stdout","time":9.900968328,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/info/exclude (240 bytes)\n"}
+,{"stream_name":"stdout","time":9.900972203,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/logs/HEAD (190 bytes)\n"}
+,{"stream_name":"stdout","time":9.900978037,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/logs/refs/heads/main (190 bytes)\n"}
+,{"stream_name":"stdout","time":9.900981988,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/logs/refs/remotes/origin/HEAD (190 bytes)\n"}
+,{"stream_name":"stdout","time":9.900985998,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/objects/pack/pack-9e3fcc160aa7f30f497d64a294db91c3b0de5a2c.idx (30,276 bytes)\n"}
+,{"stream_name":"stdout","time":9.900990095000001,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/objects/pack/pack-9e3fcc160aa7f30f497d64a294db91c3b0de5a2c.pack (595,605 bytes)\n"}
+,{"stream_name":"stdout","time":9.900994118,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/objects/pack/pack-9e3fcc160aa7f30f497d64a294db91c3b0de5a2c.rev (4,224 bytes)\n"}
+,{"stream_name":"stdout","time":9.900998342,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/packed-refs (1,426 bytes)\n"}
+,{"stream_name":"stdout","time":9.901002244,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/refs/heads/main (41 bytes)\n"}
+,{"stream_name":"stdout","time":9.901006499,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.git/refs/remotes/origin/HEAD (30 bytes)\n"}
+,{"stream_name":"stdout","time":9.901010553,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.gitignore (297 bytes)\n"}
+,{"stream_name":"stdout","time":9.901014543,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.pre-commit-config.yaml (394 bytes)\n"}
+,{"stream_name":"stdout","time":9.90101854,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/.python-version (4 bytes)\n"}
+,{"stream_name":"stdout","time":9.901022548,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/LICENSE (1,065 bytes)\n"}
+,{"stream_name":"stdout","time":9.901026512,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/README.md (4,562 bytes)\n"}
+,{"stream_name":"stdout","time":9.901030467,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/README.md (235 bytes)\n"}
+,{"stream_name":"stdout","time":9.9010348,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/__init__.py (1,419 bytes)\n"}
+,{"stream_name":"stdout","time":9.901038312,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/agent.py (9,358 bytes)\n"}
+,{"stream_name":"stdout","time":9.901041781,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/recorder.py (3,472 bytes)\n"}
+,{"stream_name":"stdout","time":9.901045282,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/swarm.py (4,201 bytes)\n"}
+,{"stream_name":"stdout","time":9.901048702,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/README.md (310 bytes)\n"}
+,{"stream_name":"stdout","time":9.901067698,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/langgraph_functional_agent.py (7,715 bytes)\n"}
+,{"stream_name":"stdout","time":9.901073566,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/langgraph_random_agent.py (3,673 bytes)\n"}
+,{"stream_name":"stdout","time":9.90107755,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/langgraph_thinking/__init__.py (70 bytes)\n"}
+,{"stream_name":"stdout","time":9.901081615,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/langgraph_thinking/agent.py (3,334 bytes)\n"}
+,{"stream_name":"stdout","time":9.901086198,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/langgraph_thinking/llm.py (390 bytes)\n"}
+,{"stream_name":"stdout","time":9.90109051,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/langgraph_thinking/nodes.py (8,676 bytes)\n"}
+,{"stream_name":"stdout","time":9.901094654,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/langgraph_thinking/prompts.py (8,132 bytes)\n"}
+,{"stream_name":"stdout","time":9.901098947,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/langgraph_thinking/schema.py (1,285 bytes)\n"}
+,{"stream_name":"stdout","time":9.901103424,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/langgraph_thinking/tools.py (2,101 bytes)\n"}
+,{"stream_name":"stdout","time":9.901107598,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/langgraph_thinking/vision.py (7,069 bytes)\n"}
+,{"stream_name":"stdout","time":9.901111537,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/llm_agents.py (24,654 bytes)\n"}
+,{"stream_name":"stdout","time":9.901115603000001,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/multimodal.py (20,472 bytes)\n"}
+,{"stream_name":"stdout","time":9.901120085,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/random_agent.py (2,028 bytes)\n"}
+,{"stream_name":"stdout","time":9.901123692,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/reasoning_agent.py (14,116 bytes)\n"}
+,{"stream_name":"stdout","time":9.90112741,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/templates/smolagents.py (16,911 bytes)\n"}
+,{"stream_name":"stdout","time":9.901130942,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/agents/tracing.py (4,082 bytes)\n"}
+,{"stream_name":"stdout","time":9.901134608,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/llms.txt (2,844 bytes)\n"}
+,{"stream_name":"stdout","time":9.90113806,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/main.py (6,202 bytes)\n"}
+,{"stream_name":"stdout","time":9.901141815999999,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/pyproject.toml (818 bytes)\n"}
+,{"stream_name":"stdout","time":9.901145172,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/pytest.ini (405 bytes)\n"}
+,{"stream_name":"stdout","time":9.901149078,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/tests/README.md (224 bytes)\n"}
+,{"stream_name":"stdout","time":9.901154224,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/tests/__init__.py (16 bytes)\n"}
+,{"stream_name":"stdout","time":9.901157988,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/tests/conftest.py (1,832 bytes)\n"}
+,{"stream_name":"stdout","time":9.901161692,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/tests/unit/test_core.py (11,072 bytes)\n"}
+,{"stream_name":"stdout","time":9.901169807,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/tests/unit/test_recorder.py (9,586 bytes)\n"}
+,{"stream_name":"stdout","time":9.901173562,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/tests/unit/test_swarm.py (7,617 bytes)\n"}
+,{"stream_name":"stdout","time":9.901177177,"data":"  competitions/arc-prize-2026-arc-agi-3/ARC-AGI-3-Agents/uv.lock (408,167 bytes)\n"}
+,{"stream_name":"stdout","time":9.901181038,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/annotated_types-0.7.0-py3-none-any.whl (13,643 bytes)\n"}
+,{"stream_name":"stdout","time":9.901198515,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/arc_agi-0.9.8-py3-none-any.whl (40,151 bytes)\n"}
+,{"stream_name":"stdout","time":9.901202401,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/arcengine-0.9.3-py3-none-any.whl (38,374 bytes)\n"}
+,{"stream_name":"stdout","time":9.901206005,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/blinker-1.9.0-py3-none-any.whl (8,458 bytes)\n"}
+,{"stream_name":"stdout","time":9.901209535,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/certifi-2026.2.25-py3-none-any.whl (153,684 bytes)\n"}
+,{"stream_name":"stdout","time":9.901213311,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/charset_normalizer-3.4.7-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (216,589 bytes)\n"}
+,{"stream_name":"stdout","time":9.901217114,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/click-8.3.2-py3-none-any.whl (108,379 bytes)\n"}
+,{"stream_name":"stdout","time":9.901221203,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/contourpy-1.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (362,601 bytes)\n"}
+,{"stream_name":"stdout","time":9.901224871,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/cycler-0.12.1-py3-none-any.whl (8,321 bytes)\n"}
+,{"stream_name":"stdout","time":9.901229141,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/flask-3.1.3-py3-none-any.whl (103,424 bytes)\n"}
+,{"stream_name":"stdout","time":9.901232799,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/fonttools-4.62.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4,988,768 bytes)\n"}
+,{"stream_name":"stdout","time":9.901236711,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/idna-3.11-py3-none-any.whl (71,008 bytes)\n"}
+,{"stream_name":"stdout","time":9.901240662,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/itsdangerous-2.2.0-py3-none-any.whl (16,234 bytes)\n"}
+,{"stream_name":"stdout","time":9.90124568,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/jinja2-3.1.6-py3-none-any.whl (134,899 bytes)\n"}
+,{"stream_name":"stdout","time":9.901249395,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/kiwisolver-1.5.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (1,477,934 bytes)\n"}
+,{"stream_name":"stdout","time":9.901253659,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22,947 bytes)\n"}
+,{"stream_name":"stdout","time":9.90125768,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/matplotlib-3.10.8-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (8,716,944 bytes)\n"}
+,{"stream_name":"stdout","time":9.901261805,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/numpy-2.4.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16,645,480 bytes)\n"}
+,{"stream_name":"stdout","time":9.901269624,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/packaging-26.1-py3-none-any.whl (95,831 bytes)\n"}
+,{"stream_name":"stdout","time":9.901273703,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/pillow-12.2.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (7,087,215 bytes)\n"}
+,{"stream_name":"stdout","time":9.90127764,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/pydantic-2.13.2-py3-none-any.whl (471,947 bytes)\n"}
+,{"stream_name":"stdout","time":9.901281669,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/pydantic_core-2.46.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2,094,058 bytes)\n"}
+,{"stream_name":"stdout","time":9.901285452,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/pyparsing-3.3.2-py3-none-any.whl (122,781 bytes)\n"}
+,{"stream_name":"stdout","time":9.901289634,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229,892 bytes)\n"}
+,{"stream_name":"stdout","time":9.901293654,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/python_dotenv-1.2.2-py3-none-any.whl (22,101 bytes)\n"}
+,{"stream_name":"stdout","time":9.901297461,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/requests-2.33.1-py3-none-any.whl (64,947 bytes)\n"}
+,{"stream_name":"stdout","time":9.901301428,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/six-1.17.0-py2.py3-none-any.whl (11,050 bytes)\n"}
+,{"stream_name":"stdout","time":9.901305188,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/typing_extensions-4.15.0-py3-none-any.whl (44,614 bytes)\n"}
+,{"stream_name":"stdout","time":9.90130916,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/typing_inspection-0.4.2-py3-none-any.whl (14,611 bytes)\n"}
+,{"stream_name":"stdout","time":9.901313539,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/urllib3-2.6.3-py3-none-any.whl (131,584 bytes)\n"}
+,{"stream_name":"stdout","time":9.90131745,"data":"  competitions/arc-prize-2026-arc-agi-3/arc_agi_3_wheels/werkzeug-3.1.8-py3-none-any.whl (226,459 bytes)\n"}
+,{"stream_name":"stdout","time":9.901321872,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/ar25/0c556536/ar25.py (75,395 bytes)\n"}
+,{"stream_name":"stdout","time":9.901326127,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/ar25/0c556536/metadata.json (310 bytes)\n"}
+,{"stream_name":"stdout","time":9.90133033,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/bp35/0a0ad940/bp35.py (166,618 bytes)\n"}
+,{"stream_name":"stdout","time":9.901334401,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/bp35/0a0ad940/metadata.json (319 bytes)\n"}
+,{"stream_name":"stdout","time":9.901338662,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/cd82/fb555c5d/cd82.py (34,273 bytes)\n"}
+,{"stream_name":"stdout","time":9.901342755,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/cd82/fb555c5d/metadata.json (292 bytes)\n"}
+,{"stream_name":"stdout","time":9.901346963,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/cn04/2fe56bfb/cn04.py (39,405 bytes)\n"}
+,{"stream_name":"stdout","time":9.901350711,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/cn04/2fe56bfb/metadata.json (295 bytes)\n"}
+,{"stream_name":"stdout","time":9.901354483,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/dc22/fdcac232/dc22.py (255,706 bytes)\n"}
+,{"stream_name":"stdout","time":9.901358056,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/dc22/fdcac232/metadata.json (296 bytes)\n"}
+,{"stream_name":"stdout","time":9.901366348,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/ft09/0d8bbf25/ft09.py (64,236 bytes)\n"}
+,{"stream_name":"stdout","time":9.901369893,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/ft09/0d8bbf25/metadata.json (268 bytes)\n"}
+,{"stream_name":"stdout","time":9.901373611,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/g50t/5849a774/g50t.py (192,353 bytes)\n"}
+,{"stream_name":"stdout","time":9.90137735,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/g50t/5849a774/metadata.json (298 bytes)\n"}
+,{"stream_name":"stdout","time":9.901381164,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/ka59/38d34dbb/ka59.py (831,580 bytes)\n"}
+,{"stream_name":"stdout","time":9.90138483,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/ka59/38d34dbb/metadata.json (304 bytes)\n"}
+,{"stream_name":"stdout","time":9.901389026,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/lf52/271a04aa/lf52.py (216,183 bytes)\n"}
+,{"stream_name":"stdout","time":9.901393381,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/lf52/271a04aa/metadata.json (322 bytes)\n"}
+,{"stream_name":"stdout","time":9.90139716,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/lp85/305b61c3/lp85.py (456,495 bytes)\n"}
+,{"stream_name":"stdout","time":9.901401872,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/lp85/305b61c3/metadata.json (301 bytes)\n"}
+,{"stream_name":"stdout","time":9.9014054,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/ls20/9607627b/ls20.py (104,880 bytes)\n"}
+,{"stream_name":"stdout","time":9.901408869,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/ls20/9607627b/metadata.json (298 bytes)\n"}
+,{"stream_name":"stdout","time":9.9014128,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/m0r0/492f87ba/m0r0.py (39,574 bytes)\n"}
+,{"stream_name":"stdout","time":9.901416827,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/m0r0/492f87ba/metadata.json (296 bytes)\n"}
+,{"stream_name":"stdout","time":9.901420287,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/r11l/495a7899/metadata.json (284 bytes)\n"}
+,{"stream_name":"stdout","time":9.901423594,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/r11l/495a7899/r11l.py (188,150 bytes)\n"}
+,{"stream_name":"stdout","time":9.901427178,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/re86/8af5384d/metadata.json (314 bytes)\n"}
+,{"stream_name":"stdout","time":9.9014308,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/re86/8af5384d/re86.py (239,075 bytes)\n"}
+,{"stream_name":"stdout","time":9.901434692,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/s5i5/18d95033/metadata.json (302 bytes)\n"}
+,{"stream_name":"stdout","time":9.901438882,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/s5i5/18d95033/s5i5.py (168,955 bytes)\n"}
+,{"stream_name":"stdout","time":9.901442668,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/sb26/7fbdac44/metadata.json (309 bytes)\n"}
+,{"stream_name":"stdout","time":9.9014467,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/sb26/7fbdac44/sb26.py (63,992 bytes)\n"}
+,{"stream_name":"stdout","time":9.901450816,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/sc25/635fd71a/metadata.json (293 bytes)\n"}
+,{"stream_name":"stdout","time":9.901455095,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/sc25/635fd71a/sc25.py (225,958 bytes)\n"}
+,{"stream_name":"stdout","time":9.901458967,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/sk48/d8078629/metadata.json (315 bytes)\n"}
+,{"stream_name":"stdout","time":9.901466933,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/sk48/d8078629/sk48.py (44,635 bytes)\n"}
+,{"stream_name":"stdout","time":9.901471011,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/sp80/589a99af/metadata.json (295 bytes)\n"}
+,{"stream_name":"stdout","time":9.901474991,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/sp80/589a99af/sp80.py (39,981 bytes)\n"}
+,{"stream_name":"stdout","time":9.901479049,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/su15/1944f8ab/metadata.json (308 bytes)\n"}
+,{"stream_name":"stdout","time":9.90148275,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/su15/1944f8ab/su15.py (88,005 bytes)\n"}
+,{"stream_name":"stdout","time":9.901487013,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/tn36/ef4dde99/metadata.json (291 bytes)\n"}
+,{"stream_name":"stdout","time":9.901492114,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/tn36/ef4dde99/tn36.py (165,101 bytes)\n"}
+,{"stream_name":"stdout","time":9.901496066,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/tr87/cd924810/metadata.json (288 bytes)\n"}
+,{"stream_name":"stdout","time":9.901499915,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/tr87/cd924810/tr87.py (48,068 bytes)\n"}
+,{"stream_name":"stdout","time":9.901503505,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/tu93/0768757b/metadata.json (319 bytes)\n"}
+,{"stream_name":"stdout","time":9.901507367,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/tu93/0768757b/tu93.py (74,044 bytes)\n"}
+,{"stream_name":"stdout","time":9.901510917,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/vc33/5430563c/metadata.json (293 bytes)\n"}
+,{"stream_name":"stdout","time":9.901514491,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/vc33/5430563c/vc33.py (74,307 bytes)\n"}
+,{"stream_name":"stdout","time":9.901518363,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/wa30/ee6fef47/metadata.json (315 bytes)\n"}
+,{"stream_name":"stdout","time":9.901522095,"data":"  competitions/arc-prize-2026-arc-agi-3/environment_files/wa30/ee6fef47/wa30.py (58,285 bytes)\n"}
+,{"stream_name":"stdout","time":9.901525657,"data":"\n"}
+,{"stream_name":"stdout","time":9.901529,"data":"Test files found: 0\n"}
+,{"stream_name":"stdout","time":9.901532524,"data":"\n"}
+,{"stream_name":"stdout","time":9.901535968,"data":"Sample submission files found: 0\n"}
+,{"stream_name":"stdout","time":10.130434137,"data":"[WARNING] No test puzzles found — will use empty dict\n"}
+,{"stream_name":"stdout","time":10.130471833,"data":"\n"}
+,{"stream_name":"stdout","time":10.130477026,"data":"Test puzzles loaded: 0\n"}
+,{"stream_name":"stdout","time":10.169541529,"data":"[LuCY] Kernel initialized | CERTIFIED_100=false | DEBUG=true\n"}
+,{"stream_name":"stdout","time":10.169602884,"data":"Solver ready | cycles=0 | CERTIFIED_100=False\n"}
+,{"stream_name":"stdout","time":10.186960272,"data":"Solving all test puzzles...\n"}
+,{"stream_name":"stdout","time":10.186995827,"data":"[WARNING] No test challenges loaded — creating empty submission\n"}
+,{"stream_name":"stdout","time":10.203225963,"data":"[OK] submission.json written: 2 bytes\n"}
+,{"stream_name":"stdout","time":10.203254956,"data":"     Path: /kaggle/working/submission.json\n"}
+,{"stream_name":"stdout","time":10.203260003,"data":"     Puzzles: 0\n"}
+,{"stream_name":"stdout","time":10.203263925,"data":"\n"}
+,{"stream_name":"stdout","time":10.203267628,"data":"=== Format validation ===\n"}
+,{"stream_name":"stdout","time":10.203283083,"data":"  Format OK — 0 errors on 0 puzzles\n"}
+,{"stream_name":"stdout","time":10.203286603,"data":"\n"}
+,{"stream_name":"stdout","time":10.203289041,"data":"CERTIFIED_100=False | unique_human_proven=False\n"}
+,{"stream_name":"stdout","time":10.219619739,"data":"============================================================\n"}
+,{"stream_name":"stdout","time":10.219654981,"data":"LuCY ARC-AGI-3 Evaluation Summary\n"}
+,{"stream_name":"stdout","time":10.21966034,"data":"============================================================\n"}
+,{"stream_name":"stdout","time":10.219664523,"data":"Timestamp: 20261014T015130Z\n"}
+,{"stream_name":"stdout","time":10.219668738,"data":"CERTIFIED_100: False\n"}
+,{"stream_name":"stdout","time":10.21967243,"data":"unique_human_proven: False\n"}
+,{"stream_name":"stdout","time":10.219675804,"data":"\n"}
+,{"stream_name":"stdout","time":10.219679251,"data":"=== Architecture ===\n"}
+,{"stream_name":"stdout","time":10.219682944,"data":"Phase 4 kernel: 8 operators (SE/SI/NE/NI/TE/TI/FE/FI) + Arbitrator\n"}
+,{"stream_name":"stdout","time":10.219686771,"data":"Bridge layer: PE (Pattern Extraction) — rule-based color/size mapping\n"}
+,{"stream_name":"stdout","time":10.219691354,"data":"Limitation: FE/FI conflict systematic on abstract numeric grids\n"}
+,{"stream_name":"stdout","time":10.219695143,"data":"           (no emotional/value context in ARC puzzles)\n"}
+,{"stream_name":"stdout","time":10.219699298,"data":"\n"}
+,{"stream_name":"stdout","time":10.219702615,"data":"=== Known limits of Phase 4 on ARC-AGI ===\n"}
+,{"stream_name":"stdout","time":10.219706326,"data":"1. Systematic FE/FI conflict → cognitive composite score ~0.125\n"}
+,{"stream_name":"stdout","time":10.219710247,"data":"2. No native pattern induction (PE operator not yet implemented)\n"}
+,{"stream_name":"stdout","time":10.219714095,"data":"3. Color mapping by position: works for simple transformations only\n"}
+,{"stream_name":"stdout","time":10.219717863,"data":"4. No spatial reasoning (rotation, reflection, translation)\n"}
+,{"stream_name":"stdout","time":10.21972186,"data":"5. No object detection or segmentation\n"}
+,{"stream_name":"stdout","time":10.2197256,"data":"\n"}
+,{"stream_name":"stdout","time":10.219729284,"data":"=== Phase 5 roadmap (not yet implemented) ===\n"}
+,{"stream_name":"stdout","time":10.219733133,"data":"- PE operator: Pattern Extraction (visual/grid native)\n"}
+,{"stream_name":"stdout","time":10.21973695,"data":"- PI operator: Pattern Induction (generalize from examples)\n"}
+,{"stream_name":"stdout","time":10.21974047,"data":"- Spatial memory integration\n"}
+,{"stream_name":"stdout","time":10.219744511,"data":"- FE/FI adaptation for abstract non-verbal stimuli\n"}
+,{"stream_name":"stdout","time":10.219748518,"data":"\n"}
+,{"stream_name":"stdout","time":10.21975177,"data":"Total cognitive cycles: 0\n"}
+,{"stream_name":"stdout","time":10.219755277,"data":"FE/FI conflicts: 0 / 0\n"}
+,{"stream_name":"stdout","time":10.219759311,"data":"Conflict rate: 0.0%\n"}
+,{"stream_name":"stdout","time":10.219762913,"data":"\n"}
+,{"stream_name":"stdout","time":10.219766281,"data":"submission.json: 0 puzzles — ready for ARC-AGI-3 evaluation\n"}
+,{"stream_name":"stdout","time":10.219770446,"data":"Competition: arc-prize-2026-arc-agi-3\n"}
+,{"stream_name":"stderr","time":13.266032499,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":13.266066041,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":13.445695136,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":13.445721986,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":14.361099801,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":14.456272508,"data":"[NbConvertApp] Writing 51837 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":17.546357538,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":18.231255805,"data":"[NbConvertApp] Writing 382857 bytes to __results__.html\n"}
+]
