@@ -1,0 +1,73 @@
+{
+  "lucy_run_log": true,
+  "version": "9.0",
+  "report_ref": "L-027",
+  "run_ts": "20261014T205154Z",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "bugs_fixed_this_version": [
+    "BUG-C1",
+    "BUG-C3",
+    "BUG-C4",
+    "BUG-C5",
+    "BUG-C7"
+  ],
+  "bugs_identified_not_fixed": [
+    "BUG-C2",
+    "BUG-C6"
+  ],
+  "games": [
+    {
+      "game_id": "ls20",
+      "max_steps_runner": 50,
+      "actions_executed": 51,
+      "levels_completed": 0,
+      "resets": 1,
+      "reset_reasons": [
+        "per_level_budget"
+      ],
+      "stuck_streak_observed": 0,
+      "explore_actions": 4,
+      "exploit_actions": 47,
+      "explore_random_choice_verified": true,
+      "per_level_budget_stuck_reset_verified": true,
+      "fp_prefixes_unique": "multiple (bf56118e, 686042e6, 2f7cf291, 265f20f0, ...)",
+      "duration_s": 0.72,
+      "avg_fps": 70.83,
+      "stop_reason": "framework_max_steps_50 (before agent budget 80)",
+      "observation": "ls20 expose 4 candidats (ACTION1-4). Exploration v9 = random.choice(untried) confirmé: actions 1..4 prises dans ordre non-déterministe (A1,A4,A2,A3)."
+    },
+    {
+      "game_id": "vc33",
+      "max_steps_runner": 50,
+      "actions_executed": "50+ (tronqué)",
+      "levels_completed": 0,
+      "resets": 0,
+      "stuck_streak_observed": 0,
+      "explore_actions": 1,
+      "exploit_actions": "49+",
+      "n_candidates_constant": 1,
+      "sole_candidate": "ACTION6 (complex)",
+      "observation": "vc33 n'expose qu'ACTION6 à chaque frame. L'agent ne peut pas diversifier — seul 1 candidat disponible. C'est la limite du jeu, pas un bug agent. BUG-C6 visible: set_data() appelé sur ACTION6 à chaque action.",
+      "delta_values_vc33": "delta altère entre 0.0002 et 0.0005 (léger mouvement), 1.0 au premier pas",
+      "avg_fps": "40-70 fps (croissant)"
+    }
+  ],
+  "key_observations_from_raw_log": [
+    "OBS-1: BUG-C1 CORRIGÉ VÉRIFIÉ — exploration ls20 actions 1..4: A1,A4,A2,A3 (non-déterministe ✅)",
+    "OBS-2: BUG-C5 CORRIGÉ VÉRIFIÉ — stuck_streak=0 après per_level_budget RESET (action 31) ✅",
+    "OBS-3: VERSION 9.0 confirmée dans GAME_INIT de ls20 et vc33 ✅",
+    "OBS-4: ForensicLogger NS actif — chaque event porte ts_ns nanoseconde ✅",
+    "OBS-5: vc33 = ACTION6 seul candidat toujours — impossible de diversifier (limite jeu)",
+    "OBS-6: ls20 levels_completed=0 malgré 51 actions — le jeu nécessite une stratégie plus sophistiquée que UCB1 pur sur frames visuelles",
+    "OBS-7: BUG-C3 non vérifiable ici (runner stop à 50, agent n'atteint pas 79 actions)",
+    "OBS-8: BUG-C4 non déclenché (aucun RESET n'a remis levels_completed à 0 dans ce run)"
+  ],
+  "remaining_open_issues": [
+    "BUG-C2: RESET consomme un _action_count — impact mineur, non corrigé",
+    "BUG-C6: set_data() sur GameAction enum singleton — risque théorique, non corrigé",
+    "FONDAMENTAL: levels_completed=0 — UCB1 sur frames visuelles insuffisant pour ARC-AGI-3. Nécessite compréhension sémantique des grilles."
+  ],
+  "next_recommended_action": "Analyser le jeu ls20 en détail pour comprendre la mécanique requise (lecture de la spec du jeu), puis adapter choose_action() avec une stratégie spécifique au type de puzzle."
+}
