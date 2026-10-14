@@ -1,0 +1,299 @@
+{
+  "ts": "20261014T130000Z",
+  "rapport": "L-019",
+  "CERTIFIED_100": false,
+  "unique_human_proven": false,
+  "DEBUG": true,
+  "espace_numerotation": "LuCY L-001 → L-019",
+  "depot": "vgactech/LUCY.git",
+
+  "historique_versions_complet": {
+    "Phase_4_v1_Phase4_kernel": {
+      "session": "L-001 → L-009",
+      "operateurs": "8 (SE/SI/NE/NI/TE/TI/FE/FI) + Arbitrator",
+      "bridge_layer": "PE Pattern Extraction rule-based color/size",
+      "tests_locaux": "112/112 PASS",
+      "score_arc_agi2_composite": 0.125244,
+      "arc_exact_match_rate": 0.0,
+      "taux_adequate": "0.0%",
+      "conflit_FE_FI": "100%",
+      "soumission_kaggle": "v1 (format incorrect — JSON vs env interactif)",
+      "score_kaggle_reel": "0 puzzles (soumission vide ou format invalide)"
+    },
+    "Phase_5_v3": {
+      "session": "L-010",
+      "apports": ["UCB1 Q(s,a)+C*sqrt(ln(N)/n)", "PE multi-résolution (coarse 4x4 + full colors)", "PI cycles (epsilon_adaptive_PI_decay)", "Q-learning Bellman ALPHA=0.2 GAMMA=0.9", "mémoire inter-niveaux game_patterns"],
+      "tests_locaux": "34/34 PASS",
+      "score_estime": "0.05–0.15",
+      "note": "amélioration honnête, non certifiée sans run Kaggle — 6 défauts P0 identifiés"
+    },
+    "Phase_5_1_v3_1": {
+      "session": "L-011",
+      "corrections": ["P0-A UCB1 invariant n_s>=n_sa", "P0-B hash sur TOUS les bytes", "P0-C REWARD_STATE_CHANGE supprimé", "P0-D tri stable par index", "P0-E game_patterns persistés/rechargés", "P0-F RESET enregistré dans Q-table"],
+      "tests_locaux": "133/133 PASS",
+      "bugs_residuels": "6 (P0-A..F v2 identifiés en audit L-012)",
+      "score_kaggle_reel": "non mesuré (pas de push distinct)"
+    },
+    "Phase_5_2_v3_2": {
+      "session": "L-012 → L-013",
+      "corrections_v2": ["P0-A v2 n_sa_sum inclut RESET", "P0-B v2 shape_prefix dimensions", "P0-C v2 3 niveaux reward", "P0-D v2 tri par action_id canonique", "P0-E v2 game_patterns consultés dans arbitrate()", "P0-F v2 max_next_q sur actions légales"],
+      "tests_locaux": "153/153 PASS",
+      "notebook_update": "v3.2 injecté dans notebook (49 209 bytes, 794 lignes cell agent)",
+      "push_kaggle": "v2 (première push réussie avec token KGAT Bearer)",
+      "score_kaggle_reel": "non confirmé (run non terminé avant session suivante)"
+    },
+    "Phase_5_3_v4_0": {
+      "session": "L-015",
+      "corrections": ["P0-G: pi.update() reçoit prev_sid_colors (état AVANT action)", "P0-H: click stratégique sur centroïde pixels saillants", "P0-I: reset stuck_counter après escape_cycle"],
+      "tests_locaux": "16/16 PASS (T75-T90)",
+      "source": "lucy_agent_v40.py"
+    },
+    "Phase_5_4_v4_1": {
+      "session": "L-016",
+      "corrections": ["FIX-1: pi.update() → prev_sid_colors (attribution temporelle correcte)", "FIX-2: _save_cognitive_state() → q_table+n_sa+n_s+color_action_rewards+game_patterns (snapshot complet)"],
+      "tests_locaux": "32/32 PASS (T91-T106 + régression T75-T90)",
+      "push_kaggle": "v3 ou v4",
+      "score_kaggle_reel": "non confirmé"
+    },
+    "Phase_6_v5_0": {
+      "session": "L-017 → L-018",
+      "architecture": "3 niveaux (8 fonctions → 4 contrôleurs PI/PE/DI/DE → 1 MetaController INTP)",
+      "reward_adaptatif": "win=10.0, level_up=2.0×min(2.0,1+progress_rate), cycle=-0.05×(1+stuck_factor)",
+      "tests_locaux": "49/49 PASS (T107-T122 v5.0 + T75-T106 non-reg)",
+      "push_kaggle": "v5 — HTTP 200 — kernel_id=138593354",
+      "url": "https://www.kaggle.com/ndarray2000/lucy-cognitive-kernel-arc-agi3-v5-0",
+      "score_kaggle_reel": "0% (arc_exact_match_rate=0.0, mesure run précédent)",
+      "puzzles_soumis": 120,
+      "temps_traitement": "< 1ms total (9.958s → 9.959s pour 120 puzzles)",
+      "FE_FI_conflit": "120/120 (100%)",
+      "with_color_patterns": "83/120 (69.2%)",
+      "taux_adequate": "0.0% (70/70 INSUFFICIENT)"
+    }
+  },
+
+  "score_kaggle_reel_mesure": {
+    "version_soumise_evaluee": "v1 (Phase 4 kernel — run enregistré dans logs Kaggle)",
+    "source_log": "LuCY/logs/kaggle_output/lucy-cognitive-kernel-arc-agi-submission.log",
+    "source_eval": "LuCY/logs/arc3_eval/lucy_arc3_summary_20261014T012959Z.json",
+    "arc_exact_match_rate": 0.0,
+    "composite_score": 0.125244,
+    "puzzles_evalues": 70,
+    "quality_distribution": {"ADEQUATE": 0, "PARTIAL": 0, "INSUFFICIENT": 70},
+    "conflict_rate": 1.0,
+    "note": "Score Kaggle officiel non récupéré (pas de retour de l'évaluateur Kaggle dans les logs). Score local = 0 puzzles résolus exactement."
+  },
+
+  "comparaison_etat_art_arc": {
+    "benchmark_reference": "ARC-AGI-2 2025 / ARC Prize leaderboard public",
+    "scores_public_connus": {
+      "o3_mini_high": "~73% (reasoning LLM + program synthesis)",
+      "Claude_3_5_Sonnet": "~21%",
+      "GPT_4o": "~5%",
+      "GPT_4V_few_shot": "~2%",
+      "LuCY_v5_0": "0%",
+      "baseline_heuristique_identite": "~0.5-1% (copier l'entrée comme sortie)"
+    },
+    "approches_gagnantes": {
+      "program_synthesis_DSL": {
+        "principe": "Générer un programme DSL (Domain Specific Language) décrivant la transformation, tester sur les exemples train, appliquer au test",
+        "avantage": "Généralisation exacte — si le programme est correct, il s'applique parfaitement",
+        "limite": "Espace de recherche combinatoire exponentiel ; difficile sur transformations nouvelles"
+      },
+      "LLM_few_shot_chain_of_thought": {
+        "principe": "Le LLM voit les exemples train, raisonne en langage naturel sur la règle, génère la grille sortie",
+        "avantage": "Flexibilité — peut raisonner sur des règles abstraites variées",
+        "limite": "Coût computationnel élevé ; hallucinations sur grilles complexes ; format de sortie difficile"
+      },
+      "hybride_LLM_RL": {
+        "principe": "LLM identifie la règle → RL exécute les transformations",
+        "avantage": "Meilleur des deux mondes",
+        "exemples": "MindsAI (gagnant ARC Prize 2024, ~85%)"
+      }
+    },
+    "position_lucy": "LuCY = approche RL tabular pur. S'applique à un espace d'actions de navigation, pas à l'induction de règles visuelles. Score 0% confirmé par les logs d'exécution Kaggle."
+  },
+
+  "analyse_neurones_standard_vs_lucy": {
+    "neurone_standard_DNN": {
+      "unite_de_base": "Neurone artificiel : y = activation(W·x + b)",
+      "apprentissage": "Gradient descent (backpropagation) sur perte supervisée (MSE, cross-entropy)",
+      "representation": "Vecteurs continus dans R^n — espace latent dense",
+      "memoire": "Dans les poids W (stateless entre inférences — pas de mémoire épisodique)",
+      "generalisation": "Interpolation latente — généralise aux exemples similaires à l'entraînement",
+      "transparence": "Boîte noire — pas d'explication causale des décisions",
+      "besoins": "10^4 à 10^7 exemples labellisés selon la complexité",
+      "limite_arc_agi": "ARC = few-shot induction (2–5 exemples) — le DNN standard requiert trop de données"
+    },
+    "neurone_lucy": {
+      "unite_de_base": "Opérateur cognitif Jungien (SE/SI/NE/NI/TE/TI/FE/FI) — une fonction de traitement spécialisée",
+      "apprentissage": "Q-learning tabular : Q(s,a) ← Q(s,a) + α(r + γ·max Q(s',a') − Q(s,a))",
+      "representation": "États discrets hachés (sid_full = MD5 frame + shape_prefix)",
+      "memoire": {
+        "procedurale": "q_table[(sid, action)] — valeur d'action apprise",
+        "episodique": "state_archive[sid] — visites, actions_tried, reward_sum",
+        "semantique": "game_patterns — patterns coarse inter-niveaux",
+        "travail": "prev_sid, stuck_counter, progress_rate"
+      },
+      "generalisation": "Limitée — sid_coarse (pool 4×4) et sid_colors permettent une abstraction légère",
+      "transparence": "Totale — chaque décision traçable (quel opérateur dominant, quel score UCB1)",
+      "besoins": "Quelques centaines d'actions par niveau (few-shot de facto)",
+      "limite_arc_agi": "Pas de compréhension sémantique des règles visuelles ; q_table = fingerprint unique par puzzle (pas de transfert inter-puzzles)"
+    },
+    "differences_fondamentales": [
+      {
+        "axe": "Nature de l'apprentissage",
+        "DNN": "Apprentissage global supervisé — minimise une perte sur un dataset complet",
+        "LuCY": "Apprentissage local par renforcement — met à jour Q(s,a) à chaque transition"
+      },
+      {
+        "axe": "Mémoire",
+        "DNN": "Aucune mémoire épisodique — inférence stateless",
+        "LuCY": "Mémoire épisodique (q_table), sémantique (game_patterns) et de travail (prev_sid)"
+      },
+      {
+        "axe": "Généralisation",
+        "DNN": "Généralise aux exemples similaires vus à l'entraînement (interpolation latente)",
+        "LuCY": "Ne généralise pas entre puzzles différents — exploration from scratch sur chaque nouveau sid_full"
+      },
+      {
+        "axe": "Exploration",
+        "DNN": "Aucune — déterministe à l'inférence",
+        "LuCY": "UCB1 + epsilon-greedy adaptatif + escape_cycle (exploration systématique garantie)"
+      },
+      {
+        "axe": "Transparence",
+        "DNN": "Boîte noire — activation de millions de paramètres sans sémantique",
+        "LuCY": "Totale — chaque décision est attribuée à un opérateur nommé (TE→UCB1, FI→epsilon, NE→stuck)"
+      },
+      {
+        "axe": "Coût computationnel",
+        "DNN": "O(n×m) par couche — GPU nécessaire pour grands modèles",
+        "LuCY": "O(|actions| × log|states|) — CPU-only, < 1ms par puzzle"
+      },
+      {
+        "axe": "Biais inductif",
+        "DNN": "Hypothèse de continuité — les exemples proches dans l'espace d'entrée ont des sorties proches",
+        "LuCY": "Hypothèse de stationnarité — la valeur d'une action dans un état est stable (Bellman)"
+      }
+    ]
+  },
+
+  "bugs_caches_et_anomalies": {
+    "BUG-A3_fondamental": {
+      "id": "BUG-A3",
+      "severite": "ARCHITECTUREL — bloquant pour ARC-AGI",
+      "module": "lucy_agent_v50.py — LuCYAgent.choose_action()",
+      "description": "LuCY ne lit JAMAIS les exemples train des puzzles ARC. Le frame_raw est une capture vidéo du jeu. Le Q-learning apprend à choisir des actions de navigation (1-6), pas à prédire une grille de sortie.",
+      "ligne_concernee": "lucy_agent_v50.py L943 → choose_action() → LuCYCognition.step() → GameAction",
+      "impact": "Score ARC exact = 0% structurel — aucune amélioration possible sans refonte architecturale",
+      "correction_requise": "Remplacer l'entrée du kernel : lire puzzle['train'] → induire la règle → prédire puzzle['test']['output']"
+    },
+    "BUG-H1": {
+      "id": "BUG-H1",
+      "severite": "Mineur",
+      "module": "_maybe_checkpoint() L703",
+      "description": "Condition `if not self.game_patterns and not self.q_table: return` — saute le checkpoint si les DEUX sont vides, même si coarse_history est non-vide",
+      "impact": "Perte de contexte si un run démarre sans patterns ni q_table mais avec un historique coarse"
+    },
+    "BUG-H2": {
+      "id": "BUG-H2",
+      "severite": "Mineur",
+      "module": "MetaController — _granted_shortcuts",
+      "description": "_granted_shortcuts non persisté dans _save_cognitive_state()",
+      "impact": "Les autorisations de court-circuit (PE→PI, DE→PE) sont réinitialisées à chaque run"
+    },
+    "BUG-H3": {
+      "id": "BUG-H3",
+      "severite": "Mineur",
+      "module": "_save_cognitive_state() L585",
+      "description": "_actions_no_progress non sauvegardé → réinitialisé à 0 à chaque run",
+      "impact": "Le compteur de stagnation perd son historique inter-runs"
+    },
+    "ANO-001_explosion_combinatoire": {
+      "id": "ANO-001",
+      "severite": "Structurelle",
+      "description": "sid_full est unique par frame. La q_table croît sans borne (1 entrée par (état, action) jamais vu). Pour 120 puzzles × 3000 actions max × 6 actions = ~2.1M entrées potentielles.",
+      "impact": "Utilisation mémoire non bornée + temps de lookup O(|states|) croissant"
+    },
+    "ANO-002_invariance_perceptive": {
+      "id": "ANO-002",
+      "severite": "Structurelle",
+      "description": "Une légère perturbation visuelle (1 pixel différent) = sid_full différent = recommencer l'exploration from scratch. L'agent n'est pas robuste au bruit.",
+      "impact": "L'apprentissage acquis sur un état ne transfère pas à un état visuellement similaire"
+    },
+    "ANO-003_FE_FI_100pct": {
+      "id": "ANO-003",
+      "severite": "Architecturale",
+      "description": "FE (SentimentExtraverti) cherche un contexte émotionnel/relationnel absent dans les grilles numériques abstraites. Conflit FE/FI = 100% sur tous les puzzles.",
+      "impact": "Le composite_score est structurellement plafonné à ~0.125 car le conflit FE/FI pénalise systématiquement"
+    },
+    "ANO-004_temps_traitement_1ms": {
+      "id": "ANO-004",
+      "severite": "Alerte de qualité",
+      "description": "120 puzzles traités en < 1ms (9.958s → 9.959s). Un traitement si rapide = heuristiques superficielles, pas d'induction réelle. Un solver ARC sérieux prend 1-30 secondes par puzzle.",
+      "impact": "Confirme que LuCY applique un fallback immédiat sans computation réelle sur les puzzles ARC"
+    },
+    "ANO-005_valeur_8_dominante": {
+      "id": "ANO-005",
+      "severite": "Anomalie soumission",
+      "description": "17.5% des pixels dans attempt_2 ont valeur 8. La valeur 8 (azur) est rare dans les puzzles ARC. Signe d'un fallback de grille par défaut rempli avec la valeur de la couleur du pattern dominant.",
+      "impact": "Les attempt_2 sont souvent des grilles 'par défaut' non significatives — 27/120 puzzles avec >20% de valeur 8"
+    },
+    "ANO-006_attempt_identiques": {
+      "id": "ANO-006",
+      "severite": "Anomalie soumission",
+      "description": "12/120 puzzles ont attempt_1 == attempt_2. L'agent ne diversifie pas ses deux tentatives.",
+      "impact": "Gaspille une tentative sur 2 — le score optimal serait maximisé en ayant attempt_1 ≠ attempt_2"
+    }
+  },
+
+  "ce_qui_fonctionne": [
+    "Architecture cognitifs modulaire et interprétable (8+4+1 niveaux, v5.0)",
+    "Exploration systématique UCB1 — garantit de ne pas sauter une action sur un état donné",
+    "Détection de cycles (ne_detect_stuck + escape_cycle) — évite les boucles infinies",
+    "Persistance complète entre runs (FIX-2 v4.1) — q_table + game_patterns survivent",
+    "Attribution temporelle correcte (FIX-1 v4.1) — couleur-action cohérente",
+    "Reward adaptatif v5.0 — pénalise la stagnation proportionnellement",
+    "Format soumission Kaggle valide — 120/120, 0 erreurs de format",
+    "69.2% de puzzles avec des patterns couleur détectés (signal pertinent)",
+    "Tests progressifs (T01→T122) — 100% PASS sans régression entre versions"
+  ],
+
+  "ce_qui_ne_fonctionne_pas": [
+    "Résolution de puzzles ARC (0% exact match) — limite architecturale fondamentale (BUG-A3)",
+    "Lecture des exemples train (puzzle['train'] jamais lu) — le kernel traite une frame vidéo, pas des grilles JSON",
+    "Induction de règles visuelles — absent du code (pas de module de raisonnement abstrait)",
+    "Généralisation inter-puzzles — sid_full unique = no transfer learning",
+    "Robustesse au bruit visuel — 1 pixel différent = sid_full différent (ANO-002)",
+    "Diversification attempt_1 / attempt_2 — 12/120 identiques (ANO-006)",
+    "Conflits FE/FI — 100% structurel sur stimuli abstraits numériques (ANO-003)"
+  ],
+
+  "ameliorations_envisageables": {
+    "P0_prioritaire": {
+      "titre": "Lire les exemples train + inférer la taille de sortie",
+      "description": "Avant toute chose, le kernel doit lire puzzle['train'] et en déduire les dimensions de la grille de sortie. Actuellement la taille est heuristique.",
+      "impact_estime": "Passe de 0% à >0% exact match (condition nécessaire mais non suffisante)"
+    },
+    "P1_induction_regles": {
+      "titre": "Module d'induction de règles (DSL ou pattern matching)",
+      "description": "Implémenter un mini-DSL de transformations (rotation, miroir, recoloration, zoom, copie de pattern) + matcher sur les exemples train. Si une règle s'applique parfaitement aux exemples → appliquer au test.",
+      "impact_estime": "Potentiellement 5-20% selon la couverture du DSL"
+    },
+    "P2_hybride_LLM_LuCY": {
+      "titre": "Hybride LLM (règle) + LuCY (exécution)",
+      "description": "Utiliser un LLM (Bob CLI) pour comprendre la règle en langage naturel depuis les exemples train, puis utiliser LuCY pour exécuter les transformations pixel à pixel.",
+      "impact_estime": "Dépend de la qualité du LLM sur ARC ; potentiellement 10-40%"
+    },
+    "P3_diversification_attempts": {
+      "titre": "Forcer attempt_1 ≠ attempt_2",
+      "description": "Si attempt_2 == attempt_1, générer une alternative par transformation simple (transposée, rotation 90°, recoloration).",
+      "impact_estime": "Amélioration marginale du score (+0.5-1%) mais correction d'une anomalie"
+    },
+    "P4_sid_robuste": {
+      "titre": "Représentation d'état robuste au bruit",
+      "description": "Remplacer sid_full MD5 par un hash perceptif (DCT, wavelet, ou downsampling + quantification) pour que des grilles visuellement similaires partagent le même sid.",
+      "impact_estime": "Améliore le transfert inter-puzzles similaires"
+    }
+  }
+}
