@@ -210,11 +210,8 @@ class SensationExtravertie:
                 raw_input_hash=raw_hash,
                 trace=trace,
             )
-            # Vérification contrat
-            all_ok, violated = self.contract.check_all_limits(result)
-            trace.limits_checked = True
-            trace.limits_violated = violated
-            trace.criteria_scores = self.contract.evaluate_all_criteria(result)
+            # Vérification contrat (P0-A : finalize_trace lève si limite violée)
+            result, trace = self.contract.finalize_trace(result, trace, t_start)
             return result
 
         # --- Étape 2 : encodage des caractéristiques concrètes ---
@@ -247,11 +244,7 @@ class SensationExtravertie:
             trace=trace,
         )
 
-        # --- Phase 2 : vérification du contrat ---
-        all_ok, violated = self.contract.check_all_limits(result)
-        trace.limits_checked = True
-        trace.limits_violated = violated
-        trace.criteria_scores = self.contract.evaluate_all_criteria(result)
-        trace.duration_ns = time.time_ns() - t_start
+        # --- Phase 3 (P0-A) : vérification du contrat via finalize_trace ---
+        result, trace = self.contract.finalize_trace(result, trace, t_start)
 
         return result

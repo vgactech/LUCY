@@ -6,6 +6,14 @@ Module : functions / types
 Auteur : LuCY Project
 
 Phase 2 — Contrats opérationnels formels (OperatorContract + OperatorTrace)
+Phase 3 (audit) — Corrections P0-A, P0-B, P1-A, P1-B :
+  P0-A : HardLimit.check() lève LimitViolationError si la limite est violée.
+         Le résultat n'est JAMAIS retourné si une limite est franchie.
+  P0-B : v:no_wipe étendu aux synonymes dans feeling_in.py.
+  P1-A : OperatorContract.check_traceability_keys() vérifie que chaque clé
+         déclarée dans `traceability` est présente dans les intermediate_steps
+         de l'OperatorTrace produit.
+  P1-B : SuccessCriterion.evaluate() clamp [0.0, 1.0] sur le score retourné.
 Chaque opérateur dispose d'un contrat formalisé décrivant :
   1. operation      : ce que l'opérateur fait à l'information
   2. mechanism      : comment il réalise cette opération
@@ -31,39 +39,82 @@ from typing import Any, Callable
 # Phase 2 — Contrat opérationnel formel
 # ---------------------------------------------------------------------------
 
+class LimitViolationError(RuntimeError):
+    """P0-A — Levée quand une HardLimit est violée.
+
+    L'opérateur DOIT attraper cette exception, loguer la violation dans la
+    trace, et NE PAS retourner de résultat (ou retourner une valeur de repli
+    explicitement marquée `limit_violated=True`).
+    """
+
+    def __init__(self, limit_name: str, operator_id: str, description: str = "") -> None:
+        self.limit_name = limit_name
+        self.operator_id = operator_id
+        self.description = description
+        super().__init__(
+            f"[LuCY/{operator_id}] HardLimit '{limit_name}' violée : {description}"
+        )
+
+
 @dataclass
 class HardLimit:
     """Une limite inviolable pour un opérateur.
 
-    check_fn reçoit le résultat brut de l'opérateur et retourne True si la
-    limite est respectée, False si elle est violée.
-    violated=True après check() signifie que le résultat doit être rejeté ou
-    signalé.
+    Phase 3 (P0-A) : check() lève LimitViolationError si la limite est
+    violée. L'opérateur ne doit JAMAIS retourner un résultat invalide.
+    violated=True sert uniquement de cache post-vérification (logging).
     """
     name: str
     description: str
     check_fn: Callable[[Any], bool] = field(default=lambda _: True, repr=False)
     violated: bool = False
 
-    def check(self, result: Any) -> bool:
-        """Retourne True si la limite est respectée."""
+    def check(self, result: Any, operator_id: str = "UNKNOWN") -> bool:
+        """Vérifie la limite. Lève LimitViolationError si violée (P0-A).
+
+        Args:
+            result      : sortie brute de l'opérateur à vérifier.
+            operator_id : identifiant de l'opérateur appelant (pour l'erreur).
+
+        Returns:
+            True si la limite est respectée.
+
+        Raises:
+            LimitViolationError : si la limite est violée — l'appelant DOIT
+            l'attraper et ne pas retourner le résultat tel quel.
+        """
         ok = self.check_fn(result)
         self.violated = not ok
-        return ok
+        if not ok:
+            raise LimitViolationError(
+                limit_name=self.name,
+                operator_id=operator_id,
+                description=self.description,
+            )
+        return True
 
 
 @dataclass
 class SuccessCriterion:
-    """Un critère de réussite mesurable pour un opérateur."""
+    """Un critère de réussite mesurable pour un opérateur.
+
+    Phase 3 (P1-B) : evaluate() clamp le score dans [0.0, 1.0]. Une
+    evaluate_fn retournant une valeur hors intervalle est silencieusement
+    corrigée et la déviation est mémorisée dans `clamped`.
+    """
     name: str
     description: str
     evaluate_fn: Callable[[Any], float] = field(default=lambda _: 1.0, repr=False)
     # score [0.0 – 1.0] mis à jour par evaluate()
     last_score: float = 0.0
+    clamped: bool = False  # True si le score brut était hors [0.0, 1.0]
 
     def evaluate(self, result: Any) -> float:
-        """Évalue et mémorise le score [0.0 – 1.0]."""
-        self.last_score = float(self.evaluate_fn(result))
+        """Évalue et mémorise le score, clamped dans [0.0, 1.0] (P1-B)."""
+        raw = float(self.evaluate_fn(result))
+        clamped_score = max(0.0, min(1.0, raw))
+        self.clamped = (raw != clamped_score)
+        self.last_score = clamped_score
         return self.last_score
 
 
@@ -87,17 +138,98 @@ class OperatorContract:
     traceability: list[str] = field(default_factory=list)
     success_criteria: list[SuccessCriterion] = field(default_factory=list)
 
-    def check_all_limits(self, result: Any) -> tuple[bool, list[str]]:
-        """Vérifier toutes les limites. Retourne (all_ok, violated_names)."""
-        violated: list[str] = []
+    def check_all_limits(
+        self, result: Any, operator_id: str | None = None
+    ) -> tuple[bool, list[str]]:
+        """Vérifier toutes les limites (P0-A).
+
+        Si une limite est violée, LimitViolationError est levée immédiatement —
+        le résultat NE DOIT PAS être retourné à l'appelant.
+
+        Les opérateurs doivent appeler check_all_limits() dans un bloc
+        try/except LimitViolationError et retourner une valeur de repli.
+
+        Args:
+            result      : sortie brute à vérifier.
+            operator_id : transmis à HardLimit.check() pour les messages d'erreur.
+
+        Returns:
+            (True, []) si toutes les limites sont respectées.
+
+        Raises:
+            LimitViolationError : dès la première limite violée.
+        """
+        op_id = operator_id or self.operator_id
         for lim in self.hard_limits:
-            if not lim.check(result):
-                violated.append(lim.name)
-        return (len(violated) == 0, violated)
+            lim.check(result, operator_id=op_id)  # lève si violée
+        return (True, [])
+
+    def check_traceability_keys(self, trace: "OperatorTrace") -> tuple[bool, list[str]]:
+        """P1-A — Vérifier que chaque clé déclarée dans `traceability` est présente
+        dans les intermediate_steps de la trace produite.
+
+        Une clé est considérée présente si au moins un élément de
+        `trace.intermediate_steps` commence par `{key}:` ou contient `{key}`.
+
+        Returns:
+            (all_present, missing_keys)
+        """
+        missing: list[str] = []
+        for key in self.traceability:
+            found = any(key in step for step in trace.intermediate_steps)
+            if not found:
+                missing.append(key)
+        return (len(missing) == 0, missing)
 
     def evaluate_all_criteria(self, result: Any) -> dict[str, float]:
         """Évaluer tous les critères. Retourne {name: score}."""
         return {c.name: c.evaluate(result) for c in self.success_criteria}
+
+    def finalize_trace(
+        self,
+        result: Any,
+        trace: "OperatorTrace",
+        t_start: int,
+        fallback_result: Any | None = None,
+    ) -> tuple[Any, "OperatorTrace"]:
+        """P0-A — Finaliser la trace après vérification des limites.
+
+        Si une limite est violée :
+        - L'exception LimitViolationError est attrapée.
+        - trace.limits_checked = True, trace.limits_violated = [nom_limite].
+        - Si `fallback_result` est fourni, il est retourné à la place du résultat invalide.
+        - Sinon, l'exception est re-levée.
+
+        Si toutes les limites sont respectées :
+        - trace.limits_checked = True, trace.limits_violated = [].
+        - trace.criteria_scores est peuplé.
+        - (result, trace) est retourné.
+
+        Usage dans les opérateurs :
+            result, trace = contract.finalize_trace(result, trace, t_start, fallback_result)
+            return result
+        """
+        trace.limits_checked = True
+        try:
+            self.check_all_limits(result, operator_id=self.operator_id)
+            trace.limits_violated = []
+        except LimitViolationError as exc:
+            trace.limits_violated = [exc.limit_name]
+            trace.intermediate_steps.append(f"LIMIT_VIOLATED:{exc.limit_name}:{exc.description}")
+            trace.criteria_scores = {}
+            trace.duration_ns = time.time_ns() - t_start
+            if fallback_result is not None:
+                return fallback_result, trace
+            raise
+
+        # Vérification des clés de traçabilité (P1-A — non bloquant, log seulement)
+        all_present, missing = self.check_traceability_keys(trace)
+        if not all_present:
+            trace.intermediate_steps.append(f"TRACEABILITY_MISSING_KEYS:{missing}")
+
+        trace.criteria_scores = self.evaluate_all_criteria(result)
+        trace.duration_ns = time.time_ns() - t_start
+        return result, trace
 
     def to_dict(self) -> dict:
         return {

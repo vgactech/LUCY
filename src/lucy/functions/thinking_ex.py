@@ -129,11 +129,7 @@ class PenseeExtravertie:
                 ts_ns=t_start,
                 trace=trace,
             )
-            all_ok, violated = self.contract.check_all_limits(result)
-            trace.limits_checked = True
-            trace.limits_violated = violated
-            trace.criteria_scores = self.contract.evaluate_all_criteria(result)
-            trace.duration_ns = time.time_ns() - t_start
+            result, trace = self.contract.finalize_trace(result, trace, t_start)
             return result
 
         accepted: list[str] = []
@@ -174,12 +170,8 @@ class PenseeExtravertie:
             trace=trace,
         )
 
-        # --- Phase 2 : vérification du contrat ---
-        all_ok, violated = self.contract.check_all_limits(result)
-        trace.limits_checked = True
-        trace.limits_violated = violated
-        trace.criteria_scores = self.contract.evaluate_all_criteria(result)
-        trace.duration_ns = time.time_ns() - t_start
+        # --- Phase 3 (P0-A) : vérification du contrat via finalize_trace ---
+        result, trace = self.contract.finalize_trace(result, trace, t_start)
 
         return result
 

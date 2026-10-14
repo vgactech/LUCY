@@ -151,10 +151,8 @@ class SentimentIntroverti:
                 trace=trace,
             )
             trace.intermediate_steps.append("values_evaluated:none")
-            trace.limits_checked = True
-            trace.limits_violated = []
-            trace.criteria_scores = self.contract.evaluate_all_criteria(result)
-            trace.duration_ns = time.time_ns() - t_start
+            # P0-A : finalize_trace gère limits + traceability + criteria
+            result, trace = self.contract.finalize_trace(result, trace, t_start)
             return result
 
         # --- Étape 1 : évaluation par chaque valeur interne ---
@@ -205,12 +203,8 @@ class SentimentIntroverti:
             trace=trace,
         )
 
-        # --- Phase 2 : vérification du contrat ---
-        all_ok, violated = self.contract.check_all_limits(result)
-        trace.limits_checked = True
-        trace.limits_violated = violated
-        trace.criteria_scores = self.contract.evaluate_all_criteria(result)
-        trace.duration_ns = time.time_ns() - t_start
+        # --- Phase 3 (P0-A) : vérification du contrat via finalize_trace ---
+        result, trace = self.contract.finalize_trace(result, trace, t_start)
 
         return result
 
@@ -234,7 +228,22 @@ class SentimentIntroverti:
             return 1.0
 
         if val.value_id == "v:no_wipe":
-            if any(w in action_lower for w in ("wipe", "truncate", "delete_log", "clear_forensic")):
+            # P0-B : liste étendue aux synonymes pour éviter les contournements lexicaux
+            _no_wipe_keywords = (
+                "wipe",
+                "truncate",
+                "delete_log",
+                "clear_forensic",
+                "remove_forensic",
+                "destroy_log",
+                "erase_log",
+                "purge_log",
+                "reset_forensic",
+                "drop_forensic",
+                "flush_forensic",
+                "overwrite_log",
+            )
+            if any(w in action_lower for w in _no_wipe_keywords):
                 return 0.0
             return 1.0
 
