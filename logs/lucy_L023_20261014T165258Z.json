@@ -1,0 +1,126 @@
+{
+  "report_ref": "L-023",
+  "ts": "2026-10-14T16:52:58Z",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "kernel_id": "ndarray2000/lucy-v7-0-arc-agi-3-cognitive-agent",
+  "kernel_status": "KernelWorkerStatus.COMPLETE",
+  "kaggle_submissions": [
+    {
+      "ref": 57187586,
+      "file": "submission.parquet",
+      "date": "2026-10-14T15:41:54Z",
+      "status": "SubmissionStatus.COMPLETE",
+      "public_score": 0.14,
+      "private_score": null
+    },
+    {
+      "ref": 57180631,
+      "file": "submission.parquet",
+      "date": "2026-10-14T11:33:12Z",
+      "status": "SubmissionStatus.ERROR",
+      "public_score": null,
+      "private_score": null
+    }
+  ],
+  "submission_parquet": {
+    "shape": [
+      1,
+      4
+    ],
+    "columns": [
+      "row_id",
+      "game_id",
+      "end_of_game",
+      "score"
+    ],
+    "rows": [
+      {
+        "row_id": "1_0",
+        "game_id": "1",
+        "end_of_game": true,
+        "score": 1
+      }
+    ],
+    "analysis": {
+      "total_games": 1,
+      "games_with_end_of_game_true": 1,
+      "unique_game_ids": [
+        "1"
+      ],
+      "score_values": [
+        1
+      ],
+      "anomaly": "SINGLE_GAME — submission contient 1 seule partie (attendu: N parties du dataset test)"
+    }
+  },
+  "log_analysis": {
+    "total_lines": 51,
+    "agent_print_lines": 0,
+    "agent_lucy_traces": 0,
+    "install_lines": 38,
+    "nbconvert_lines": 4,
+    "debugger_warnings": 8,
+    "anomaly_P0": "AUCUNE trace [LuCY] dans le log — le notebook a exécuté mais aucun print agent visible dans stdout Kaggle",
+    "hypothesis": [
+      "H1: Le framework ARC-AGI ne log pas stdout de lagent mais le capture dans __results__.html (338505 bytes)",
+      "H2: MAX_ACTIONS_TOTAL=500 dépasse le budget Kaggle (framework default=80) — le framework a peut-être limité à 1 game",
+      "H3: Le DEBUG print est actif mais stdout est redirigé par nbconvert"
+    ]
+  },
+  "code_bugs_identified": {
+    "BUG-B1": {
+      "severity": "CRITIQUE",
+      "location": "my_agent.py ligne 54",
+      "description": "MAX_ACTIONS_TOTAL=500 > framework default 80 — commentaire dit que le framework définit 80 mais le code fixe 500, ce qui peut être ignoré ou causer une erreur selon la version du framework",
+      "evidence": "submission.parquet contient 1 seul jeu (game_id=1) — le jeu se termine immédiatement avec score=1 sans vraie progression"
+    },
+    "BUG-B2": {
+      "severity": "MAJEUR",
+      "location": "my_agent.py ligne 251",
+      "description": "is_done() retourne True sur GameState.WIN uniquement — mais si le jeu passe par NOT_PLAYED (reset après GAME_OVER), le framework peut compter cela comme fin de session",
+      "evidence": "score=1 dans parquet (score brut, pas RHAE) — peut indiquer 1 action réussie ou 1 jeu complété"
+    },
+    "BUG-B3": {
+      "severity": "MODÉRÉ",
+      "location": "my_agent.py lignes 126-127",
+      "description": "_frame_delta tronque à 256 éléments — pour des frames de haute résolution (>256 pixels), la détection de changement est partielle",
+      "evidence": "stuck_streak peut rester élevé même si des changements mineurs hors zone [:256] se produisent"
+    },
+    "BUG-B4": {
+      "severity": "MODÉRÉ",
+      "location": "my_agent.py ligne 341-343",
+      "description": "Action complexe (ACTION6) reçoit des coordonnées aléatoires x,y ∈ [0,63] — aucune heuristique basée sur le contenu du frame",
+      "evidence": "Si ACTION6 est la seule action disponible, les coordonnées aléatoires sont probablement sous-optimales vs human_baseline"
+    },
+    "BUG-B5": {
+      "severity": "MINEUR",
+      "location": "my_agent.py ligne 229",
+      "description": "Seed aléatoire basée sur time.time() XOR hash(game_id) — non reproductible entre runs Kaggle (différent ts à chaque exécution)",
+      "evidence": "Résultats non déterministes — RHAE peut varier d un run à l autre"
+    },
+    "BUG-B6": {
+      "severity": "ARCHITECTURE",
+      "location": "my_agent.py global",
+      "description": "Le modèle UCB1 (_ActionModel) est réinitialisé à chaque __init__ (new game) — pas de transfert de connaissance entre parties du même dataset",
+      "evidence": "ARC-AGI-3 contient de nombreux puzzles avec des patterns similaires. Un agent qui apprend entre les parties aurait un RHAE bien supérieur"
+    }
+  },
+  "score_analysis": {
+    "public_score": 0.14,
+    "score_formula": "RHAE = (human_baseline_actions / ai_actions)^2 per completed level, moyenné sur N jeux",
+    "interpretation": "0.14 = 14% — lagent complète certains niveaux mais 3.8x moins efficacement que le human baseline",
+    "benchmark_comparison": {
+      "random_baseline_estimated": "0.02-0.05",
+      "lucy_v70": 0.14,
+      "human_baseline": 1.0,
+      "state_of_art_ARC_AGI3_estimated": "0.30-0.60"
+    },
+    "vs_previous_versions": {
+      "v6_0": "ERROR (ref 57180631)",
+      "v7_0": 0.14
+    }
+  },
+  "sha256_agent": "f53e26380c8ed0bdcafa57a789c30599fccfc8c9d84e38bc44fd213a2aa78db8"
+}
