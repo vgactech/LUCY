@@ -1,0 +1,47 @@
+{
+  "rapport": "L-024",
+  "date": "2026-10-14T17:52:29Z",
+  "mode": "DEBUG",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "espace": "LuCY",
+  "objectifs": [
+    "Identifier les fichiers LuCY mal placés dans l'espace playground",
+    "Vérifier l'existence de R594 dans le workspace",
+    "Documenter le doublon rapports/426 vs LuCY/rapports/L-001",
+    "Auditer le nommage Noyau cognitif vs Cognitive Agent"
+  ],
+  "resultats": {
+    "R594_dans_workspace": false,
+    "fichiers_lucy_mal_places": [
+      {
+        "fichier": "rapports/426_lucy_init_nouveau_projet_2026-10-14.md",
+        "espace": "playground",
+        "doublon_de": "LuCY/rapports/L-001_init_2026-10-14.md",
+        "action": "conserve_sans_suppression_jamais_wipe"
+      }
+    ],
+    "fichiers_legitimes_avec_kaggle_dans_nom": [
+      "rapports/rapport_103_phase14_multienv_homomorphe_kaggle_2026-08-01.md",
+      "rapports/rapport_104_kaggle_node_decentralisation_homomorphe_2026-08-01.md"
+    ],
+    "nommage_audit": {
+      "terme_officiel_cdc": "Noyau cognitif",
+      "terme_agent_kaggle_v70": "Cognitive Agent",
+      "cause": "D-004 — code en anglais pour Kaggle",
+      "decision_utilisateur": "EN_ATTENTE_A_B_ou_C",
+      "modification_code": false
+    }
+  },
+  "etat_depots": {
+    "vgactech_LUCY_HEAD": "93faf9d",
+    "playground_HEAD": "7304d49",
+    "dernier_rapport_lucy": "L-023",
+    "prochain_rapport_lucy": "L-025"
+  },
+  "invariants": {
+    "aucun_rapport_ecrase": true,
+    "aucun_fichier_supprime": true,
+    "debug_actif": true
+  }
+}
