@@ -1,0 +1,41 @@
+{
+  "timestamp": "20261014T085314Z",
+  "report": "L-015",
+  "version": "4.0",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "corrections": {
+    "P0-G": "sid_colors branche dans UCB1 via PI.color_action_rewards (COLOR_MATCH_BONUS=0.15)",
+    "P0-H": "click sur centroide pixels non-noirs via pe_find_nonblack_centroid()",
+    "P0-I": "stuck_counter = 0 complet apres RESET productif (etait decremente de 1)",
+    "P0-J": "checkpoint game_patterns periodique (INTERVAL=50) + ecriture atomique via .tmp"
+  },
+  "tests": {
+    "new": {
+      "T75_T90": 16,
+      "status": "PASS"
+    },
+    "total": {
+      "count": 169,
+      "status": "PASS",
+      "regressions": 0
+    }
+  },
+  "anomalies_closed": [
+    "ANO-007",
+    "ANO-008",
+    "ANO-009",
+    "ANO-010"
+  ],
+  "anomalies_open": [
+    "A-001 (explosion combinatoire)",
+    "A-002 (invariance perceptive)",
+    "A-003 (irresolubiilte)"
+  ],
+  "files_created": [
+    "LuCY/src/lucy/kernel/lucy_agent_v40.py",
+    "LuCY/tests/test_lucy_v40_p0_corrections_v4.py"
+  ],
+  "next_step": "Mettre a jour le notebook Kaggle v4.0 et pousser (action manuelle requise si cle Kaggle revoquee)"
+}
