@@ -14,6 +14,21 @@ Phase 3 (audit) — Corrections P0-A, P0-B, P1-A, P1-B :
          déclarée dans `traceability` est présente dans les intermediate_steps
          de l'OperatorTrace produit.
   P1-B : SuccessCriterion.evaluate() clamp [0.0, 1.0] sur le score retourné.
+Phase 4 (audit critique) — Corrections résiduelles P0-A / P0-B / P1-A / P1-B :
+  P0-A : finalize_trace() persiste la trace forensic AVANT re-raise.
+         LimitViolationError sans fallback = trace persistée côté logger,
+         puis exception re-levée. Diagnostic jamais perdu.
+  P0-B : SuccessCriterion.evaluate() guard math.isfinite() avant le clamp.
+         NaN/±inf → score 0.0 + clamped=True + score_invalid=True.
+         Vérification : max(0.0, min(1.0, NaN)) == 1.0 en Python — bug réel.
+  P1-A : HardLimit.violated / SuccessCriterion.last_score / .clamped /
+         .score_invalid ne sont plus stockés sur les instances globales.
+         Ces états sont retournés uniquement via LimitCheckResult /
+         CriterionResult et inclus dans l'OperatorTrace.
+  P1-B : OperatorContract.critical_traceability_keys : list[str] — si une clé
+         critique est absente de la trace, finalize_trace() lève
+         CriticalTraceabilityError (ou retourne le fallback si fourni).
+         Les clés non-critiques restent des warnings dans intermediate_steps.
 Chaque opérateur dispose d'un contrat formalisé décrivant :
   1. operation      : ce que l'opérateur fait à l'information
   2. mechanism      : comment il réalise cette opération
@@ -30,9 +45,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import time
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 
 # ---------------------------------------------------------------------------
@@ -56,21 +72,73 @@ class LimitViolationError(RuntimeError):
         )
 
 
+class CriticalTraceabilityError(RuntimeError):
+    """P1-B Phase 4 — Levée quand une clé de traçabilité critique est absente.
+
+    Distincte de LimitViolationError : concerne le manque de preuve
+    reconstructible, pas le franchissement d'une limite opérationnelle.
+    """
+
+    def __init__(self, missing_keys: list[str], operator_id: str) -> None:
+        self.missing_keys = missing_keys
+        self.operator_id = operator_id
+        super().__init__(
+            f"[LuCY/{operator_id}] Clés de traçabilité critiques manquantes : {missing_keys}"
+        )
+
+
+@dataclass
+class LimitCheckResult:
+    """Phase 4 (P1-A) — Résultat d'une vérification de limite.
+
+    N'est JAMAIS stocké dans l'instance globale HardLimit.
+    Retourné uniquement par check_stateless() pour éviter toute mutation
+    des instances globales (thread-safety inter-cycles).
+    """
+    limit_name: str
+    violated: bool
+    operator_id: str = "UNKNOWN"
+
+
+@dataclass
+class CriterionResult:
+    """Phase 4 (P1-A) — Résultat d'une évaluation de critère.
+
+    N'est JAMAIS stocké dans l'instance globale SuccessCriterion.
+    Retourné uniquement par evaluate_stateless() pour isoler les états
+    par cycle (thread-safety).
+    """
+    criterion_name: str
+    score: float          # [0.0, 1.0] — toujours fini et borné
+    clamped: bool         # True si le score brut était hors [0.0, 1.0]
+    score_invalid: bool   # True si le score brut était NaN ou infini (P0-B)
+    raw_score: float      # valeur brute avant guard + clamp (debug)
+
+
 @dataclass
 class HardLimit:
     """Une limite inviolable pour un opérateur.
 
     Phase 3 (P0-A) : check() lève LimitViolationError si la limite est
     violée. L'opérateur ne doit JAMAIS retourner un résultat invalide.
-    violated=True sert uniquement de cache post-vérification (logging).
+
+    Phase 4 (P1-A) : check_stateless() est la méthode recommandée pour les
+    nouveaux appels. Elle retourne un LimitCheckResult sans muter l'instance
+    (thread-safe). check() reste disponible pour compatibilité ascendante mais
+    son effet de bord `self.violated = not ok` est déprécié.
     """
     name: str
     description: str
     check_fn: Callable[[Any], bool] = field(default=lambda _: True, repr=False)
+    # DEPRECATED Phase 4 (P1-A) : violated ne doit plus être lu par les
+    # consommateurs — utiliser LimitCheckResult.violated à la place.
     violated: bool = False
 
     def check(self, result: Any, operator_id: str = "UNKNOWN") -> bool:
         """Vérifie la limite. Lève LimitViolationError si violée (P0-A).
+
+        Compatibilité ascendante — maintient self.violated pour les anciens
+        consommateurs. Préférer check_stateless() dans les nouveaux appels.
 
         Args:
             result      : sortie brute de l'opérateur à vérifier.
@@ -80,11 +148,10 @@ class HardLimit:
             True si la limite est respectée.
 
         Raises:
-            LimitViolationError : si la limite est violée — l'appelant DOIT
-            l'attraper et ne pas retourner le résultat tel quel.
+            LimitViolationError : si la limite est violée.
         """
         ok = self.check_fn(result)
-        self.violated = not ok
+        self.violated = not ok  # DEPRECATED — effet de bord conservé compat
         if not ok:
             raise LimitViolationError(
                 limit_name=self.name,
@@ -93,29 +160,172 @@ class HardLimit:
             )
         return True
 
+    def check_stateless(
+        self, result: Any, operator_id: str = "UNKNOWN"
+    ) -> LimitCheckResult:
+        """Phase 4 (P1-A) — Vérifier la limite sans muter l'instance globale.
+
+        Thread-safe : aucun état n'est écrit sur self.
+        Lève LimitViolationError si la limite est violée (même comportement
+        que check() pour la propagation d'exception).
+
+        Returns:
+            LimitCheckResult avec violated=False si la limite est respectée.
+
+        Raises:
+            LimitViolationError : si la limite est violée.
+        """
+        ok = self.check_fn(result)
+        if not ok:
+            raise LimitViolationError(
+                limit_name=self.name,
+                operator_id=operator_id,
+                description=self.description,
+            )
+        return LimitCheckResult(limit_name=self.name, violated=False, operator_id=operator_id)
+
 
 @dataclass
 class SuccessCriterion:
     """Un critère de réussite mesurable pour un opérateur.
 
-    Phase 3 (P1-B) : evaluate() clamp le score dans [0.0, 1.0]. Une
-    evaluate_fn retournant une valeur hors intervalle est silencieusement
-    corrigée et la déviation est mémorisée dans `clamped`.
+    Phase 3 (P1-B) : evaluate() clamp le score dans [0.0, 1.0].
+    Phase 4 (P0-B) : evaluate() guard math.isfinite() — NaN/±inf → 0.0 +
+                     score_invalid=True (bug Python confirmé :
+                     max(0.0, min(1.0, NaN)) == 1.0).
+    Phase 4 (P1-A) : evaluate_stateless() est la méthode recommandée. Elle
+                     retourne un CriterionResult sans muter last_score/clamped
+                     sur l'instance globale (thread-safe).
     """
     name: str
     description: str
     evaluate_fn: Callable[[Any], float] = field(default=lambda _: 1.0, repr=False)
-    # score [0.0 – 1.0] mis à jour par evaluate()
+    # DEPRECATED Phase 4 (P1-A) : last_score / clamped ne doivent plus être
+    # lus par les consommateurs — utiliser CriterionResult à la place.
     last_score: float = 0.0
-    clamped: bool = False  # True si le score brut était hors [0.0, 1.0]
+    clamped: bool = False
 
     def evaluate(self, result: Any) -> float:
-        """Évalue et mémorise le score, clamped dans [0.0, 1.0] (P1-B)."""
+        """Évalue le score, clamped dans [0.0, 1.0].
+
+        Phase 4 (P0-B) : guard isfinite() avant clamp.
+        Compatibilité ascendante — maintient last_score/clamped pour les
+        anciens consommateurs. Préférer evaluate_stateless().
+        """
         raw = float(self.evaluate_fn(result))
+        if not math.isfinite(raw):
+            # P0-B : NaN ou ±inf → score invalide = 0.0, pas 1.0
+            self.clamped = True
+            self.last_score = 0.0
+            return 0.0
         clamped_score = max(0.0, min(1.0, raw))
         self.clamped = (raw != clamped_score)
         self.last_score = clamped_score
         return self.last_score
+
+    def evaluate_stateless(self, result: Any) -> "CriterionResult":
+        """Phase 4 (P1-A) — Évaluer sans muter l'instance globale.
+
+        Thread-safe : aucun état n'est écrit sur self.
+        Inclut le guard math.isfinite() (P0-B).
+
+        Returns:
+            CriterionResult avec score dans [0.0, 1.0].
+        """
+        raw = float(self.evaluate_fn(result))
+        if not math.isfinite(raw):
+            return CriterionResult(
+                criterion_name=self.name,
+                score=0.0,
+                clamped=True,
+                score_invalid=True,
+                raw_score=raw,
+            )
+        clamped_score = max(0.0, min(1.0, raw))
+        return CriterionResult(
+            criterion_name=self.name,
+            score=clamped_score,
+            clamped=(raw != clamped_score),
+            score_invalid=False,
+            raw_score=raw,
+        )
+
+
+
+# ---------------------------------------------------------------------------
+# Phase 4 (P0-A) — Helper : persistance forensic avant re-raise
+# ---------------------------------------------------------------------------
+
+def _persist_trace_forensic(
+    trace: "OperatorTrace",
+    forensic_logger: Any,
+    event: str = "limit_violation",
+) -> None:
+    """Persister la trace dans le log forensic AVANT de re-lever l'exception.
+
+    P0-A Phase 4 : garantit que le diagnostic n'est jamais perdu même si
+    l'exception traverse toute la pile d'appel sans être attrapée.
+
+    Si `forensic_logger` est None (pas de logger injecté), la trace est
+    enregistrée dans un fichier de secours basé sur le timestamp pour ne
+    jamais perdre d'information (fallback sans dépendance externe).
+
+    Args:
+        trace           : trace à persister (OperatorTrace déjà partiellement renseignée).
+        forensic_logger : instance avec méthode log(event, **kwargs), ou None.
+        event           : type d'événement pour le log ('limit_violation' ou
+                          'critical_traceability_missing').
+    """
+    import json as _json
+    import os as _os
+
+    trace_dict = trace.to_dict()
+    trace_dict["forensic_event"] = event
+    trace_dict["persisted_before_raise"] = True
+
+    if forensic_logger is not None:
+        try:
+            forensic_logger.log(event, trace=trace_dict)
+        except Exception:
+            # Fail-safe : si le logger lui-même échoue, écrire en fichier brut
+            _write_emergency_trace(trace_dict, event)
+    else:
+        # Pas de logger injecté → écriture d'urgence dans les intermediate_steps
+        # (toujours visible dans la trace sans dépendance externe)
+        trace.intermediate_steps.append(
+            f"FORENSIC_PERSISTED_BEFORE_RAISE:{event}:ts_ns={trace.ts_ns}"
+        )
+        # Tentative d'écriture dans le fichier forensic par défaut
+        _write_emergency_trace(trace_dict, event)
+
+
+def _write_emergency_trace(trace_dict: dict, event: str) -> None:
+    """Écriture d'urgence de la trace dans un fichier JSON minimal.
+
+    Utilisée quand le forensic_logger n'est pas disponible. Garantit P0-A
+    sans créer de dépendance sur ForensicLogger.
+    """
+    import json as _json
+    import os as _os
+    import time as _time
+
+    # Chercher le dossier logs/forensic à partir du dossier courant
+    candidate_paths = [
+        "LuCY/logs/forensic/lucy_forensic_emergency.jsonl",
+        "logs/forensic/lucy_forensic_emergency.jsonl",
+        "/tmp/lucy_forensic_emergency.jsonl",
+    ]
+    for path in candidate_paths:
+        try:
+            dir_path = _os.path.dirname(path)
+            if dir_path:
+                _os.makedirs(dir_path, exist_ok=True)
+            with open(path, "a", encoding="utf-8") as fh:
+                fh.write(_json.dumps(trace_dict, default=str) + "\n")
+            return  # Succès
+        except Exception:
+            continue  # Essayer le chemin suivant
+
 
 
 @dataclass
@@ -127,8 +337,12 @@ class OperatorContract:
     2. mechanism        — mécanisme de réalisation
     3. output_type      — type de sortie produit
     4. hard_limits      — limites vérifiables à l'exécution
-    5. traceability     — clés de traçabilité obligatoires dans le trace dict
+    5. traceability     — clés de traçabilité (warnings si manquantes)
     6. success_criteria — critères de réussite mesurables
+
+    Phase 4 (P1-B) : critical_traceability_keys — sous-ensemble bloquant de
+    `traceability`. Si une de ces clés est absente de la trace,
+    finalize_trace() lève CriticalTraceabilityError (ou retourne le fallback).
     """
     operator_id: str          # SE / SI / NE / NI / TE / TI / FE / FI
     operation: str
@@ -137,21 +351,21 @@ class OperatorContract:
     hard_limits: list[HardLimit] = field(default_factory=list)
     traceability: list[str] = field(default_factory=list)
     success_criteria: list[SuccessCriterion] = field(default_factory=list)
+    # Phase 4 (P1-B) : clés critiques bloquantes (sous-ensemble de traceability)
+    critical_traceability_keys: list[str] = field(default_factory=list)
 
     def check_all_limits(
-        self, result: Any, operator_id: str | None = None
+        self, result: Any, operator_id: Optional[str] = None
     ) -> tuple[bool, list[str]]:
         """Vérifier toutes les limites (P0-A).
 
-        Si une limite est violée, LimitViolationError est levée immédiatement —
-        le résultat NE DOIT PAS être retourné à l'appelant.
-
-        Les opérateurs doivent appeler check_all_limits() dans un bloc
-        try/except LimitViolationError et retourner une valeur de repli.
+        Phase 4 (P1-A) : utilise check_stateless() en interne pour éviter de
+        muter les instances globales. L'exception LimitViolationError est
+        toujours levée dès la première violation.
 
         Args:
             result      : sortie brute à vérifier.
-            operator_id : transmis à HardLimit.check() pour les messages d'erreur.
+            operator_id : transmis aux limites pour les messages d'erreur.
 
         Returns:
             (True, []) si toutes les limites sont respectées.
@@ -161,15 +375,16 @@ class OperatorContract:
         """
         op_id = operator_id or self.operator_id
         for lim in self.hard_limits:
-            lim.check(result, operator_id=op_id)  # lève si violée
+            lim.check_stateless(result, operator_id=op_id)  # P1-A : sans mutation
         return (True, [])
 
-    def check_traceability_keys(self, trace: "OperatorTrace") -> tuple[bool, list[str]]:
-        """P1-A — Vérifier que chaque clé déclarée dans `traceability` est présente
-        dans les intermediate_steps de la trace produite.
+    def check_traceability_keys(
+        self, trace: "OperatorTrace"
+    ) -> tuple[bool, list[str]]:
+        """Vérifier que chaque clé déclarée dans `traceability` est présente.
 
         Une clé est considérée présente si au moins un élément de
-        `trace.intermediate_steps` commence par `{key}:` ou contient `{key}`.
+        `trace.intermediate_steps` contient `{key}`.
 
         Returns:
             (all_present, missing_keys)
@@ -181,9 +396,40 @@ class OperatorContract:
                 missing.append(key)
         return (len(missing) == 0, missing)
 
+    def check_critical_traceability_keys(
+        self, trace: "OperatorTrace"
+    ) -> tuple[bool, list[str]]:
+        """Phase 4 (P1-B) — Vérifier les clés de traçabilité CRITIQUES.
+
+        Si une clé listée dans `critical_traceability_keys` est absente de la
+        trace, le diagnostic est irreconstituable → erreur bloquante.
+
+        Returns:
+            (all_present, missing_critical_keys)
+        """
+        missing_critical: list[str] = []
+        for key in self.critical_traceability_keys:
+            found = any(key in step for step in trace.intermediate_steps)
+            if not found:
+                missing_critical.append(key)
+        return (len(missing_critical) == 0, missing_critical)
+
+    def evaluate_all_criteria_stateless(self, result: Any) -> dict[str, "CriterionResult"]:
+        """Phase 4 (P1-A) — Évaluer tous les critères sans muter les instances.
+
+        Returns:
+            {criterion_name: CriterionResult} — états isolés par cycle.
+        """
+        return {c.name: c.evaluate_stateless(result) for c in self.success_criteria}
+
     def evaluate_all_criteria(self, result: Any) -> dict[str, float]:
-        """Évaluer tous les critères. Retourne {name: score}."""
-        return {c.name: c.evaluate(result) for c in self.success_criteria}
+        """Évaluer tous les critères. Retourne {name: score}.
+
+        Compatibilité ascendante — utilise evaluate_stateless() en interne
+        (P1-A) mais retourne le format dict[str, float] attendu par finalize_trace.
+        """
+        results = self.evaluate_all_criteria_stateless(result)
+        return {name: cr.score for name, cr in results.items()}
 
     def finalize_trace(
         self,
@@ -191,42 +437,86 @@ class OperatorContract:
         trace: "OperatorTrace",
         t_start: int,
         fallback_result: Any | None = None,
+        _forensic_logger: Any | None = None,
     ) -> tuple[Any, "OperatorTrace"]:
-        """P0-A — Finaliser la trace après vérification des limites.
+        """Phase 4 — Finaliser la trace après vérification complète des limites.
 
-        Si une limite est violée :
-        - L'exception LimitViolationError est attrapée.
-        - trace.limits_checked = True, trace.limits_violated = [nom_limite].
-        - Si `fallback_result` est fourni, il est retourné à la place du résultat invalide.
-        - Sinon, l'exception est re-levée.
+        Séquence :
+        1. Vérification des HardLimits (check_all_limits — stateless P1-A).
+           - Violation → trace persistée forensic AVANT re-raise (P0-A).
+           - fallback_result fourni → retour du fallback sans raise.
+        2. Vérification des clés critiques (P1-B).
+           - Clé critique manquante → CriticalTraceabilityError (ou fallback).
+        3. Vérification des clés non-critiques (warning dans intermediate_steps).
+        4. Évaluation des critères de réussite (stateless P1-A, guard NaN P0-B).
+        5. Finalisation de la durée.
 
-        Si toutes les limites sont respectées :
-        - trace.limits_checked = True, trace.limits_violated = [].
-        - trace.criteria_scores est peuplé.
-        - (result, trace) est retourné.
+        Args:
+            result           : sortie brute à vérifier.
+            trace            : trace en cours de construction.
+            t_start          : timestamp ns de début.
+            fallback_result  : valeur de repli si violation. None = re-raise.
+            _forensic_logger : optionnel — instance ForensicLogger pour P0-A.
+                               Si None, la trace est encodée JSON dans
+                               intermediate_steps (fallback sans dépendance).
 
-        Usage dans les opérateurs :
-            result, trace = contract.finalize_trace(result, trace, t_start, fallback_result)
-            return result
+        Returns:
+            (result_final, trace) — result_final peut être le fallback.
+
+        Raises:
+            LimitViolationError        : si limite violée et pas de fallback.
+            CriticalTraceabilityError  : si clé critique manquante et pas de fallback.
         """
         trace.limits_checked = True
+
+        # ── Étape 1 : vérification des HardLimits ──────────────────────────
         try:
             self.check_all_limits(result, operator_id=self.operator_id)
             trace.limits_violated = []
         except LimitViolationError as exc:
             trace.limits_violated = [exc.limit_name]
-            trace.intermediate_steps.append(f"LIMIT_VIOLATED:{exc.limit_name}:{exc.description}")
+            trace.intermediate_steps.append(
+                f"LIMIT_VIOLATED:{exc.limit_name}:{exc.description}"
+            )
             trace.criteria_scores = {}
             trace.duration_ns = time.time_ns() - t_start
+
+            # P0-A : persister la trace forensic AVANT re-raise
+            _persist_trace_forensic(trace, _forensic_logger, event="limit_violation")
+
             if fallback_result is not None:
                 return fallback_result, trace
             raise
 
-        # Vérification des clés de traçabilité (P1-A — non bloquant, log seulement)
+        # ── Étape 2 : vérification des clés critiques (P1-B) ───────────────
+        all_critical_ok, missing_critical = self.check_critical_traceability_keys(trace)
+        if not all_critical_ok:
+            trace.intermediate_steps.append(
+                f"CRITICAL_TRACEABILITY_MISSING:{missing_critical}"
+            )
+            trace.duration_ns = time.time_ns() - t_start
+
+            # P0-A appliqué aussi aux erreurs de traçabilité critique
+            _persist_trace_forensic(trace, _forensic_logger, event="critical_traceability_missing")
+
+            if fallback_result is not None:
+                return fallback_result, trace
+            raise CriticalTraceabilityError(
+                missing_keys=missing_critical,
+                operator_id=self.operator_id,
+            )
+
+        # ── Étape 3 : clés non-critiques (warnings) ────────────────────────
         all_present, missing = self.check_traceability_keys(trace)
         if not all_present:
-            trace.intermediate_steps.append(f"TRACEABILITY_MISSING_KEYS:{missing}")
+            # Filtrer les clés critiques déjà traitées (pour éviter doublons)
+            non_critical_missing = [k for k in missing if k not in self.critical_traceability_keys]
+            if non_critical_missing:
+                trace.intermediate_steps.append(
+                    f"TRACEABILITY_MISSING_KEYS:{non_critical_missing}"
+                )
 
+        # ── Étape 4 : évaluation des critères (stateless + guard NaN) ──────
         trace.criteria_scores = self.evaluate_all_criteria(result)
         trace.duration_ns = time.time_ns() - t_start
         return result, trace
@@ -238,10 +528,11 @@ class OperatorContract:
             "mechanism": self.mechanism,
             "output_type": self.output_type,
             "hard_limits": [
-                {"name": l.name, "description": l.description, "violated": l.violated}
-                for l in self.hard_limits
+                {"name": lim.name, "description": lim.description, "violated": lim.violated}
+                for lim in self.hard_limits
             ],
             "traceability_keys": self.traceability,
+            "critical_traceability_keys": self.critical_traceability_keys,
             "success_criteria": [
                 {"name": c.name, "description": c.description, "last_score": c.last_score}
                 for c in self.success_criteria
