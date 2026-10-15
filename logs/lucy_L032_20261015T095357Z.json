@@ -1,0 +1,679 @@
+{
+  "run_id": "L032",
+  "version": "LuCY v12.0",
+  "timestamp": "2026-10-15T09:53:57Z",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "total_games": 25,
+  "games_won": 0,
+  "games_budget_exhausted": 25,
+  "total_actions": 1975,
+  "total_elapsed_ms": 69931.31,
+  "levels_completed_total": 0,
+  "unknown_action_ids_total": 0,
+  "fallback_triggered_total": 0,
+  "games_with_single_action": [
+    "tn36",
+    "vc33",
+    "r11l",
+    "s5i5",
+    "lp85",
+    "ft09"
+  ],
+  "games_with_high_identity_ratio": [
+    "tn36",
+    "cd82",
+    "ls20",
+    "vc33",
+    "wa30",
+    "s5i5",
+    "ka59",
+    "sp80",
+    "dc22",
+    "tr87",
+    "cn04",
+    "m0r0",
+    "re86",
+    "ar25"
+  ],
+  "goal_found_any_game": false,
+  "action_id_audit_clean": true,
+  "games": [
+    {
+      "game_id": "tn36",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 7,
+      "total_actions": 79,
+      "elapsed_ms": 1382.72,
+      "known_ids": 77,
+      "avail_ids": [
+        6
+      ],
+      "max_stuck": 0,
+      "transforms": {
+        "IDENTITY": 72,
+        "SHIFT": 2,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION6": 0.78
+      }
+    },
+    {
+      "game_id": "cd82",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 6,
+      "total_actions": 79,
+      "elapsed_ms": 1496.88,
+      "known_ids": 462,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "max_stuck": 1,
+      "transforms": {
+        "IDENTITY": 72,
+        "SHIFT": 2,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION4": 1.787,
+        "ACTION6": 1.772,
+        "ACTION1": 1.713
+      }
+    },
+    {
+      "game_id": "ls20",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 7,
+      "total_actions": 79,
+      "elapsed_ms": 1608.73,
+      "known_ids": 308,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "max_stuck": 2,
+      "transforms": {
+        "IDENTITY": 70,
+        "SHIFT": 4,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION3": 5.75,
+        "ACTION4": 2.75,
+        "ACTION1": 2.57
+      }
+    },
+    {
+      "game_id": "vc33",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 7,
+      "total_actions": 79,
+      "elapsed_ms": 1567.59,
+      "known_ids": 77,
+      "avail_ids": [
+        6
+      ],
+      "max_stuck": 0,
+      "transforms": {
+        "IDENTITY": 74,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION6": 0.569
+      }
+    },
+    {
+      "game_id": "wa30",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 9,
+      "total_actions": 79,
+      "elapsed_ms": 1761.75,
+      "known_ids": 385,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "max_stuck": 2,
+      "transforms": {
+        "IDENTITY": 74,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION2": 1.236,
+        "ACTION1": 1.194,
+        "ACTION3": 1.194
+      }
+    },
+    {
+      "game_id": "sk48",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 8,
+      "total_actions": 79,
+      "elapsed_ms": 2305.11,
+      "known_ids": 462,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7
+      ],
+      "max_stuck": 6,
+      "transforms": {
+        "IDENTITY": 55,
+        "GROWING": 10,
+        "SHRINKING": 9,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION7": 5.823,
+        "ACTION1": 2.845,
+        "ACTION6": 2.369
+      }
+    },
+    {
+      "game_id": "r11l",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 6,
+      "total_actions": 79,
+      "elapsed_ms": 4063.12,
+      "known_ids": 77,
+      "avail_ids": [
+        6
+      ],
+      "max_stuck": 0,
+      "transforms": {
+        "IDENTITY": 0,
+        "GROWING": 72,
+        "SHRINKING": 1,
+        "RECOLOR": 1,
+        "UNKNOWN": 3
+      },
+      "top_actions": {}
+    },
+    {
+      "game_id": "s5i5",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 8,
+      "total_actions": 79,
+      "elapsed_ms": 1383.09,
+      "known_ids": 77,
+      "avail_ids": [
+        6
+      ],
+      "max_stuck": 0,
+      "transforms": {
+        "IDENTITY": 74,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION6": 0.51
+      }
+    },
+    {
+      "game_id": "bp35",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 9,
+      "total_actions": 79,
+      "elapsed_ms": 4787.5,
+      "known_ids": 300,
+      "avail_ids": [
+        3,
+        4,
+        6,
+        7
+      ],
+      "max_stuck": 0,
+      "transforms": {
+        "IDENTITY": 8,
+        "SHIFT": 6,
+        "GROWING": 24,
+        "SHRINKING": 32,
+        "UNKNOWN": 5
+      },
+      "top_actions": {
+        "ACTION3": 2.8,
+        "ACTION4": 2.65,
+        "ACTION7": 2.1
+      }
+    },
+    {
+      "game_id": "lf52",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 10,
+      "total_actions": 79,
+      "elapsed_ms": 3592.65,
+      "known_ids": 462,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7
+      ],
+      "max_stuck": 0,
+      "transforms": {
+        "IDENTITY": 59,
+        "SHIFT": 12,
+        "GROWING": 3,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION6": 1.393,
+        "ACTION1": 1.343,
+        "ACTION2": 1.343
+      }
+    },
+    {
+      "game_id": "sb26",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 8,
+      "total_actions": 79,
+      "elapsed_ms": 11594.95,
+      "known_ids": 228,
+      "avail_ids": [
+        5,
+        6,
+        7
+      ],
+      "max_stuck": 9,
+      "transforms": {
+        "IDENTITY": 41,
+        "SHIFT": 31,
+        "UNKNOWN": 4
+      },
+      "top_actions": {
+        "ACTION7": 1.391,
+        "ACTION5": 1.365,
+        "ACTION6": 1.101
+      }
+    },
+    {
+      "game_id": "g50t",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 7,
+      "total_actions": 79,
+      "elapsed_ms": 3849.28,
+      "known_ids": 385,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "max_stuck": 1,
+      "transforms": {
+        "IDENTITY": 42,
+        "SHIFT": 28,
+        "GROWING": 2,
+        "SHRINKING": 2,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION4": 2.944,
+        "ACTION3": 2.324,
+        "ACTION2": 2.284
+      }
+    },
+    {
+      "game_id": "ka59",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 7,
+      "total_actions": 79,
+      "elapsed_ms": 1370.65,
+      "known_ids": 385,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4,
+        6
+      ],
+      "max_stuck": 1,
+      "transforms": {
+        "IDENTITY": 74,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION6": 1.155,
+        "ACTION1": 1.118,
+        "ACTION2": 1.118
+      }
+    },
+    {
+      "game_id": "sp80",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 6,
+      "total_actions": 79,
+      "elapsed_ms": 1138.87,
+      "known_ids": 462,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "max_stuck": 0,
+      "transforms": {
+        "IDENTITY": 74,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION1": 2.181,
+        "ACTION2": 1.981,
+        "ACTION6": 1.883
+      }
+    },
+    {
+      "game_id": "dc22",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 6,
+      "total_actions": 79,
+      "elapsed_ms": 1631.24,
+      "known_ids": 385,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4,
+        6
+      ],
+      "max_stuck": 1,
+      "transforms": {
+        "IDENTITY": 71,
+        "GROWING": 3,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION4": 1.139,
+        "ACTION2": 1.115,
+        "ACTION1": 1.083
+      }
+    },
+    {
+      "game_id": "lp85",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 8,
+      "total_actions": 79,
+      "elapsed_ms": 1333.25,
+      "known_ids": 73,
+      "avail_ids": [
+        6
+      ],
+      "max_stuck": 9,
+      "transforms": {
+        "IDENTITY": 66,
+        "UNKNOWN": 7
+      },
+      "top_actions": {
+        "ACTION6": 0.266
+      }
+    },
+    {
+      "game_id": "sc25",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 6,
+      "total_actions": 79,
+      "elapsed_ms": 4367.36,
+      "known_ids": 385,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4,
+        6
+      ],
+      "max_stuck": 0,
+      "transforms": {
+        "IDENTITY": 41,
+        "SHIFT": 33,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION2": 1.6,
+        "ACTION3": 1.6,
+        "ACTION4": 1.6
+      }
+    },
+    {
+      "game_id": "tr87",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 6,
+      "total_actions": 79,
+      "elapsed_ms": 1386.69,
+      "known_ids": 308,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "max_stuck": 0,
+      "transforms": {
+        "IDENTITY": 74,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION4": 0.917,
+        "ACTION1": 0.861,
+        "ACTION2": 0.861
+      }
+    },
+    {
+      "game_id": "ft09",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 6,
+      "total_actions": 79,
+      "elapsed_ms": 4666.38,
+      "known_ids": 76,
+      "avail_ids": [
+        6
+      ],
+      "max_stuck": 9,
+      "transforms": {
+        "IDENTITY": 47,
+        "SHIFT": 25,
+        "UNKNOWN": 4
+      },
+      "top_actions": {
+        "ACTION6": -0.991
+      }
+    },
+    {
+      "game_id": "cn04",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 6,
+      "total_actions": 79,
+      "elapsed_ms": 1736.07,
+      "known_ids": 462,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "max_stuck": 1,
+      "transforms": {
+        "IDENTITY": 74,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION3": 6.044,
+        "ACTION5": 3.103,
+        "ACTION4": 3.044
+      }
+    },
+    {
+      "game_id": "m0r0",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 6,
+      "total_actions": 79,
+      "elapsed_ms": 1496.23,
+      "known_ids": 462,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "max_stuck": 1,
+      "transforms": {
+        "IDENTITY": 71,
+        "SHRINKING": 3,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION2": 2.44,
+        "ACTION3": 2.363,
+        "ACTION1": 2.321
+      }
+    },
+    {
+      "game_id": "su15",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 9,
+      "total_actions": 79,
+      "elapsed_ms": 3740.14,
+      "known_ids": 154,
+      "avail_ids": [
+        6,
+        7
+      ],
+      "max_stuck": 2,
+      "transforms": {
+        "IDENTITY": 18,
+        "SHIFT": 54,
+        "GROWING": 1,
+        "SHRINKING": 1,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION6": 5.471,
+        "ACTION7": 2.366
+      }
+    },
+    {
+      "game_id": "re86",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 8,
+      "total_actions": 79,
+      "elapsed_ms": 1507.55,
+      "known_ids": 385,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "max_stuck": 1,
+      "transforms": {
+        "IDENTITY": 74,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION2": 3.167,
+        "ACTION3": 3.167,
+        "ACTION4": 3.167
+      }
+    },
+    {
+      "game_id": "ar25",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 8,
+      "total_actions": 79,
+      "elapsed_ms": 1487.12,
+      "known_ids": 539,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "max_stuck": 9,
+      "transforms": {
+        "IDENTITY": 74,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION1": 5.938,
+        "ACTION3": 3.0,
+        "ACTION4": 3.0
+      }
+    },
+    {
+      "game_id": "tu93",
+      "reason": "BUDGET_EXHAUSTED",
+      "levels_completed": 0,
+      "win_levels": 9,
+      "total_actions": 79,
+      "elapsed_ms": 4676.39,
+      "known_ids": 308,
+      "avail_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "max_stuck": 0,
+      "transforms": {
+        "IDENTITY": 37,
+        "SHIFT": 37,
+        "UNKNOWN": 3
+      },
+      "top_actions": {
+        "ACTION2": 1.068,
+        "ACTION3": 1.068,
+        "ACTION4": 1.068
+      }
+    }
+  ]
+}
