@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "report_id": "L-033",
+    "version": "12.1",
+    "run_timestamp": "2026-10-15T08:31:15Z",
+    "log_source": "lucy_L033_run_20261015T083115Z.log",
+    "mode": "OFFLINE",
+    "max_steps": 80,
+    "games_played": 25,
+    "certified_100": false,
+    "unique_human_proven": false,
+    "debug": true
+  },
+  "global_results": {
+    "games_won": 0,
+    "games_budget_exhausted": 25,
+    "levels_completed_total": 0,
+    "total_actions": 1975,
+    "total_elapsed_ms": 48504,
+    "avg_elapsed_ms_per_game": 1940,
+    "score_kaggle": 0.0
+  },
+  "fix_validation": {
+    "P0A_false_level_up_eliminated": {
+      "status": "PASS",
+      "evidence": "LEVEL_UP count v12.1 = 0 (was 25 false LEVEL_UP in v12.0 at action=1)",
+      "win_levels_is_game_total_confirmed": true,
+      "win_levels_at_start_captured_on_all_25_games": true,
+      "detail": "win_levels=7 for tn36 at start, wl_start=7 = game total, never used as win signal"
+    },
+    "P0B_goal_delta_inactive_acknowledged": {
+      "status": "PARTIAL",
+      "evidence": "goal_found=false on all 25 games (confirmed). LEVELS_PROGRESS events=0 because 0 real level_up. Mechanism is correct but untriggered.",
+      "levels_progress_events": 0,
+      "note": "lp_map remains None since no level_up occurred — fix is structurally correct but no signal yet"
+    },
+    "P0C_real_progress_counter": {
+      "status": "PASS_STRUCTURAL",
+      "evidence": "n_progress_real used in scoring instead of n_visual. 0 increments (no level_up). n_visual_change tracked separately.",
+      "n_progress_real_total": 0,
+      "n_visual_change_total": 1534
+    },
+    "P1D_single_action_loop_broken": {
+      "status": "PASS",
+      "evidence": "14 SINGLE_ACTION_LOOP events detected and broken",
+      "loops_by_game": {"lp85": 8, "ft09": 6},
+      "games_affected": 2,
+      "streak_threshold": 8,
+      "candidate_in_all_loops": "ACTION6"
+    }
+  },
+  "games": [
+    {"game_id":"tn36","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":7,"win_levels_at_end":7,"total_actions":79,"elapsed_ms":1118,"single_action_loops":0},
+    {"game_id":"cd82","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":6,"win_levels_at_end":6,"total_actions":79,"elapsed_ms":2325,"single_action_loops":0},
+    {"game_id":"ls20","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":7,"win_levels_at_end":7,"total_actions":79,"elapsed_ms":933,"single_action_loops":0},
+    {"game_id":"vc33","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":7,"win_levels_at_end":7,"total_actions":79,"elapsed_ms":901,"single_action_loops":0},
+    {"game_id":"wa30","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":9,"win_levels_at_end":9,"total_actions":79,"elapsed_ms":829,"single_action_loops":0},
+    {"game_id":"sk48","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":8,"win_levels_at_end":8,"total_actions":79,"elapsed_ms":1190,"single_action_loops":0},
+    {"game_id":"r11l","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":6,"win_levels_at_end":6,"total_actions":79,"elapsed_ms":2663,"single_action_loops":0},
+    {"game_id":"s5i5","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":8,"win_levels_at_end":8,"total_actions":79,"elapsed_ms":819,"single_action_loops":0},
+    {"game_id":"bp35","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":9,"win_levels_at_end":9,"total_actions":79,"elapsed_ms":2981,"single_action_loops":0},
+    {"game_id":"lf52","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":10,"win_levels_at_end":10,"total_actions":79,"elapsed_ms":2598,"single_action_loops":0},
+    {"game_id":"sb26","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":8,"win_levels_at_end":8,"total_actions":79,"elapsed_ms":7409,"single_action_loops":0},
+    {"game_id":"g50t","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":7,"win_levels_at_end":7,"total_actions":79,"elapsed_ms":3828,"single_action_loops":0},
+    {"game_id":"ka59","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":7,"win_levels_at_end":7,"total_actions":79,"elapsed_ms":909,"single_action_loops":0},
+    {"game_id":"sp80","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":6,"win_levels_at_end":6,"total_actions":79,"elapsed_ms":2454,"single_action_loops":0},
+    {"game_id":"dc22","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":6,"win_levels_at_end":6,"total_actions":79,"elapsed_ms":872,"single_action_loops":0},
+    {"game_id":"lp85","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":8,"win_levels_at_end":8,"total_actions":79,"elapsed_ms":793,"single_action_loops":8},
+    {"game_id":"sc25","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":6,"win_levels_at_end":6,"total_actions":79,"elapsed_ms":2948,"single_action_loops":0},
+    {"game_id":"tr87","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":6,"win_levels_at_end":6,"total_actions":79,"elapsed_ms":901,"single_action_loops":0},
+    {"game_id":"ft09","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":6,"win_levels_at_end":6,"total_actions":79,"elapsed_ms":3324,"single_action_loops":6},
+    {"game_id":"cn04","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":6,"win_levels_at_end":6,"total_actions":79,"elapsed_ms":847,"single_action_loops":0},
+    {"game_id":"m0r0","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":6,"win_levels_at_end":6,"total_actions":79,"elapsed_ms":851,"single_action_loops":0},
+    {"game_id":"su15","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":9,"win_levels_at_end":9,"total_actions":79,"elapsed_ms":1882,"single_action_loops":0},
+    {"game_id":"re86","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":8,"win_levels_at_end":8,"total_actions":79,"elapsed_ms":851,"single_action_loops":0},
+    {"game_id":"ar25","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":8,"win_levels_at_end":8,"total_actions":79,"elapsed_ms":871,"single_action_loops":0},
+    {"game_id":"tu93","reason":"BUDGET_EXHAUSTED","levels_completed":0,"win_levels_at_start":9,"win_levels_at_end":9,"total_actions":79,"elapsed_ms":3407,"single_action_loops":0}
+  ],
+  "action_distribution": {
+    "ACTION6": 705, "ACTION3": 293, "ACTION1": 243,
+    "ACTION4": 237, "ACTION2": 232, "ACTION5": 120, "ACTION7": 82
+  },
+  "transform_distribution": {
+    "IDENTITY": 1374, "SHIFT": 286, "GROWING": 118, "UNKNOWN": 87, "SHRINKING": 47
+  },
+  "pixel_diff": {
+    "total_action_after": 1912,
+    "changed_frac_gt0": 1534,
+    "changed_frac_gt0_pct": 80.2
+  },
+  "comparison_v120_v121": {
+    "total_elapsed_ms_v120": 69931,
+    "total_elapsed_ms_v121": 48504,
+    "delta_ms": -21427,
+    "false_level_up_v120": 25,
+    "false_level_up_v121": 0,
+    "single_action_loops_broken_v121": 14,
+    "lp85_elapsed_ms_v120": "est.6241",
+    "lp85_elapsed_ms_v121": 793,
+    "ft09_elapsed_ms_v120": "est.474",
+    "ft09_elapsed_ms_v121": 3324,
+    "sb26_elapsed_ms_v120": 11595,
+    "sb26_elapsed_ms_v121": 7409
+  }
+}
