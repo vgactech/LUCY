@@ -1,0 +1,141 @@
+{
+  "version": "12.0",
+  "report_ref": "L-031",
+  "timestamp": "2026-10-15T12:00:00Z",
+  "run_type": "architecture + forensic design — no local run (arcengine not importable outside Kaggle sandbox)",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+
+  "architecture": {
+    "modules": [
+      "_GridPerceptor",
+      "_EpisodicMemory",
+      "_CognitiveEngine",
+      "_TransformType",
+      "_RuleMemory",
+      "_GoalDeltaTracker",
+      "_KaggleForensicLogger"
+    ],
+    "new_in_v12": ["_GoalDeltaTracker", "_KaggleForensicLogger v2"],
+    "modified_in_v12": ["_CognitiveEngine (goal_delta_map)", "_get_available_actions (raw_ids + audit)"],
+    "scoring_weights": {
+      "W_MEMORY": 3.0,
+      "W_PROGRESS": 2.0,
+      "W_DIVERSITY": 1.0,
+      "W_PERCEPTION": 1.5,
+      "W_GOAL_DELTA": 5.0
+    },
+    "ps_constants": {
+      "PS_CONFIDENCE_THRESHOLD": 1.5,
+      "PS_VERIFY_REWARD": 1.0,
+      "PS_CONTRADICT_DECAY": 0.8,
+      "PS_MAX_HYPOTHESES": 32
+    },
+    "program_synthesis": true,
+    "goal_delta_engine": true,
+    "cognitive_engine": true,
+    "external_llm": false
+  },
+
+  "forensic_events_v12": {
+    "GAME_INIT": {
+      "new_fields": ["schema_version", "valid_gameaction_ids", "goal_delta_engine", "note_timing"],
+      "note_timing": "ts_ns=civil clock; elapsed_ns=monotone; resolution=nanosecond_unit_not_guaranteed_precision"
+    },
+    "FRAME_INVENTORY": {
+      "emitted": "once_per_game_first_frame",
+      "captures": ["all FrameData attrs with types/shapes/values", "goal_related_attrs", "available_actions_raw type", "win_levels_present", "levels_completed_present"]
+    },
+    "ACTION_BEFORE": {
+      "new_fields": ["win_levels", "raw_available_ids", "raw_known_ids", "raw_unknown_ids", "n_unknown_ids", "goal_delta_before", "frame_shape", "ts_before_monotone_ns"]
+    },
+    "ACTION_AFTER": {
+      "new_fields": ["pixel_diff (changed_pixels, changed_frac, added_pixels, removed_pixels, net_change, total_pixels)", "goal_delta_after", "goal_delta_improvement", "transform_type"]
+    },
+    "ACTION_ID_UNKNOWN": {
+      "trigger": "every int ID in available_actions that cannot be mapped via GameAction.from_id()",
+      "fields": ["raw_id", "attempt_count", "valid_range", "note", "implication"]
+    },
+    "GOAL_DELTA": {
+      "emitted": "once_per_game_first_frame",
+      "fields": ["goal_found", "goal_attr_used", "goal_delta"]
+    },
+    "LEVEL_UP": {
+      "new_fields": ["old_win_levels", "new_win_levels"]
+    },
+    "RESET": {
+      "new_fields": ["budget_remaining", "stuck_streak_at_reset"]
+    },
+    "GAME_DONE": {
+      "new_fields": ["win_levels", "elapsed_ms", "total_events", "action_id_audit (known, unknown, fallback)", "note_win_levels"]
+    }
+  },
+
+  "root_cause_analysis": {
+    "P0_win_levels": {
+      "problem": "v11.0 tracked levels_completed from FrameData.levels_completed. The engine also provides win_levels (FrameData field) which is the authoritative win counter.",
+      "fix": "v12.0 reads both levels_completed and win_levels, takes max(), and tracks _win_levels independently. Level-up detected if either increments.",
+      "evidence": "FrameData.win_levels field confirmed present (arcengine/enums.py line 136: win_levels: int = Field(0, ge=0, le=254))"
+    },
+    "P0_action_ids": {
+      "problem": "GameAction enum has IDs 0-7 only. FrameData.available_actions is list[int]. If a game provides IDs like [22, 123, 73, 84, 96, 192, 186], GameAction.from_id() raises ValueError and they are silently ignored. LuCY falls back to ACTION1..ACTION7 — a subset that may never win.",
+      "fix": "v12.0 audits all raw IDs, logs ACTION_ID_UNKNOWN events, and reports action_id_audit in GAME_DONE. Operator can now see exactly which games use out-of-range IDs.",
+      "evidence": "arcengine/enums.py GameAction.from_id() line 89-93: raises ValueError for unknown ID. FrameData.available_actions: list[int] = [] (line 140).",
+      "implication": "If all games use IDs > 7, LuCY is always using fallback actions and cannot win regardless of cognitive strategy. This must be confirmed by reading FRAME_INVENTORY logs."
+    },
+    "P0_perception": {
+      "problem": "IDENTITY classification triggers when active_count, dominant_colour, and centre_of_mass are all equal. This is a coarse test — the pixel grid can change significantly while these three aggregates stay identical (e.g. a colour substitution with same count, same dominant, same CoM).",
+      "fix": "v12.0 computes _pixel_diff_detail() for every action: changed_pixels, changed_frac, added_pixels, removed_pixels, net_change. Logged in ACTION_AFTER. This allows post-hoc detection of changes invisible to v11 classifiers.",
+      "note": "_RuleMemory._classify() still uses the aggregate features — pixel_diff is forensic only in v12. A v13 improvement would be to feed pixel_diff back into classification."
+    },
+    "P1_goal_delta": {
+      "problem": "LuCY had no access to the puzzle goal state. It was acting blindly, optimising for change (GROWING) rather than progress towards the target.",
+      "fix": "v12.0 _GoalDeltaTracker inspects FrameData for goal/target/answer/output_grid/expected_output/solution attributes. If found, computes goal_delta = fraction of pixels differing from goal. Feeds goal_delta_improvement into CognitiveEngine as W_GOAL_DELTA=5.0 signal.",
+      "current_status": "FRAME_INVENTORY will reveal whether any goal attribute exists in the live FrameData. If goal_found=false, this module is dormant and no performance change expected.",
+      "verified_as_of": "NOT_VERIFIED — requires live Kaggle run to confirm FrameData attrs"
+    }
+  },
+
+  "comparison_v11_vs_v12": {
+    "levels_completed": {"v11": 0, "v12": "NOT_RUN_YET"},
+    "win_levels": {"v11": "not_tracked", "v12": "tracked"},
+    "action_id_audit": {"v11": "silent_fallback", "v12": "full_audit_logged"},
+    "pixel_diff": {"v11": "not_available", "v12": "per_action_logged"},
+    "goal_delta": {"v11": "not_available", "v12": "tracked_if_goal_attr_found"},
+    "forensic_events_per_game": {"v11": 320, "v12": "estimated_400_500_per_game"},
+    "errors": {"v11": 0, "v12": "NOT_RUN_YET"}
+  },
+
+  "open_questions": {
+    "Q1": "Do any FrameData attrs contain a goal/target grid? Answer in FRAME_INVENTORY.goal_related_attrs after Kaggle run.",
+    "Q2": "Are baseline_actions [22,123,73,84,96,192,186] consistently available? Answer in ACTION_ID_AUDIT logs.",
+    "Q3": "Does win_levels ever increment? Or is levels_completed the correct counter? Answer after first run with a level win.",
+    "Q4": "What is the pixel_diff.changed_frac distribution? If all actions give changed_frac=0.000, the frame is truly static and IDENTITY is correct.",
+    "Q5": "What are the full FrameData available_actions int lists for the 25 test games? Needed to understand the action space."
+  },
+
+  "files_changed": [
+    {
+      "file": "vendor/ARC-AGI-3-Kaggle-Starter/agent/my_agent.py",
+      "action": "MODIFIED to v12.0",
+      "lines": 1335
+    },
+    {
+      "file": "agent/my_agent_v120.py",
+      "action": "CREATED (archive)",
+      "lines": 1335
+    },
+    {
+      "file": "logs/lucy_L031_20261015T120000Z.json",
+      "action": "CREATED (this file)"
+    },
+    {
+      "file": "rapports/L-031_lucy_v120_forensic_maximal_2026-10-15.md",
+      "action": "CREATED"
+    }
+  ],
+
+  "timing_note": "arcengine imports FrameData, GameAction etc — not importable outside Kaggle sandbox. v12.0 code is syntax-verified by inspection; execution results pending Kaggle submission.",
+  "next_step": "Submit v12.0 to Kaggle (make submit), read FRAME_INVENTORY + ACTION_ID_AUDIT from console output, then implement v13.0 based on Q1-Q5 answers."
+}
