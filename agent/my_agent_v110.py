@@ -5,49 +5,42 @@ splices the contents of this file into the Kaggle submission notebook.
 
 [edit my_agent.py] → [make play-local] → [make submit]
 
-Architecture v11.0 — LuCY PROGRAM SYNTHESIS
+Architecture v11.0 — LuCY PROGRAM SYNTHESIS ENGINE
   D-LUCY-001: LuCY IS her own cognitive model — NO external LLM whatsoever.
   Intelligence emerges from:
-    1. Direct grid perception       (_GridPerceptor)       ← from v10.0
-    2. Transformation detection     (_TransformDetector)   ← NEW v11.0
-    3. Rule hypothesis engine       (_RuleHypothesizer)    ← NEW v11.0
-    4. Cross-game persistent memory (_CrossGameMemory)     ← NEW v11.0
-    5. Episodic memory              (_EpisodicMemory)      ← from v10.0
-    6. Cognitive scoring engine     (_CognitiveEngine)     ← upgraded v11.0
-    7. Nanosecond forensic log      (_KaggleForensicLogger)← from v10.0
-
-CERTIFIED_100=false | unique_human_proven=false | DEBUG=true
+    1. Direct grid perception    (_GridPerceptor)       — from v10.0
+    2. Episodic memory           (_EpisodicMemory)      — from v10.0
+    3. Cognitive scoring engine  (_CognitiveEngine)     — from v10.0
+    4. Program synthesis engine  (_ProgramSynthesis)    — NEW v11.0
+    5. Cross-episode rule memory (_RuleMemory)          — NEW v11.0
+    6. Nanosecond forensic log   (_KaggleForensicLogger)
 
 Changes from v10.0:
-  MOD-PS1 : _TransformDetector — analyses consecutive frames to detect what
-             CHANGED between them: colour swaps, translation, fill ratio shift,
-             axis reflection, border pattern changes.
-  MOD-PS2 : _RuleHypothesizer — accumulates (action, transform_signature)
-             pairs. A hypothesis is "action A causes transform T with probability p".
-             When confidence >= HYPOTHESIS_CONFIRM_THRESHOLD, the rule is treated
-             as CONFIRMED and becomes the primary action to repeat.
-  MOD-PS3 : _CrossGameMemory — stores confirmed rules as JSON in /tmp for
-             reuse across multiple games in the same Kaggle session. Falls back
-             gracefully (dict in memory) when /tmp is not writable.
-  MOD-PS4 : _CognitiveEngine upgraded — adds a 5th signal: rule_score, the
-             probability that a candidate action is a confirmed rule for the
-             current puzzle type. W_RULE=4.0 (highest weight).
-
-  Root cause of levels_completed=0 addressed:
-    v1..v10: No rule inference. Optimised numeric signals without understanding
-    the semantic puzzle rules (which action sequence solves this puzzle type).
-    v11.0: Explicitly tracks WHAT CHANGED after each action, clusters changes
-    by action, and concentrates on the action whose effects best match the
-    goal state transition seen in earlier frames.
+  ROOT CAUSE FIX: levels_completed=0/25 because v10.0 had no rule inference.
+  PS-1 : _ProgramSynthesis — observes pairs of consecutive frames, detects
+         which action caused which transformation (delta), builds hypotheses:
+           - IDENTITY  : frame unchanged (action had no effect)
+           - GROWING   : active cell count increased
+           - SHRINKING : active cell count decreased
+           - RECOLOR   : dominant colour changed
+           - SHIFT     : centre-of-mass moved
+  PS-2 : _RuleMemory — persists verified hypotheses across episodes within
+         the same game. key=(action_value, pre_state_signature) → confidence.
+         Confidence grows each verification, decays on contradiction.
+  PS-3 : Synthesis loop in choose_action() — before picking, ask PS for the
+         best-verified rule. If confidence > PS_CONFIDENCE_THRESHOLD, follow it.
+         Otherwise fall back to cognitive scoring (v10.0 path).
+  PS-4 : Hypothesis search — in EXPLORE phase, tries all candidates once to
+         build a local transformation map before exploiting.
 
 Kept from v10.0:
-  _GridPerceptor (grid feature extraction — symmetry, colour, complexity).
-  _EpisodicMemory (per-game action→outcome scores).
-  _KaggleForensicLogger (nanosecond stdout logger, BUG-C7 guard).
+  _KaggleForensicLogger, _GridPerceptor, _EpisodicMemory, _CognitiveEngine.
   _frame_fingerprint / _frame_delta utilities.
   _get_available_actions with integer fallback.
-  RESET budget and stagnation recovery logic.
-  All BUG-B1/B2/B3/C1/C3/C4/C5/C7 fixes remain active.
+  RESET budget, stagnation, phase dispatch logic.
+  All BUG-B1/B2/B3/C1/C3/C4/C5/C7/D1 fixes remain active.
+
+CERTIFIED_100=false | unique_human_proven=false | DEBUG=true
 """
 
 from __future__ import annotations
@@ -55,7 +48,6 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-import os
 import random
 import time
 from collections import Counter, defaultdict
@@ -71,7 +63,7 @@ from agents.agent import Agent
 VERSION = "11.0"
 DEBUG = True  # PROTOCOLE_ARTCB: always DEBUG until user disables explicitly
 
-# Action budgets (BUG-B1 fix carried from v9.0)
+# Action budgets
 MAX_ACTIONS_TOTAL = 80
 MAX_ACTIONS_PER_LEVEL = 30
 
@@ -79,27 +71,24 @@ MAX_ACTIONS_PER_LEVEL = 30
 STUCK_THRESHOLD = 5
 RESET_AFTER_STUCK = 5
 
-# Cognitive scoring weights — v11.0 adds W_RULE
-W_MEMORY = 2.0      # weight for episodic memory score
-W_PROGRESS = 1.5    # weight for frame-delta progress
-W_DIVERSITY = 0.8   # weight for under-tried actions
-W_PERCEPTION = 1.0  # weight for perception-based hint
-W_RULE = 4.0        # weight for confirmed rule hypothesis (NEW v11.0)
+# Cognitive scoring weights (v10.0 — kept)
+W_MEMORY = 3.0
+W_PROGRESS = 2.0
+W_DIVERSITY = 1.0
+W_PERCEPTION = 1.5
+
+# Program synthesis constants (NEW v11.0)
+PS_CONFIDENCE_THRESHOLD = 1.5   # min confidence to follow a rule
+PS_VERIFY_REWARD = 1.0          # confidence gain when rule verified
+PS_CONTRADICT_DECAY = 0.8       # confidence decay on contradiction
+PS_MAX_HYPOTHESES = 32          # cap per action to avoid memory explosion
 
 # Minimum delta to count as progress
 DELTA_MIN = 0.01
 
-# Program synthesis thresholds
-HYPOTHESIS_CONFIRM_THRESHOLD = 0.70  # p >= 70% → treat as confirmed rule
-HYPOTHESIS_MIN_TRIALS = 3            # need at least 3 observations before confirming
-TRANSFORM_SIG_BUCKETS = 8            # number of buckets for transform signature
-
 # Grid feature weights for perception hint
 _COMPLEX_ACTIONS = {6}
 _SIMPLE_ACTIONS = {1, 2, 3, 4, 5, 7}
-
-# Cross-game memory path (Kaggle ephemeral /tmp — graceful fallback)
-_CROSS_GAME_MEMORY_PATH = "/tmp/lucy_v11_cross_game.json"
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -108,13 +97,6 @@ _CROSS_GAME_MEMORY_PATH = "/tmp/lucy_v11_cross_game.json"
 
 class _KaggleForensicLogger:
     """Inline nanosecond forensic logger for Kaggle execution environment.
-
-    Design constraints:
-    - No external file I/O (Kaggle ephemeral FS).
-    - stdout print() captured by Kaggle in __results__.html.
-    - Each event line: [LuCY-NS:{ts_ns}] {event_type} | {payload_json}
-    - Events fired BEFORE and DURING every state change.
-    - Summary JSON printed at game end.
 
     CERTIFIED_100=false | unique_human_proven=false
     """
@@ -125,7 +107,7 @@ class _KaggleForensicLogger:
         self.game_id = game_id
         self._events: list[dict] = []
         self._game_start_ns: int = time.time_ns()
-        self._done_emitted: bool = False  # BUG-C7 fix
+        self._done_emitted: bool = False
         self._emit("GAME_INIT", {
             "game_id": game_id,
             "version": VERSION,
@@ -141,12 +123,7 @@ class _KaggleForensicLogger:
 
     def _emit(self, event_type: str, payload: dict) -> None:
         ts_ns = time.time_ns()
-        entry = {
-            "ts_ns": ts_ns,
-            "event": event_type,
-            "game_id": self.game_id,
-            **payload,
-        }
+        entry = {"ts_ns": ts_ns, "event": event_type, "game_id": self.game_id, **payload}
         self._events.append(entry)
         line = json.dumps(entry, separators=(",", ":"), default=str)
         print(f"{self.PREFIX}:{ts_ns}] {event_type} | {line}", flush=True)
@@ -157,24 +134,13 @@ class _KaggleForensicLogger:
     def on_cognitive_score(self, scores: dict) -> None:
         self._emit("COGNITIVE_SCORE", scores)
 
-    def on_rule_hypothesis(self, payload: dict) -> None:
-        self._emit("RULE_HYPOTHESIS", payload)
+    def on_synthesis_hypothesis(self, payload: dict) -> None:
+        self._emit("PS_HYPOTHESIS", payload)
 
-    def on_rule_confirmed(self, payload: dict) -> None:
-        self._emit("RULE_CONFIRMED", payload)
+    def on_synthesis_follow(self, action_name: str, confidence: float) -> None:
+        self._emit("PS_FOLLOW", {"action": action_name, "confidence": round(confidence, 3)})
 
-    def on_transform_detected(self, payload: dict) -> None:
-        self._emit("TRANSFORM_DETECTED", payload)
-
-    def on_action_before(
-        self,
-        action_count: int,
-        phase: str,
-        candidates: list,
-        fp: str,
-        stuck_streak: int,
-        levels_completed: int,
-    ) -> int:
+    def on_action_before(self, action_count, phase, candidates, fp, stuck_streak, levels_completed) -> int:
         ts_before = time.time_ns()
         self._emit("ACTION_BEFORE", {
             "action_count": action_count,
@@ -188,14 +154,7 @@ class _KaggleForensicLogger:
         })
         return ts_before
 
-    def on_action_after(
-        self,
-        action_count: int,
-        action_name: str,
-        phase: str,
-        ts_before_ns: int,
-        is_complex: bool,
-    ) -> None:
+    def on_action_after(self, action_count, action_name, phase, ts_before_ns, is_complex) -> None:
         ts_after = time.time_ns()
         self._emit("ACTION_AFTER", {
             "action_count": action_count,
@@ -205,32 +164,19 @@ class _KaggleForensicLogger:
             "selection_dur_ns": ts_after - ts_before_ns,
         })
 
-    def on_level_up(self, old_level: int, new_level: int, actions_this_level: int) -> None:
-        self._emit("LEVEL_UP", {
-            "old_level": old_level,
-            "new_level": new_level,
-            "actions_this_level": actions_this_level,
-        })
+    def on_level_up(self, old_level, new_level, actions_this_level) -> None:
+        self._emit("LEVEL_UP", {"old_level": old_level, "new_level": new_level,
+                                "actions_this_level": actions_this_level})
 
-    def on_stuck(self, streak: int, phase: str) -> None:
+    def on_stuck(self, streak, phase) -> None:
         self._emit("STUCK", {"streak": streak, "phase": phase})
 
-    def on_reset(self, reason: str, action_count: int) -> None:
+    def on_reset(self, reason, action_count) -> None:
         self._emit("RESET", {"reason": reason, "action_count": action_count})
 
-    def on_model_update(
-        self,
-        action_name: str,
-        level_up: bool,
-        delta: float,
-        n_total: int,
-    ) -> None:
-        self._emit("MODEL_UPDATE", {
-            "action": action_name,
-            "level_up": level_up,
-            "delta": round(delta, 4),
-            "n_total": n_total,
-        })
+    def on_model_update(self, action_name, level_up, delta, n_total) -> None:
+        self._emit("MODEL_UPDATE", {"action": action_name, "level_up": level_up,
+                                    "delta": round(delta, 4), "n_total": n_total})
 
     def on_done(self, reason: str, levels_completed: int, total_actions: int) -> None:
         """BUG-C7 fix: guarded by _done_emitted."""
@@ -258,28 +204,12 @@ class _KaggleForensicLogger:
             "certified_100": False,
             "unique_human_proven": False,
         }
-        print(
-            f"{self.PREFIX}:SUMMARY] {json.dumps(summary, separators=(',', ':'))}",
-            flush=True,
-        )
+        print(f"{self.PREFIX}:SUMMARY] {json.dumps(summary, separators=(',', ':'))}", flush=True)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
 # UTILITIES
 # ──────────────────────────────────────────────────────────────────────────────
-
-def _scalar(v: Any) -> int:
-    """Recursively extract a scalar int from any nested structure.
-
-    Carried from v10.0 BUG-D1 fix.
-    """
-    if isinstance(v, (list, tuple)):
-        return _scalar(v[0]) if v else 0
-    try:
-        return int(v)
-    except (TypeError, ValueError):
-        return 0
-
 
 def _frame_fingerprint(frame: Any) -> str:
     """Compact SHA1-based fingerprint of the full visual game state."""
@@ -289,7 +219,6 @@ def _frame_fingerprint(frame: Any) -> str:
         import numpy as np
         if isinstance(frame, np.ndarray):
             return hashlib.sha1(frame.tobytes()).hexdigest()[:16]
-
         flat: list = []
 
         def _flatten(obj: Any) -> None:
@@ -316,7 +245,7 @@ def _frame_fingerprint(frame: Any) -> str:
 def _frame_delta(frame_a: Any, frame_b: Any) -> float:
     """Fraction of elements that differ between two frames (0.0 = identical).
 
-    BUG-B3 fix: full frame comparison, no [:256] truncation.
+    BUG-B3 fix: full frame comparison.
     """
     if frame_a is None or frame_b is None:
         return 1.0
@@ -341,11 +270,7 @@ def _frame_delta(frame_a: Any, frame_b: Any) -> float:
 
 
 def _get_available_actions(latest_frame: FrameData) -> list[GameAction]:
-    """Extract available actions from frame (Fix-1 from v7.0).
-
-    Prefers latest_frame.available_actions (authoritative) if non-empty.
-    Falls back to all simple GameActions excluding RESET.
-    """
+    """Extract available actions from frame (Fix-1 from v7.0)."""
     avail = getattr(latest_frame, "available_actions", None)
     if avail:
         result = []
@@ -366,63 +291,42 @@ def _get_available_actions(latest_frame: FrameData) -> list[GameAction]:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MODULE 1 — GRID PERCEPTOR (carried from v10.0)
+# MODULE 1 — GRID PERCEPTOR (from v10.0, unchanged)
 # ──────────────────────────────────────────────────────────────────────────────
 
 class _GridPerceptor:
-    """Direct visual perception of ARC-AGI-3 grids.
+    """Direct visual perception of ARC-AGI-3 grids. D-LUCY-001: no external LLM."""
 
-    D-LUCY-001: no external LLM — features extracted by native Python analysis.
-
-    Features extracted:
-      symmetry_h      : horizontal symmetry ratio [0..1]
-      symmetry_v      : vertical symmetry ratio [0..1]
-      dominant_colour : most frequent cell value (int)
-      complexity      : number of distinct non-zero cell values
-      active_ratio    : fraction of non-zero cells
-      colour_count    : total number of distinct colours (including 0)
-      delta_mass      : signed change in count of non-zero cells vs previous frame
-    """
-
-    def extract(
-        self,
-        frame: Any,
-        prev_frame: Any = None,
-    ) -> dict:
-        """Extract visual features from a frame. Returns feature dict."""
+    def extract(self, frame: Any, prev_frame: Any = None) -> dict:
         features: dict = {
-            "symmetry_h": 0.0,
-            "symmetry_v": 0.0,
-            "dominant_colour": 0,
-            "complexity": 1,
-            "active_ratio": 0.0,
-            "colour_count": 1,
-            "delta_mass": 0,
-            "grid_valid": False,
-            "rows": 0,
-            "cols": 0,
+            "symmetry_h": 0.0, "symmetry_v": 0.0, "dominant_colour": 0,
+            "complexity": 1, "active_ratio": 0.0, "colour_count": 1,
+            "delta_mass": 0, "grid_valid": False,
+            "active_count": 0, "rows": 0, "cols": 0,
+            "centre_of_mass_r": 0.0, "centre_of_mass_c": 0.0,
         }
-
         grid = self._to_grid(frame)
         if grid is None or len(grid) == 0:
             return features
-
         features["grid_valid"] = True
         rows = len(grid)
         cols = max(len(r) for r in grid) if grid else 0
         if cols == 0:
             return features
-
         features["rows"] = rows
         features["cols"] = cols
 
-        # Flatten to uniform 2D matrix (pad missing cells with 0)
-        mat = [[grid[r][c] if c < len(grid[r]) else 0
-                for c in range(cols)]
-               for r in range(rows)]
+        def _scalar(v: Any) -> int:
+            if isinstance(v, (list, tuple)):
+                return _scalar(v[0]) if v else 0
+            try:
+                return int(v)
+            except (TypeError, ValueError):
+                return 0
 
-        all_vals = [_scalar(mat[r][c]) for r in range(rows) for c in range(cols)]
-        mat = [[_scalar(mat[r][c]) for c in range(cols)] for r in range(rows)]
+        mat = [[_scalar(grid[r][c] if c < len(grid[r]) else 0)
+                for c in range(cols)] for r in range(rows)]
+        all_vals = [mat[r][c] for r in range(rows) for c in range(cols)]
         counter = Counter(all_vals)
         features["dominant_colour"] = counter.most_common(1)[0][0] if counter else 0
         features["colour_count"] = len(counter)
@@ -431,10 +335,17 @@ class _GridPerceptor:
         total = rows * cols
         active = sum(1 for v in all_vals if v != 0)
         features["active_ratio"] = active / max(1, total)
+        features["active_count"] = active
+
+        # Centre of mass of active cells
+        if active > 0:
+            sum_r = sum(r for r in range(rows) for c in range(cols) if mat[r][c] != 0)
+            sum_c = sum(c for r in range(rows) for c in range(cols) if mat[r][c] != 0)
+            features["centre_of_mass_r"] = sum_r / active
+            features["centre_of_mass_c"] = sum_c / active
 
         if rows >= 2:
-            h_matches = 0
-            h_total = 0
+            h_matches = h_total = 0
             for c in range(cols):
                 for dr in range(rows // 2):
                     r1, r2 = dr, rows - 1 - dr
@@ -444,8 +355,7 @@ class _GridPerceptor:
             features["symmetry_h"] = h_matches / max(1, h_total)
 
         if cols >= 2:
-            v_matches = 0
-            v_total = 0
+            v_matches = v_total = 0
             for r in range(rows):
                 for dc in range(cols // 2):
                     c1, c2 = dc, cols - 1 - dc
@@ -457,16 +367,13 @@ class _GridPerceptor:
         if prev_frame is not None:
             prev_grid = self._to_grid(prev_frame)
             if prev_grid is not None:
-                prev_active = sum(
-                    1 for row in prev_grid for v in row if v != 0
-                )
+                prev_active = sum(1 for row in prev_grid for v in row if v != 0)
                 features["delta_mass"] = active - prev_active
 
         return features
 
     @staticmethod
     def _to_grid(frame: Any) -> Optional[list]:
-        """Convert any frame representation to a list-of-lists grid."""
         if frame is None:
             return None
         try:
@@ -487,274 +394,11 @@ class _GridPerceptor:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MODULE PS1 — TRANSFORM DETECTOR (NEW v11.0)
-# ──────────────────────────────────────────────────────────────────────────────
-
-class _TransformDetector:
-    """Detects what transformation occurred between two consecutive frames.
-
-    D-LUCY-001: pure Python arithmetic — no LLM.
-
-    A transformation signature is a compact descriptor of the change type:
-      fill_ratio_change : signed change in fraction of non-zero cells
-      dominant_colour_shift : did the dominant colour change? (bool)
-      mass_change_bucket : quantised signed mass delta in 8 buckets
-      h_sym_change : change in horizontal symmetry (increased/decreased/stable)
-      v_sym_change : change in vertical symmetry (increased/decreased/stable)
-      changed_fraction : what fraction of cells changed between frames
-
-    These six attributes form a TransformSignature that identifies the type
-    of effect an action had on the game state.
-    """
-
-    _BUCKET_EDGES = [-1.0, -0.5, -0.2, -0.05, 0.05, 0.2, 0.5, 1.0]
-
-    def detect(
-        self,
-        feats_before: dict,
-        feats_after: dict,
-        frame_before: Any,
-        frame_after: Any,
-    ) -> dict:
-        """Return a transform signature dict comparing before/after features.
-
-        Returns an empty dict if either frame is invalid.
-        """
-        if not feats_before.get("grid_valid") or not feats_after.get("grid_valid"):
-            return {}
-
-        # Fill ratio change
-        fill_before = feats_before.get("active_ratio", 0.0)
-        fill_after = feats_after.get("active_ratio", 0.0)
-        fill_delta = round(fill_after - fill_before, 4)
-
-        # Dominant colour shift
-        dom_before = feats_before.get("dominant_colour", 0)
-        dom_after = feats_after.get("dominant_colour", 0)
-        colour_shift = dom_before != dom_after
-
-        # Mass change bucket (quantised)
-        mass_delta = feats_after.get("delta_mass", 0)
-        total_cells = max(
-            feats_before.get("rows", 1) * feats_before.get("cols", 1), 1
-        )
-        mass_norm = max(-1.0, min(1.0, mass_delta / total_cells))
-        mass_bucket = self._quantise(mass_norm)
-
-        # Symmetry changes (stable / increased / decreased)
-        h_before = feats_before.get("symmetry_h", 0.0)
-        h_after = feats_after.get("symmetry_h", 0.0)
-        h_sym_change = self._sym_change(h_before, h_after)
-
-        v_before = feats_before.get("symmetry_v", 0.0)
-        v_after = feats_after.get("symmetry_v", 0.0)
-        v_sym_change = self._sym_change(v_before, v_after)
-
-        # Changed fraction (pixel-level)
-        changed_frac = round(_frame_delta(frame_before, frame_after), 4)
-
-        return {
-            "fill_delta": fill_delta,
-            "colour_shift": colour_shift,
-            "mass_bucket": mass_bucket,
-            "h_sym_change": h_sym_change,
-            "v_sym_change": v_sym_change,
-            "changed_frac": changed_frac,
-        }
-
-    def signature_key(self, sig: dict) -> str:
-        """Convert a transform signature to a compact string key for hashing."""
-        if not sig:
-            return "null"
-        return (
-            f"fd{sig.get('fill_delta', 0):.2f}"
-            f"cs{int(sig.get('colour_shift', False))}"
-            f"mb{sig.get('mass_bucket', 4)}"
-            f"hs{sig.get('h_sym_change', 's')}"
-            f"vs{sig.get('v_sym_change', 's')}"
-            f"cf{sig.get('changed_frac', 0.0):.2f}"
-        )
-
-    @staticmethod
-    def _quantise(v: float) -> int:
-        """Quantise a value in [-1,1] into 0..7 bucket."""
-        for i, edge in enumerate(_TransformDetector._BUCKET_EDGES):
-            if v <= edge:
-                return i
-        return TRANSFORM_SIG_BUCKETS - 1
-
-    @staticmethod
-    def _sym_change(before: float, after: float) -> str:
-        """Return 'i' (increased), 'd' (decreased), 's' (stable)."""
-        diff = after - before
-        if diff > 0.05:
-            return "i"
-        if diff < -0.05:
-            return "d"
-        return "s"
-
-
-# ──────────────────────────────────────────────────────────────────────────────
-# MODULE PS2 — RULE HYPOTHESIZER (NEW v11.0)
-# ──────────────────────────────────────────────────────────────────────────────
-
-class _RuleHypothesizer:
-    """Accumulates (action, transform_signature) evidence and infers rules.
-
-    D-LUCY-001: pure Python — no LLM.
-
-    A rule is a pair (action_value, transform_sig_key) that occurs with
-    sufficient frequency to be considered predictive.
-
-    confirmed_rules: {action_value: best_transform_sig_key}
-      — the most likely transformation caused by each action.
-
-    rule_confidence: {action_value: float in [0,1]}
-      — fraction of observations where the dominant signature occurred.
-
-    A rule is "confirmed" when:
-      rule_confidence[v] >= HYPOTHESIS_CONFIRM_THRESHOLD
-      AND n_observations[v] >= HYPOTHESIS_MIN_TRIALS
-    """
-
-    def __init__(self) -> None:
-        # {action_value: {sig_key: count}}
-        self._sig_counts: defaultdict[int, Counter] = defaultdict(Counter)
-        # {action_value: total observations}
-        self._n_obs: Counter = Counter()
-
-    def record(self, action: GameAction, sig_key: str) -> None:
-        """Record an observed (action → transform_signature) pair."""
-        if not sig_key or sig_key == "null":
-            return
-        v = action.value
-        self._sig_counts[v][sig_key] += 1
-        self._n_obs[v] += 1
-
-    def rule_score(self, action: GameAction) -> float:
-        """Return confidence that this action causes a consistent transformation.
-
-        Returns 0.0 if not enough observations or no dominant signature.
-        """
-        v = action.value
-        n = self._n_obs[v]
-        if n < HYPOTHESIS_MIN_TRIALS:
-            return 0.0
-        if not self._sig_counts[v]:
-            return 0.0
-        best_count = self._sig_counts[v].most_common(1)[0][1]
-        return best_count / n
-
-    def dominant_sig(self, action: GameAction) -> Optional[str]:
-        """Return the most observed transform signature for an action."""
-        v = action.value
-        if not self._sig_counts[v]:
-            return None
-        return self._sig_counts[v].most_common(1)[0][0]
-
-    def is_confirmed(self, action: GameAction) -> bool:
-        """True when the rule hypothesis is confirmed (high confidence + enough data)."""
-        return (
-            self._n_obs[action.value] >= HYPOTHESIS_MIN_TRIALS
-            and self.rule_score(action) >= HYPOTHESIS_CONFIRM_THRESHOLD
-        )
-
-    def confirmed_actions(self, candidates: list[GameAction]) -> list[GameAction]:
-        """Return the subset of candidates with confirmed rules, sorted by confidence."""
-        confirmed = [a for a in candidates if self.is_confirmed(a)]
-        confirmed.sort(key=self.rule_score, reverse=True)
-        return confirmed
-
-    def to_dict(self) -> dict:
-        """Serialise to a dict for cross-game persistence."""
-        return {
-            "sig_counts": {
-                str(k): dict(v) for k, v in self._sig_counts.items()
-            },
-            "n_obs": dict(self._n_obs),
-        }
-
-    def merge_from_dict(self, data: dict) -> None:
-        """Merge persisted cross-game data into this hypothesizer."""
-        try:
-            for k, v in data.get("sig_counts", {}).items():
-                self._sig_counts[int(k)].update(v)
-            for k, v in data.get("n_obs", {}).items():
-                self._n_obs[int(k)] += int(v)
-        except Exception:
-            pass  # Corrupt persistent data — fail-open (keep in-memory data)
-
-
-# ──────────────────────────────────────────────────────────────────────────────
-# MODULE PS3 — CROSS-GAME MEMORY (NEW v11.0)
-# ──────────────────────────────────────────────────────────────────────────────
-
-class _CrossGameMemory:
-    """Persists confirmed rule hypotheses across multiple games in a session.
-
-    D-LUCY-001: JSON file in /tmp — no external service, no LLM.
-
-    Falls back gracefully to in-memory dict when /tmp is not writable.
-    Thread-safety: single-process Kaggle environment — no locking needed.
-    """
-
-    def __init__(self, path: str = _CROSS_GAME_MEMORY_PATH) -> None:
-        self._path = path
-        self._data: dict = {}  # in-memory fallback
-        self._writable = True
-        self._load()
-
-    def _load(self) -> None:
-        """Load persisted data from disk if available."""
-        try:
-            if os.path.exists(self._path):
-                with open(self._path, "r", encoding="utf-8") as fh:
-                    loaded = json.load(fh)
-                    if isinstance(loaded, dict):
-                        self._data = loaded
-        except Exception:
-            self._data = {}
-
-    def save(self, hypothesizer: _RuleHypothesizer) -> None:
-        """Persist the current hypothesizer state to disk."""
-        try:
-            payload = hypothesizer.to_dict()
-            with open(self._path, "w", encoding="utf-8") as fh:
-                json.dump(payload, fh)
-            self._data = payload
-        except Exception:
-            self._writable = False
-            self._data = hypothesizer.to_dict()
-
-    def load_into(self, hypothesizer: _RuleHypothesizer) -> None:
-        """Merge persisted data from previous games into the hypothesizer."""
-        if self._data:
-            hypothesizer.merge_from_dict(self._data)
-
-    @property
-    def game_count(self) -> int:
-        """Approximate number of games accumulated (n_obs sum as proxy)."""
-        try:
-            return sum(self._data.get("n_obs", {}).values())
-        except Exception:
-            return 0
-
-
-# ──────────────────────────────────────────────────────────────────────────────
-# MODULE 2 — EPISODIC MEMORY (carried from v10.0)
+# MODULE 2 — EPISODIC MEMORY (from v10.0, unchanged)
 # ──────────────────────────────────────────────────────────────────────────────
 
 class _EpisodicMemory:
-    """Stores per-game experience: which actions produced progress on which states.
-
-    D-LUCY-001: pure Python data structures — no external storage.
-
-    Key: grid fingerprint (16-char hex)
-    Value: {action_value: cumulative_score}
-      +2.0 per level_up
-      +1.0 per frame delta > DELTA_MIN
-      -0.1 per no-progress action (decay)
-    """
+    """Stores per-game experience: (fingerprint, action) → cumulative score."""
 
     LEVEL_UP_REWARD = 2.0
     PROGRESS_REWARD = 1.0
@@ -764,13 +408,7 @@ class _EpisodicMemory:
         self._scores: defaultdict[str, dict[int, float]] = defaultdict(dict)
         self._n_tried: Counter[int] = Counter()
 
-    def record(
-        self,
-        fp: str,
-        action: GameAction,
-        level_up: bool,
-        delta: float,
-    ) -> None:
+    def record(self, fp: str, action: GameAction, level_up: bool, delta: float) -> None:
         v = action.value
         self._n_tried[v] += 1
         prev = self._scores[fp].get(v, 0.0)
@@ -784,11 +422,7 @@ class _EpisodicMemory:
     def memory_score(self, fp: str, action: GameAction) -> float:
         return self._scores[fp].get(action.value, 0.0)
 
-    def best_on_state(
-        self,
-        fp: str,
-        candidates: list[GameAction],
-    ) -> Optional[GameAction]:
+    def best_on_state(self, fp: str, candidates: list[GameAction]) -> Optional[GameAction]:
         scores = {a: self._scores[fp].get(a.value, None) for a in candidates}
         known = {a: s for a, s in scores.items() if s is not None}
         if not known:
@@ -800,88 +434,40 @@ class _EpisodicMemory:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MODULE 3 — COGNITIVE ENGINE (upgraded v11.0 — adds rule_score signal)
+# MODULE 3 — COGNITIVE ENGINE (from v10.0, unchanged)
 # ──────────────────────────────────────────────────────────────────────────────
 
 class _CognitiveEngine:
-    """Scores available actions using five cognitive signals.
+    """Scores available actions using the four cognitive signals. D-LUCY-001."""
 
-    D-LUCY-001: pure arithmetic, no external call.
-
-    score(action) = W_MEMORY      * memory_score(fp, action)    [recalled experience]
-                  + W_PROGRESS    * progress_score(action)       [frame delta history]
-                  + W_DIVERSITY   * diversity_score(action)      [exploration bonus]
-                  + W_PERCEPTION  * perception_hint(feats, act)  [grid-based hint]
-                  + W_RULE        * rule_score(action)           [program synthesis — NEW]
-    """
-
-    def __init__(
-        self,
-        memory: _EpisodicMemory,
-        hypothesizer: _RuleHypothesizer,
-        n_progress: Counter,
-        n_total: Counter,
-    ) -> None:
+    def __init__(self, memory: _EpisodicMemory, n_progress: Counter, n_total: Counter) -> None:
         self._memory = memory
-        self._hypothesizer = hypothesizer
         self._n_progress = n_progress
         self._n_total = n_total
 
-    def score_all(
-        self,
-        fp: str,
-        candidates: list[GameAction],
-        features: dict,
-        total_actions: int,
-    ) -> dict[GameAction, float]:
-        """Return {action: cognitive_score} for all candidates."""
+    def score_all(self, fp, candidates, features, total_actions) -> dict[GameAction, float]:
         scores: dict[GameAction, float] = {}
         max_tried = max((self._memory.n_tried(a) for a in candidates), default=1)
-
         for action in candidates:
             v = action.value
             n = max(self._n_total[v], 1)
-
-            # Signal 1 — episodic memory score on current grid state
             mem = self._memory.memory_score(fp, action)
-
-            # Signal 2 — historical progress rate
             prog = self._n_progress[v] / n
-
-            # Signal 3 — diversity bonus (under-tried actions get boost)
             tried = self._memory.n_tried(action)
             div = 1.0 - (tried / max(max_tried, 1))
-
-            # Signal 4 — perception hint (grid-feature heuristic)
             hint = self._perception_hint(features, action)
-
-            # Signal 5 — rule hypothesis confidence (NEW v11.0)
-            rule = self._hypothesizer.rule_score(action)
-
-            total = (
-                W_MEMORY * mem
-                + W_PROGRESS * prog
-                + W_DIVERSITY * div
-                + W_PERCEPTION * hint
-                + W_RULE * rule
-            )
-            scores[action] = total
-
+            scores[action] = W_MEMORY * mem + W_PROGRESS * prog + W_DIVERSITY * div + W_PERCEPTION * hint
         return scores
 
     @staticmethod
     def _perception_hint(features: dict, action: GameAction) -> float:
-        """Heuristic: which action is likely useful given grid features."""
         if not features.get("grid_valid", False):
             return 0.5
-
         sym = (features.get("symmetry_h", 0.0) + features.get("symmetry_v", 0.0)) / 2.0
         active = features.get("active_ratio", 0.5)
         complexity = features.get("complexity", 1)
         delta_mass = features.get("delta_mass", 0)
-
         v = action.value
-
         if v in _SIMPLE_ACTIONS:
             score = 0.5
             if sym > 0.7:
@@ -891,7 +477,6 @@ class _CognitiveEngine:
             if delta_mass > 0:
                 score += 0.1
             return min(score, 1.0)
-
         if v in _COMPLEX_ACTIONS:
             score = 0.3
             if complexity >= 3:
@@ -901,8 +486,143 @@ class _CognitiveEngine:
             if sym < 0.5:
                 score += 0.2
             return min(score, 1.0)
-
         return 0.5
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# MODULE 4 — PROGRAM SYNTHESIS ENGINE (NEW v11.0)
+# ──────────────────────────────────────────────────────────────────────────────
+
+class _TransformType:
+    """Discrete transformation categories inferred from frame pairs."""
+    IDENTITY = "IDENTITY"     # frame unchanged
+    GROWING = "GROWING"       # active cell count increased
+    SHRINKING = "SHRINKING"   # active cell count decreased
+    RECOLOR = "RECOLOR"       # dominant colour changed
+    SHIFT = "SHIFT"           # centre-of-mass moved significantly
+    DELTA = "DELTA"           # generic change (< 5% but > 0)
+    UNKNOWN = "UNKNOWN"
+
+
+class _RuleMemory:
+    """Persists transformation hypotheses within one game.
+
+    Key  : (action_value, pre_state_signature)
+    Value: {transform_type: confidence}
+
+    pre_state_signature = coarse hash of (dominant_colour, complexity, active_ratio bucket).
+    This is deliberately lossy so similar states share hypotheses.
+    """
+
+    def __init__(self) -> None:
+        # (action_val, state_sig) → {transform_type: confidence}
+        self._rules: defaultdict[tuple, dict[str, float]] = defaultdict(dict)
+        self._n_records: int = 0
+
+    @staticmethod
+    def state_signature(features: dict) -> str:
+        """Coarse fingerprint of the grid state for hypothesis matching."""
+        dom = features.get("dominant_colour", 0)
+        cplx = min(features.get("complexity", 1), 5)  # bucket to [1..5]
+        active_bucket = int(features.get("active_ratio", 0.5) * 4)  # 0..4
+        return f"{dom}:{cplx}:{active_bucket}"
+
+    def record(
+        self,
+        action: GameAction,
+        pre_features: dict,
+        post_features: dict,
+        level_up: bool,
+    ) -> str:
+        """Observe a (pre→action→post) transition and update rule memory."""
+        sig = self.state_signature(pre_features)
+        transform = self._classify(pre_features, post_features, level_up)
+
+        key = (action.value, sig)
+        prev = self._rules[key].get(transform, 0.0)
+
+        if level_up:
+            # Level up: strong confirmation regardless of transform type
+            self._rules[key][transform] = prev + PS_VERIFY_REWARD * 2.0
+        elif transform != _TransformType.IDENTITY:
+            self._rules[key][transform] = prev + PS_VERIFY_REWARD
+        else:
+            # Identity: decay all non-IDENTITY rules for this (action, state)
+            for t in list(self._rules[key].keys()):
+                if t != _TransformType.IDENTITY:
+                    self._rules[key][t] = self._rules[key][t] * PS_CONTRADICT_DECAY
+            self._rules[key][_TransformType.IDENTITY] = prev + 0.1
+
+        # Cap memory
+        if len(self._rules) > PS_MAX_HYPOTHESES:
+            # Remove entry with lowest total confidence
+            worst = min(self._rules.keys(),
+                        key=lambda k: sum(self._rules[k].values()))
+            del self._rules[worst]
+
+        self._n_records += 1
+        return transform
+
+    @staticmethod
+    def _classify(pre: dict, post: dict, level_up: bool) -> str:
+        """Classify the transformation between pre and post feature dicts."""
+        if level_up:
+            return _TransformType.GROWING  # level up = success = progress
+
+        pre_active = pre.get("active_count", 0)
+        post_active = post.get("active_count", 0)
+        pre_dom = pre.get("dominant_colour", 0)
+        post_dom = post.get("dominant_colour", 0)
+        pre_com_r = pre.get("centre_of_mass_r", 0.0)
+        pre_com_c = pre.get("centre_of_mass_c", 0.0)
+        post_com_r = post.get("centre_of_mass_r", 0.0)
+        post_com_c = post.get("centre_of_mass_c", 0.0)
+
+        # No change at all
+        if (pre_active == post_active and pre_dom == post_dom
+                and abs(pre_com_r - post_com_r) < 0.5
+                and abs(pre_com_c - post_com_c) < 0.5):
+            return _TransformType.IDENTITY
+
+        # Colour change
+        if pre_dom != post_dom:
+            return _TransformType.RECOLOR
+
+        # Spatial shift
+        shift = math.sqrt((pre_com_r - post_com_r) ** 2 + (pre_com_c - post_com_c) ** 2)
+        if shift > 1.5:
+            return _TransformType.SHIFT
+
+        # Mass change
+        if post_active > pre_active:
+            return _TransformType.GROWING
+        if post_active < pre_active:
+            return _TransformType.SHRINKING
+
+        return _TransformType.DELTA
+
+    def best_action(
+        self,
+        candidates: list[GameAction],
+        pre_features: dict,
+        prefer_transform: str = _TransformType.GROWING,
+    ) -> tuple[Optional[GameAction], float]:
+        """Return (best_action, confidence) for the desired transform, or (None, 0.0)."""
+        sig = self.state_signature(pre_features)
+        best_action: Optional[GameAction] = None
+        best_conf = 0.0
+
+        for action in candidates:
+            key = (action.value, sig)
+            conf = self._rules[key].get(prefer_transform, 0.0)
+            if conf > best_conf:
+                best_conf = conf
+                best_action = action
+
+        return best_action, best_conf
+
+    def n_records(self) -> int:
+        return self._n_records
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -910,110 +630,65 @@ class _CognitiveEngine:
 # ──────────────────────────────────────────────────────────────────────────────
 
 class MyAgent(Agent):
-    """LuCY Program Synthesis v11.0 — native cognitive agent, zero external LLM.
+    """LuCY Noyau Cognitif v11.0 — program synthesis + native cognitive engine.
 
     D-LUCY-001: LuCY IS her own type of cognitive model.
 
-    Four phases:
+    Phases:
       EXPLORE  : try every available action at least once (diversity-first).
-      SYNTH    : program synthesis active — exploit confirmed rule hypotheses.
-      EXPLOIT  : cognitive scoring engine selects best action.
+                 While exploring, feed (pre→action→post) pairs into _RuleMemory.
+      EXPLOIT  : use synthesized rules if confidence > PS_CONFIDENCE_THRESHOLD,
+                 else fall back to _CognitiveEngine scoring.
       RECOVER  : after stagnation, diversify or force RESET.
-
-    Forensic events (stdout, nanosecond timestamps):
-      GAME_INIT, PERCEPTION, TRANSFORM_DETECTED, RULE_HYPOTHESIS,
-      RULE_CONFIRMED, COGNITIVE_SCORE, ACTION_BEFORE, ACTION_AFTER,
-      LEVEL_UP, STUCK, RESET, MODEL_UPDATE, GAME_DONE, SUMMARY.
 
     CERTIFIED_100=false | unique_human_proven=false | DEBUG=true
     """
 
     MAX_ACTIONS = MAX_ACTIONS_TOTAL
 
-    # Shared cross-game memory across all instances in the same session
-    _shared_cross_game: Optional[_CrossGameMemory] = None
-
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         random.seed(int(time.time() * 1_000_000) ^ hash(self.game_id))
 
-        # Forensic logger (NS precision)
         self._forensic = _KaggleForensicLogger(game_id=str(self.game_id))
-
-        # Grid perception module (v10.0)
         self._perceptor = _GridPerceptor()
-
-        # Program synthesis modules (NEW v11.0)
-        self._transform_detector = _TransformDetector()
-        self._hypothesizer = _RuleHypothesizer()
-
-        # Cross-game memory: init once per session, shared across games
-        if MyAgent._shared_cross_game is None:
-            MyAgent._shared_cross_game = _CrossGameMemory()
-        MyAgent._shared_cross_game.load_into(self._hypothesizer)
-
-        # Episodic memory (v10.0)
         self._memory = _EpisodicMemory()
+        self._rule_memory = _RuleMemory()        # NEW v11.0
         self._n_progress: Counter[int] = Counter()
         self._n_total: Counter[int] = Counter()
 
-        # State counters
         self._action_count: int = 0
         self._level_action_count: int = 0
         self._levels_completed: int = 0
-        self._max_levels_seen: int = 0  # BUG-C4 fix
+        self._max_levels_seen: int = 0
         self._stuck_streak: int = 0
         self._prev_fp: str = ""
         self._prev_action: Optional[GameAction] = None
-        self._prev_features: dict = {}
+        self._prev_features: Optional[dict] = None   # NEW v11.0
         self._phase: str = "explore"
 
         if DEBUG:
-            cross_obs = MyAgent._shared_cross_game.game_count
             print(
                 f"[LuCY v{VERSION}] game_id={self.game_id!r} "
-                f"PROGRAM_SYNTHESIS external_llm=False "
-                f"MAX_ACTIONS={MAX_ACTIONS_TOTAL} "
-                f"cross_game_obs={cross_obs}",
+                f"NOYAU_COGNITIF_NATIF+PROGRAM_SYNTHESIS external_llm=False "
+                f"MAX_ACTIONS={MAX_ACTIONS_TOTAL}",
                 flush=True,
             )
 
-    # ── Contract ──────────────────────────────────────────────────────────────
-
     @property
     def name(self) -> str:
-        return f"LuCY-ProgramSynthesis-v{VERSION}"
+        return f"LuCY-NoyauCognitif-v{VERSION}"
 
-    def is_done(
-        self,
-        frames: list[FrameData],
-        latest_frame: FrameData,
-    ) -> bool:
-        """BUG-B2/C3 fix: stop on WIN or budget exhaustion."""
+    def is_done(self, frames: list[FrameData], latest_frame: FrameData) -> bool:
         if latest_frame.state is GameState.WIN:
-            self._on_game_end("WIN")
+            self._forensic.on_done("WIN", self._levels_completed, self._action_count)
             return True
         if self._action_count >= MAX_ACTIONS_TOTAL - 1:
-            self._on_game_end("BUDGET_EXHAUSTED")
+            self._forensic.on_done("BUDGET_EXHAUSTED", self._levels_completed, self._action_count)
             return True
         return False
 
-    def _on_game_end(self, reason: str) -> None:
-        """Called when the game ends — persist cross-game memory."""
-        self._forensic.on_done(
-            reason=reason,
-            levels_completed=self._levels_completed,
-            total_actions=self._action_count,
-        )
-        # Persist the accumulated rule hypotheses for future games
-        if MyAgent._shared_cross_game is not None:
-            MyAgent._shared_cross_game.save(self._hypothesizer)
-
-    def choose_action(
-        self,
-        frames: list[FrameData],
-        latest_frame: FrameData,
-    ) -> GameAction:
+    def choose_action(self, frames: list[FrameData], latest_frame: FrameData) -> GameAction:
         self._action_count += 1
         self._level_action_count += 1
 
@@ -1021,70 +696,56 @@ class MyAgent(Agent):
         if latest_frame.state in (GameState.NOT_PLAYED, GameState.GAME_OVER):
             self._level_action_count = 0
             self._stuck_streak = 0
-            self._forensic.on_reset(
-                reason=f"state_{latest_frame.state.name}",
-                action_count=self._action_count,
-            )
+            self._prev_features = None
+            self._forensic.on_reset(f"state_{latest_frame.state.name}", self._action_count)
             if DEBUG:
                 print(f"[LuCY] state={latest_frame.state.name} → RESET", flush=True)
             return GameAction.RESET
 
         # ── Per-level budget exhausted → RESET ───────────────────────────────
         if self._level_action_count > MAX_ACTIONS_PER_LEVEL:
-            self._forensic.on_reset(
-                reason="per_level_budget",
-                action_count=self._action_count,
-            )
+            self._forensic.on_reset("per_level_budget", self._action_count)
             self._level_action_count = 0
             self._phase = "explore"
-            self._stuck_streak = 0  # BUG-C5 fix
+            self._stuck_streak = 0
+            self._prev_features = None
             if DEBUG:
                 print("[LuCY] per-level budget exhausted → RESET", flush=True)
             return GameAction.RESET
 
-        # ── Get available actions (Fix-1) ─────────────────────────────────────
+        # ── Available actions ─────────────────────────────────────────────────
         candidates = _get_available_actions(latest_frame)
         if not candidates:
-            candidates = [a for a in GameAction
-                          if a is not GameAction.RESET and a.is_simple()]
+            candidates = [a for a in GameAction if a is not GameAction.RESET and a.is_simple()]
 
         # ── Observe frame ─────────────────────────────────────────────────────
         fp = _frame_fingerprint(latest_frame.frame)
         prev_raw = frames[-2].frame if len(frames) >= 2 else None
-
-        # ── Cognitive perception (MOD-1) ──────────────────────────────────────
         features = self._perceptor.extract(latest_frame.frame, prev_raw)
+
         if DEBUG and self._action_count <= 3:
             self._forensic.on_perception({
                 "action_count": self._action_count,
                 "fp_prefix": fp[:8],
-                **{k: round(v, 3) if isinstance(v, float) else v
-                   for k, v in features.items()},
+                **{k: round(v, 3) if isinstance(v, float) else v for k, v in features.items()},
             })
 
-        # ── Level tracking (BUG-C4 fix) ───────────────────────────────────────
+        # ── Level tracking (BUG-C4) ───────────────────────────────────────────
         current_levels_raw = getattr(latest_frame, "levels_completed", 0) or 0
         current_levels = max(current_levels_raw, self._max_levels_seen)
         self._max_levels_seen = current_levels
         level_up = current_levels > self._levels_completed
         if level_up:
-            self._forensic.on_level_up(
-                old_level=self._levels_completed,
-                new_level=current_levels,
-                actions_this_level=self._level_action_count,
-            )
+            self._forensic.on_level_up(self._levels_completed, current_levels,
+                                       self._level_action_count)
             if DEBUG:
-                print(
-                    f"[LuCY] LEVEL UP {self._levels_completed} → {current_levels} "
-                    f"(actions this level: {self._level_action_count})",
-                    flush=True,
-                )
+                print(f"[LuCY] LEVEL UP {self._levels_completed} → {current_levels}", flush=True)
             self._levels_completed = current_levels
             self._level_action_count = 0
             self._stuck_streak = 0
-            self._phase = "explore"
+            self._phase = "exploit"
 
-        # ── Record outcome of previous action + TRANSFORM DETECTION (NEW v11.0) ──
+        # ── Record outcome of previous action (episodic memory + PS) ─────────
         if self._prev_action is not None and len(frames) >= 2:
             delta = _frame_delta(frames[-2].frame, latest_frame.frame)
             self._memory.record(self._prev_fp, self._prev_action, level_up, delta)
@@ -1092,42 +753,20 @@ class MyAgent(Agent):
             if level_up or delta >= DELTA_MIN:
                 self._n_progress[self._prev_action.value] += 1
             self._forensic.on_model_update(
-                action_name=self._prev_action.name,
-                level_up=level_up,
-                delta=delta,
-                n_total=self._n_total[self._prev_action.value],
+                self._prev_action.name, level_up, delta,
+                self._n_total[self._prev_action.value]
             )
-
-            # Program synthesis: detect the transform caused by prev_action
-            if self._prev_features and delta > 0:
-                sig = self._transform_detector.detect(
-                    self._prev_features, features,
-                    frames[-2].frame, latest_frame.frame,
+            # NEW v11.0 — feed program synthesis rule memory
+            if self._prev_features is not None:
+                transform = self._rule_memory.record(
+                    self._prev_action, self._prev_features, features, level_up
                 )
-                sig_key = self._transform_detector.signature_key(sig)
-                self._hypothesizer.record(self._prev_action, sig_key)
-
-                if DEBUG and sig:
-                    self._forensic.on_transform_detected({
+                if DEBUG and self._action_count % 15 == 0:
+                    self._forensic.on_synthesis_hypothesis({
                         "action": self._prev_action.name,
-                        "sig_key": sig_key,
-                        "changed_frac": sig.get("changed_frac", 0.0),
-                        "mass_bucket": sig.get("mass_bucket", 4),
+                        "transform": transform,
+                        "n_rules": self._rule_memory.n_records(),
                     })
-
-                # Log confirmed rules (first time each action becomes confirmed)
-                if self._hypothesizer.is_confirmed(self._prev_action):
-                    conf = self._hypothesizer.rule_score(self._prev_action)
-                    dom_sig = self._hypothesizer.dominant_sig(self._prev_action)
-                    if DEBUG:
-                        self._forensic.on_rule_confirmed({
-                            "action": self._prev_action.name,
-                            "confidence": round(conf, 3),
-                            "dominant_sig": dom_sig,
-                        })
-
-        # Store current features for next transform detection
-        self._prev_features = features
 
         # ── Stagnation detection ───────────────────────────────────────────────
         if fp == self._prev_fp:
@@ -1140,90 +779,67 @@ class MyAgent(Agent):
             self._phase = "recover"
             if self._stuck_streak == STUCK_THRESHOLD:
                 self._forensic.on_stuck(self._stuck_streak, self._phase)
-                if DEBUG:
-                    print(
-                        f"[LuCY] STUCK (streak={self._stuck_streak}) → recover",
-                        flush=True,
-                    )
             if self._stuck_streak >= STUCK_THRESHOLD + RESET_AFTER_STUCK:
-                self._forensic.on_reset(
-                    reason="deep_stuck",
-                    action_count=self._action_count,
-                )
+                self._forensic.on_reset("deep_stuck", self._action_count)
                 self._stuck_streak = 0
                 self._level_action_count = 0
                 self._phase = "explore"
+                self._prev_features = None
                 if DEBUG:
                     print("[LuCY] deep stuck → RESET", flush=True)
                 return GameAction.RESET
 
-        # ── Phase upgrade: if confirmed rules exist, switch to SYNTH ──────────
-        confirmed = self._hypothesizer.confirmed_actions(candidates)
-        if confirmed and self._phase == "exploit":
-            self._phase = "synth"
-
-        # ── Emit forensic BEFORE action selection ─────────────────────────────
+        # ── Forensic BEFORE action ─────────────────────────────────────────────
         ts_before = self._forensic.on_action_before(
-            action_count=self._action_count,
-            phase=self._phase,
-            candidates=candidates,
-            fp=fp,
-            stuck_streak=self._stuck_streak,
-            levels_completed=self._levels_completed,
+            self._action_count, self._phase, candidates, fp,
+            self._stuck_streak, self._levels_completed,
         )
 
-        # ── Phase dispatch ─────────────────────────────────────────────────────
-        unseen = [a for a in candidates
-                  if self._memory.n_tried(a) == 0]
+        # ── Phase dispatch with program synthesis (NEW v11.0) ─────────────────
+        unseen = [a for a in candidates if self._memory.n_tried(a) == 0]
 
         if self._phase == "explore" and unseen:
-            # EXPLORE: try unseen actions (random order — BUG-C1 fix)
             action = random.choice(unseen)
 
-        elif self._phase == "synth" and confirmed:
-            # SYNTH (NEW v11.0): use the highest-confidence confirmed rule
-            action = confirmed[0]
-            if DEBUG and self._action_count % 5 == 0:
-                self._forensic.on_rule_hypothesis({
-                    "action_count": self._action_count,
-                    "synth_action": action.name,
-                    "confidence": round(
-                        self._hypothesizer.rule_score(action), 3
-                    ),
-                    "n_confirmed": len(confirmed),
-                })
-
         elif self._phase == "recover":
-            # RECOVER: prefer least-tried candidates (escape local minimum)
             if unseen:
                 action = random.choice(unseen)
             else:
-                engine = _CognitiveEngine(
-                    self._memory, self._hypothesizer,
-                    self._n_progress, self._n_total,
-                )
+                engine = _CognitiveEngine(self._memory, self._n_progress, self._n_total)
                 scores = engine.score_all(fp, candidates, features, self._action_count)
                 action = min(candidates, key=lambda a: scores.get(a, 0.0))
 
         else:
-            # EXPLOIT: full cognitive scoring engine (5 signals)
+            # EXPLOIT: try program synthesis first
             self._phase = "exploit"
-            engine = _CognitiveEngine(
-                self._memory, self._hypothesizer,
-                self._n_progress, self._n_total,
+            ps_action, ps_conf = self._rule_memory.best_action(
+                candidates, features, prefer_transform=_TransformType.GROWING
             )
-            scores = engine.score_all(fp, candidates, features, self._action_count)
 
-            if DEBUG and self._action_count % 10 == 0:
-                top = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:3]
-                self._forensic.on_cognitive_score({
-                    "action_count": self._action_count,
-                    "top3": {a.name: round(s, 3) for a, s in top},
-                })
+            if ps_action is not None and ps_conf >= PS_CONFIDENCE_THRESHOLD:
+                # Follow synthesized rule
+                action = ps_action
+                self._forensic.on_synthesis_follow(action.name, ps_conf)
+                if DEBUG and self._action_count % 10 == 0:
+                    print(
+                        f"[LuCY] PS_FOLLOW action={action.name} conf={ps_conf:.2f}",
+                        flush=True,
+                    )
+            else:
+                # Fall back to cognitive scoring engine
+                engine = _CognitiveEngine(self._memory, self._n_progress, self._n_total)
+                scores = engine.score_all(fp, candidates, features, self._action_count)
 
-            action = max(candidates, key=lambda a: scores.get(a, 0.0))
+                if DEBUG and self._action_count % 10 == 0:
+                    top = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:3]
+                    self._forensic.on_cognitive_score({
+                        "action_count": self._action_count,
+                        "top3": {a.name: round(s, 3) for a, s in top},
+                    })
 
-        # ── Handle complex actions ─────────────────────────────────────────────
+                action = max(candidates, key=lambda a: scores.get(a, 0.0))
+
+        # ── Complex action (ACTION6) coordinate selection ─────────────────────
         if action.is_complex():
             active_ratio = features.get("active_ratio", 0.5)
             if features.get("grid_valid", False) and active_ratio < 0.5:
@@ -1234,27 +850,19 @@ class MyAgent(Agent):
                 y = random.randint(0, 63)
             action.set_data({"x": x, "y": y})
 
-        # ── Emit forensic AFTER action selection ──────────────────────────────
+        # ── Forensic AFTER action ──────────────────────────────────────────────
         self._forensic.on_action_after(
-            action_count=self._action_count,
-            action_name=action.name,
-            phase=self._phase,
-            ts_before_ns=ts_before,
-            is_complex=action.is_complex(),
+            self._action_count, action.name, self._phase, ts_before, action.is_complex()
         )
 
         self._prev_action = action
+        self._prev_features = features   # NEW v11.0 — save for PS update next step
 
         if DEBUG and (self._action_count % 10 == 0 or level_up):
-            n_hyp_confirmed = sum(
-                1 for a in candidates
-                if self._hypothesizer.is_confirmed(a)
-            )
             print(
                 f"[LuCY] n={self._action_count} action={action.name} "
                 f"phase={self._phase} levels={self._levels_completed} "
-                f"stuck={self._stuck_streak} "
-                f"confirmed_rules={n_hyp_confirmed} "
+                f"stuck={self._stuck_streak} ps_rules={self._rule_memory.n_records()} "
                 f"avail={[a.name for a in candidates]}",
                 flush=True,
             )

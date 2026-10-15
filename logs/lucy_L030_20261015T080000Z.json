@@ -1,0 +1,61 @@
+{
+  "version": "11.0",
+  "report_ref": "L-030",
+  "timestamp": "2026-10-15T08:00:00Z",
+  "run_type": "play-local 3 games (ls20, vc33, lp85) — validation v11.0",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "architecture": {
+    "modules": [
+      "_GridPerceptor",
+      "_EpisodicMemory",
+      "_CognitiveEngine",
+      "_TransformType",
+      "_RuleMemory",
+      "_KaggleForensicLogger"
+    ],
+    "new_in_v11": ["_TransformType", "_RuleMemory"],
+    "scoring_weights": {"W_MEMORY": 3.0, "W_PROGRESS": 2.0, "W_DIVERSITY": 1.0, "W_PERCEPTION": 1.5},
+    "ps_constants": {
+      "PS_CONFIDENCE_THRESHOLD": 1.5,
+      "PS_VERIFY_REWARD": 1.0,
+      "PS_CONTRADICT_DECAY": 0.8,
+      "PS_MAX_HYPOTHESES": 32
+    },
+    "program_synthesis": true,
+    "cognitive_engine": true,
+    "external_llm": false
+  },
+  "results": {
+    "games_played": 3,
+    "games_tested": ["ls20", "vc33", "lp85"],
+    "games_completed_error_free": 3,
+    "levels_completed": 0,
+    "reason": "BUDGET_EXHAUSTED x3"
+  },
+  "ps_events_observed": {
+    "ls20": {"PS_HYPOTHESIS_count": 5, "transforms_seen": ["IDENTITY"], "PS_FOLLOW_count": 0, "n_rules_final": 70},
+    "vc33": {"PS_HYPOTHESIS_count": 5, "transforms_seen": ["IDENTITY"], "PS_FOLLOW_count": 0, "n_rules_final": 70},
+    "lp85": {"PS_HYPOTHESIS_count": 5, "transforms_seen": ["IDENTITY"], "PS_FOLLOW_count": 0, "n_rules_final": 68}
+  },
+  "diagnostic": {
+    "ps_module_operational": true,
+    "ps_hypotheses_generated": true,
+    "ps_follow_triggered": false,
+    "root_cause_ps_follow_zero": "All transforms classified as IDENTITY — actions do not produce measurable changes in active_count, dominant_colour, or centre_of_mass on these 3 test games. This means PS_CONFIDENCE_THRESHOLD (1.5) was never reached for GROWING transform.",
+    "observation_1": "PS_HYPOTHESIS events emit correctly with n_rules growing (14→70) — module is functional.",
+    "observation_2": "IDENTITY-only transforms mean the grids are static visually from LuCY's perspective — this is a perception granularity issue, not a PS architecture flaw.",
+    "observation_3": "The baseline actions (ls20: [22,123,73,84,96,192,186] from metadata.json) suggest specific integer action IDs are needed, not just ACTION1..ACTION6.",
+    "key_insight": "metadata.json baseline_actions = [22, 123, 73, 84, 96, 192, 186] are integer IDs. GameAction.from_id() needs to map these correctly. If ARC-AGI-3 uses integer-keyed actions beyond 1..7, LuCY is only trying a small subset.",
+    "next_step_p0": "Investigate the full action space: what does GameAction.from_id(22) return? Are there valid actions beyond ACTION1..ACTION7? The baseline_actions hint suggests game-specific integer actions are the actual solution space.",
+    "next_step_p1": "For ps_follow to trigger: need to observe GROWING/RECOLOR/SHIFT transforms. Either the game needs different actions, or the perception threshold needs tuning."
+  },
+  "comparison_v10_vs_v11": {
+    "levels_completed": {"v10": 0, "v11": 0},
+    "errors": {"v10": 0, "v11": 0},
+    "ps_module_active": {"v10": false, "v11": true},
+    "ps_hypotheses_built": {"v10": 0, "v11": "up to 70 per game"},
+    "transforms_detected": {"v10": "none", "v11": "IDENTITY observed, GROWING not yet"}
+  }
+}
