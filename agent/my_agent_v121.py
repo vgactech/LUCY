@@ -84,8 +84,11 @@ DEBUG = True  # PROTOCOLE_ARTCB: always DEBUG until user disables explicitly
 
 # Action budgets — C-003 curriculum phase (2026-10-15): extended for r11l diagnosis
 # AVANT: MAX_ACTIONS_TOTAL=80, MAX_ACTIONS_PER_LEVEL=30
-# APRÈS: MAX_ACTIONS_TOTAL=200, MAX_ACTIONS_PER_LEVEL=80
-MAX_ACTIONS_TOTAL = 200
+# C-003: MAX_ACTIONS_TOTAL=200, MAX_ACTIONS_PER_LEVEL=80
+# L-046 (2026-10-16): extended to 500 for r11l budget diagnosis (T-02)
+# AVANT: MAX_ACTIONS_TOTAL=200
+# APRÈS: MAX_ACTIONS_TOTAL=500
+MAX_ACTIONS_TOTAL = 500
 MAX_ACTIONS_PER_LEVEL = 80
 
 # Stagnation detection

@@ -1,0 +1,3 @@
+usage: play_local.py [-h] [--game GAME] [--max-steps MAX_STEPS] [--list]
+                     [--render {None,terminal}]
+play_local.py: error: unrecognized arguments: --games r11l

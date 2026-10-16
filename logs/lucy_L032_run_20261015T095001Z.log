@@ -1,0 +1,84 @@
+INFO:arc_agi.scorecard:Initialized ScorecardManager with idle_for=0:15:00 and max_open_for=3 days, 0:00:00
+Traceback (most recent call last):
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/urllib3/connection.py", line 239, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/urllib3/util/connection.py", line 60, in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+               ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/Cellar/python@3.13/3.13.15/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socket.py", line 983, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 494, in _make_request
+    raise new_e
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 470, in _make_request
+    self._validate_conn(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 1125, in _validate_conn
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/urllib3/connection.py", line 827, in connect
+    self.sock = sock = self._new_conn()
+                       ~~~~~~~~~~~~~~^^
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/urllib3/connection.py", line 246, in _new_conn
+    raise NameResolutionError(self.host, self, e) from e
+urllib3.exceptions.NameResolutionError: HTTPSConnection(host='three.arcprize.org', port=443): Failed to resolve 'three.arcprize.org' ([Errno 8] nodename nor servname provided, or not known)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/requests/adapters.py", line 696, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 847, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/urllib3/util/retry.py", line 555, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='three.arcprize.org', port=443): Max retries exceeded with url: /api/games/anonkey (Caused by NameResolutionError("HTTPSConnection(host='three.arcprize.org', port=443): Failed to resolve 'three.arcprize.org' ([Errno 8] nodename nor servname provided, or not known)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/scripts/play_local.py", line 126, in <module>
+    main()
+    ~~~~^^
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/scripts/play_local.py", line 64, in main
+    arc = arc_agi.Arcade(operation_mode=OperationMode.NORMAL)
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/arc_agi/base.py", line 174, in __init__
+    self.arc_api_key = self._get_anonymous_api_key()
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/arc_agi/base.py", line 197, in _get_anonymous_api_key
+    response = requests.get(url, headers=headers, timeout=10)
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/requests/api.py", line 87, in get
+    return request("get", url, params=params, **kwargs)
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/requests/api.py", line 71, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/requests/sessions.py", line 651, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/requests/sessions.py", line 784, in send
+    r = adapter.send(request, **kwargs)
+  File "/Users/deyi/.bob/playground/LuCY/vendor/ARC-AGI-3-Kaggle-Starter/.venv/lib/python3.13/site-packages/requests/adapters.py", line 729, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='three.arcprize.org', port=443): Max retries exceeded with url: /api/games/anonkey (Caused by NameResolutionError("HTTPSConnection(host='three.arcprize.org', port=443): Failed to resolve 'three.arcprize.org' ([Errno 8] nodename nor servname provided, or not known)"))
+=== RUN COMPLETE ===
