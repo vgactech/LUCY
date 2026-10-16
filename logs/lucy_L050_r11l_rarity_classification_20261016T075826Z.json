@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "session": "L-050",
+  "ts_utc": "20261016T075826Z",
+  "agent_version": "13.2",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "changes": {
+    "FIX-P0A-v2": {
+      "description": "Classification couleurs par rarete au lieu de frequence decroissante",
+      "before": "piece = 2eme plus frequente (ciel/2), target = 3eme (bordure/0)",
+      "after": "piece/target = couleurs avec MIN_PIECE_CELLS<=count<=MAX_PIECE_CELLS_RATIO*total, triees par rarete",
+      "r11l_before": {
+        "piece_colour": 2,
+        "target_colour": 0
+      },
+      "r11l_after": {
+        "piece_colour": 3,
+        "target_colour": 15
+      },
+      "constants": {
+        "MIN_PIECE_CELLS": 3,
+        "MAX_PIECE_CELLS_RATIO": 0.15
+      }
+    },
+    "FIX-CLUSTER": {
+      "description": "Ciblage par centroide de cluster au lieu de random.choice",
+      "before": "random.choice(piece_cells)",
+      "after": "_pick_cluster_centre() — cellule la plus proche du centroide geometrique",
+      "advantage": "Clic sur le coeur de la piece, pas sur un pixel de bord"
+    }
+  },
+  "tests": {
+    "v130": {
+      "file": "test_lucy_v130_l048_fsm.py",
+      "total": 30,
+      "passed": 30,
+      "failed": 0
+    },
+    "v131": {
+      "file": "test_lucy_v131_l049.py",
+      "total": 19,
+      "passed": 19,
+      "failed": 0
+    },
+    "v132": {
+      "file": "test_lucy_v132_l050.py",
+      "total": 20,
+      "passed": 20,
+      "failed": 0
+    },
+    "suite_complete": {
+      "total": 69,
+      "passed": 69,
+      "failed": 0,
+      "regressions": 0
+    }
+  },
+  "analysis_r11l_grid": {
+    "source": "logs/lucy_L047_r11l_v122_20261016T060937Z.log (FRAME_INVENTORY action=1)",
+    "grid_size": "64x64",
+    "frame_structure": "list[1][64 cols][64 rows] (columnar)",
+    "value_distribution": {
+      "5": {
+        "count": 3318,
+        "role": "floor (dominant)",
+        "fraction": 0.81
+      },
+      "2": {
+        "count": 638,
+        "role": "sky/fond secondaire (FAUSSE piece en v13.1)",
+        "fraction": 0.156
+      },
+      "0": {
+        "count": 76,
+        "role": "bordure noire (FAUSSE cible en v13.1)",
+        "fraction": 0.019
+      },
+      "15": {
+        "count": 34,
+        "role": "vraie cible (T) — groupes 5x5",
+        "fraction": 0.008
+      },
+      "1": {
+        "count": 17,
+        "role": "chemin diagonal",
+        "fraction": 0.004
+      },
+      "3": {
+        "count": 12,
+        "role": "vraie piece (B) — groupe 5x5",
+        "fraction": 0.003
+      },
+      "6": {
+        "count": 1,
+        "role": "element unique",
+        "fraction": 0.0002
+      }
+    },
+    "v131_bug": "piece=2(ciel, 638 cells) et target=0(bordure, 76 cells) -> LuCY cliquait sur le fond",
+    "v132_fix": "piece=3(12 cells) et target=15(34 cells) -> LuCY cible les vraies pieces"
+  },
+  "next_step": "Executer v13.2 sur Kaggle r11l et mesurer confirmed_selections/tentatives vs v13.1"
+}
