@@ -1,11 +1,11 @@
-"""LuCY Cognitive Agent v12.1 — ARC-AGI-3 (arc-prize-2026)
+"""LuCY Cognitive Agent v12.2 — ARC-AGI-3 (arc-prize-2026)
 
 This is the ONLY file edited in the Kaggle Starter. `scripts/build_notebook.py`
 splices the contents of this file into the Kaggle submission notebook.
 
 [edit my_agent.py] → [make play-local] → [make submit]
 
-Architecture v12.1 — LuCY FORENSIC MAX + GOAL-DELTA ENGINE (FIXED)
+Architecture v12.2 — LuCY VISUAL TARGETING for ACTION6 (T-04 fix)
   D-LUCY-001: LuCY IS her own cognitive model — NO external LLM whatsoever.
   Intelligence emerges from:
     1. Direct grid perception    (_GridPerceptor)       — from v10.0
@@ -79,7 +79,7 @@ from agents.agent import Agent
 # CONSTANTS
 # ──────────────────────────────────────────────────────────────────────────────
 
-VERSION = "12.1"
+VERSION = "12.2"
 DEBUG = True  # PROTOCOLE_ARTCB: always DEBUG until user disables explicitly
 
 # Action budgets — C-003 curriculum phase (2026-10-15): extended for r11l diagnosis
@@ -88,6 +88,7 @@ DEBUG = True  # PROTOCOLE_ARTCB: always DEBUG until user disables explicitly
 # L-046 (2026-10-16): extended to 500 for r11l budget diagnosis (T-02)
 # AVANT: MAX_ACTIONS_TOTAL=200
 # APRÈS: MAX_ACTIONS_TOTAL=500
+# L-047 (2026-10-16): T-04 fix — visual targeting for ACTION6 (no budget change)
 MAX_ACTIONS_TOTAL = 500
 MAX_ACTIONS_PER_LEVEL = 80
 
@@ -637,6 +638,177 @@ def _get_available_actions(latest_frame: FrameData, logger: Optional[_KaggleFore
     if result:
         return result, raw_ids
     return [a for a in GameAction if a is not GameAction.RESET and a.is_simple()], raw_ids
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# VISUAL TARGETING UTILITY — L-047 T-04 FIX
+# ──────────────────────────────────────────────────────────────────────────────
+
+def _pick_active_cell(frame: Any, prev_frame: Any = None) -> tuple[int, int, str]:
+    """Visual targeting for ACTION6 — L-047 fix for T-04 random coordinate problem.
+
+    Analyses the current frame to detect active zones (pieces, objects, targets)
+    and returns (x, y) coordinates aimed at a detected zone rather than random.
+
+    Strategy:
+      1. Convert frame to a 2D colour value matrix, handling the ARC-AGI-3
+         columnar encoding: frame = list[1][64_cols][64_rows] where each
+         frame[0][col_idx][row_idx] is a colour integer. This is transposed
+         relative to standard image convention (confirmed from FRAME_INVENTORY
+         L-047: frame[0] = 64 columns, each column = list of 64 int values).
+      2. Find the dominant colour (background/floor)
+      3. Collect all cells with colour ≠ dominant AND ≠ 0 if dominant ≠ 0
+         (these are pieces, targets, special objects)
+      4. If multiple candidate cells found: pick a random one and return its
+         (col, row) as (x, y) clamped to [0, 63]
+      5. Fallback to centre zone random if no candidates found (no regression)
+
+    Returns:
+        (x, y, method) where method is one of:
+          "visual_targeted"  — aimed at a detected active cell
+          "visual_changed"   — aimed at a cell that changed vs prev_frame
+          "fallback_centre"  — centre-zone random (no candidates found)
+          "fallback_random"  — full random (frame parse failed)
+
+    CERTIFIED_100=false | unique_human_proven=false | DEBUG=true
+    """
+    def _to_int_grid(f: Any) -> Optional[list]:
+        """Convert ARC-AGI-3 frame to 2D grid[row][col] of int colour values.
+
+        Handles the columnar encoding confirmed from FRAME_INVENTORY:
+          frame = list of len 1, where frame[0] = list of 64 columns,
+          and each frame[0][col] = list of 64 row pixel values (integers).
+          So: pixel(row, col) = frame[0][col][row]  (columnar, NOT row-major)
+
+        Also handles numpy arrays and standard row-major list formats.
+        """
+        if f is None:
+            return None
+        try:
+            import numpy as np
+            if isinstance(f, np.ndarray):
+                if f.ndim == 2:
+                    return f.tolist()
+                if f.ndim == 3:
+                    # Take first channel as colour discriminator
+                    return f[:, :, 0].tolist()
+                return None
+        except ImportError:
+            pass
+        if not isinstance(f, list) or len(f) == 0:
+            return None
+
+        # Detect the ARC-AGI-3 columnar encoding:
+        # frame = [outer_row] where outer_row is a list of 64 column-lists
+        # Each column-list contains 64 int values (one per row in game coords)
+        first = f[0]
+        if (isinstance(first, list)
+                and len(first) > 0
+                and isinstance(first[0], list)
+                and len(first[0]) > 0
+                and not isinstance(first[0][0], list)):
+            # frame[0] = list of columns, frame[0][col][row] = int
+            # Transpose to grid[row][col]
+            n_cols = len(first)
+            n_rows = len(first[0])
+            return [[int(first[c][r]) if r < len(first[c]) else 0
+                     for c in range(n_cols)]
+                    for r in range(n_rows)]
+
+        # Standard 2D row-major: frame = list[rows][cols] of int
+        if isinstance(first, list) and (not first or not isinstance(first[0], list)):
+            return [[int(v) if not isinstance(v, list) else (int(v[0]) if v else 0)
+                     for v in row] for row in f]
+
+        # 3D row-major: frame = list[rows][cols][channels] → take channel 0
+        if isinstance(first, list) and first and isinstance(first[0], list):
+            return [[int(cell[0]) if isinstance(cell, list) and cell else int(cell)
+                     for cell in row] for row in f]
+
+        # 1D fallback: treat as single row
+        return [[int(v) if not isinstance(v, list) else (int(v[0]) if v else 0)
+                 for v in f]]
+
+    grid = _to_int_grid(frame)
+    if grid is None or len(grid) == 0:
+        x = random.randint(0, 63)
+        y = random.randint(0, 63)
+        return x, y, "fallback_random"
+
+    rows = len(grid)
+    cols = max((len(r) for r in grid), default=0)
+    if cols == 0:
+        x = random.randint(0, 63)
+        y = random.randint(0, 63)
+        return x, y, "fallback_random"
+
+    # Flatten to find dominant colour (background)
+    all_vals: list[int] = []
+    for r in range(rows):
+        for c in range(cols):
+            v = grid[r][c] if c < len(grid[r]) else 0
+            all_vals.append(int(v))
+    if not all_vals:
+        return random.randint(0, 63), random.randint(0, 63), "fallback_random"
+
+    counter = Counter(all_vals)
+    dominant = counter.most_common(1)[0][0]  # most frequent = background/floor
+
+    # Second most common (if dominant is 0, ignore it too as pure black background)
+    # We want cells that stand out — colour ≠ dominant AND colour ≠ 0
+    exclude = {dominant}
+    if dominant != 0:
+        exclude.add(0)  # also exclude pure black border/void
+
+    # Collect active cells: (row, col) for cells with colour ∉ exclude
+    active_cells: list[tuple[int, int]] = []
+    for r in range(rows):
+        for c in range(cols):
+            v = grid[r][c] if c < len(grid[r]) else 0
+            if int(v) not in exclude:
+                active_cells.append((r, c))
+
+    # If prev_frame available, also collect changed cells as bonus candidates
+    changed_cells: list[tuple[int, int]] = []
+    if prev_frame is not None:
+        prev_grid = _to_int_grid(prev_frame)
+        if prev_grid is not None and len(prev_grid) > 0:
+            for r in range(min(rows, len(prev_grid))):
+                prev_row = prev_grid[r]
+                for c in range(min(cols, len(prev_row))):
+                    v_cur = grid[r][c] if c < len(grid[r]) else 0
+                    v_prev = prev_grid[r][c] if c < len(prev_grid[r]) else 0
+                    if int(v_cur) != int(v_prev) and int(v_cur) not in exclude:
+                        changed_cells.append((r, c))
+
+    # Pick a target cell
+    method = "fallback_centre"
+    target_r, target_c = rows // 2, cols // 2  # default: centre
+
+    if changed_cells:
+        # Prefer changed cells (animation / interactive feedback)
+        target_r, target_c = random.choice(changed_cells)
+        method = "visual_changed"
+    elif active_cells:
+        # Pick a random active cell (piece, target marker, etc.)
+        target_r, target_c = random.choice(active_cells)
+        method = "visual_targeted"
+
+    if method == "fallback_centre":
+        # No candidates: aim near centre with some jitter (better than full random)
+        cx = max(0, min(63, int(target_c * 63 / max(1, cols - 1))))
+        cy = max(0, min(63, int(target_r * 63 / max(1, rows - 1))))
+        jitter_x = random.randint(-6, 6)
+        jitter_y = random.randint(-6, 6)
+        x = max(0, min(63, cx + jitter_x))
+        y = max(0, min(63, cy + jitter_y))
+        return x, y, method
+
+    # Normalise (row, col) → (x, y) in [0, 63]
+    # x = column direction, y = row direction (standard screen coords)
+    x = max(0, min(63, int(target_c * 63 / max(1, cols - 1))))
+    y = max(0, min(63, int(target_r * 63 / max(1, rows - 1))))
+    return x, y, method
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1404,16 +1576,24 @@ class MyAgent(Agent):
 
                 action = max(candidates, key=lambda a: scores.get(a, 0.0))
 
-        # ── Complex action (ACTION6) coordinate selection ─────────────────
+        # ── Complex action (ACTION6) coordinate selection — L-047 T-04 FIX ──
+        # AVANT (v12.1): random.randint(0,63) — ~1-3% hit probability on pieces
+        # APRÈS (v12.2): _pick_active_cell() — visual targeting via colour analysis
         if action.is_complex():
-            active_ratio = features.get("active_ratio", 0.5)
-            if features.get("grid_valid", False) and active_ratio < 0.5:
-                x = random.randint(20, 44)
-                y = random.randint(20, 44)
-            else:
-                x = random.randint(0, 63)
-                y = random.randint(0, 63)
+            prev_raw_for_targeting = self._prev_frame  # available from previous step
+            x, y, targeting_method = _pick_active_cell(
+                latest_frame.frame, prev_raw_for_targeting
+            )
             action.set_data({"x": x, "y": y})
+            if DEBUG and self._action_count % 5 == 0:
+                self._forensic.on_cognitive_score({
+                    "action_count": self._action_count,
+                    "event": "ACTION6_VISUAL_TARGET",
+                    "targeting_method": targeting_method,
+                    "x": x,
+                    "y": y,
+                    "v12_2_fix": "visual_targeting_replaces_random",
+                })
 
         # ── Forensic AFTER action ──────────────────────────────────────────
         self._forensic.on_action_after(
