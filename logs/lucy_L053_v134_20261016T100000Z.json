@@ -1,0 +1,81 @@
+{
+  "session": "L-053",
+  "version": "13.4",
+  "timestamp": "2026-10-16T10:00:00Z",
+  "pytest_suite": "tests/test_lucy_v134_l053.py",
+  "tests_new": 17,
+  "tests_total_cumulative": 103,
+  "passed": 17,
+  "failed": 0,
+  "skipped": 0,
+  "duration_s": 0.42,
+  "non_regression_suites": [
+    {"suite": "test_lucy_v130_l048_fsm.py", "passed": 30, "failed": 0},
+    {"suite": "test_lucy_v131_l049.py", "passed": 19, "failed": 0},
+    {"suite": "test_lucy_v132_l050.py", "passed": 20, "failed": 0},
+    {"suite": "test_lucy_v133_l052.py", "passed": 17, "failed": 0},
+    {"suite": "test_lucy_v134_l053.py", "passed": 17, "failed": 0}
+  ],
+  "fixes_applied": {
+    "FIX_P1A": {
+      "description": "Centroïde calculé sur groupe COMPLET (pas available filtrés)",
+      "file": "agent/my_agent_v134.py",
+      "method": "_pick_cluster_centre",
+      "lines_changed": "1333-1335",
+      "avant": "cr = sum(r for r, c in available) / len(available)\ncc = sum(c for r, c in available) / len(available)",
+      "apres": "cr = sum(r for r, c in group) / len(group)\ncc = sum(c for r, c in group) / len(group)"
+    },
+    "FIX_P1C": {
+      "description": "Blacklist purgée lors du recovery (MAX_CONSECUTIVE_MISSES)",
+      "file": "agent/my_agent_v134.py",
+      "method": "step",
+      "lines_changed": "1527-1529",
+      "avant": "self._consecutive_misses = 0  # (no clear of failed_coords)",
+      "apres": "self._consecutive_misses = 0\nself._failed_coords.clear()  # FIX-P1C"
+    },
+    "FIX_P1D": {
+      "description": "Tests explicites 4-connexité vs 8-connexité (T-FSM-92/93/94)",
+      "file": "tests/test_lucy_v134_l053.py",
+      "tests": ["T-FSM-92", "T-FSM-93", "T-FSM-94"]
+    }
+  },
+  "tests_new_list": [
+    "T-FSM-84: FIX-P1A forme U centroïde groupe complet",
+    "T-FSM-85: FIX-P1A forme L bords blacklistés centroïde stable",
+    "T-FSM-86: FIX-P1A forme anneau centroïde stable",
+    "T-FSM-87: FIX-P1A compact sans blacklist non-régression",
+    "T-FSM-88: FIX-P1A deux objets disjoints centroïde plus grand",
+    "T-FSM-89: FIX-P1C recovery purge blacklist",
+    "T-FSM-90: FIX-P1C blacklist bornée après recovery",
+    "T-FSM-91: FIX-P1C coords précédemment échouées disponibles après recovery",
+    "T-FSM-92: FIX-P1D diagonales = groupes séparés explicite",
+    "T-FSM-93: FIX-P1D adjacence H/V = même groupe explicite",
+    "T-FSM-94: FIX-P1D 4 coins non connexes = 4 groupes",
+    "T-FSM-95: clic toujours sur cellule occupée (U et L)",
+    "T-FSM-96: blacklist partielle forme U clic reste dans groupe",
+    "T-FSM-97: rectangle plein centroïde central non-régression",
+    "T-FSM-98: recovery + classify_frame blacklist purgée avant SELECT",
+    "T-FSM-99: VERSION == '13.4'",
+    "T-FSM-100: non-régression 86 tests précédents"
+  ],
+  "ls20_analysis": {
+    "game_type": "ls20-9607627b",
+    "tag": "keyboard",
+    "baseline_actions": [22, 123, 73, 84, 96, 192, 186],
+    "dominant_colour_observed": "colour_5 (green terrain, dominant)",
+    "key_sprites": {
+      "nszegiawib": "large piece colour 3 (U-shaped top missing 2 cells)",
+      "kvynsvxbpi": "small diagonal piece colour 0",
+      "rhsxkxzdjz": "target marker colour 0/1",
+      "sfqyzhzkij": "bicolour piece colours 9+12",
+      "vjotnebuqo_njpewhmtfd": "target frames colour 5 (frame border)"
+    },
+    "classification_note": "ls20 uses multiple piece/target types per level. Rarity classification may need to handle bicolour sprites (e.g. sfqyzhzkij with colours 9 and 12).",
+    "next_step": "Execute v13.4 on ls20 Kaggle notebook to validate perception→action→result chain"
+  },
+  "invariants": {
+    "CERTIFIED_100": false,
+    "unique_human_proven": false,
+    "DEBUG": true
+  }
+}
