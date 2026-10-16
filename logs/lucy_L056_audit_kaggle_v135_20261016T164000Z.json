@@ -1,0 +1,122 @@
+{
+  "rapport": "L-056",
+  "timestamp": "2026-10-16T16:40:00Z",
+  "version_lucy": "13.5",
+  "commit_lucy": "a068d18",
+  "kernel_id": "ndarray2000/lucy-v13-5-arc-agi-3-bfs-guards-fsm-select-place",
+  "kernel_push_commit": "f806707",
+  "kernel_status": "KernelWorkerStatus.COMPLETE",
+  "mode_debug": true,
+  "certified_100": false,
+  "unique_human_proven": false,
+
+  "soumissions_competition": [
+    {
+      "ref": "57273062",
+      "version": "v13.5",
+      "date": "2026-10-16T14:55:55Z",
+      "status": "SubmissionStatus.COMPLETE",
+      "public_score": 0.00,
+      "mode_execution": "commit_dummy",
+      "jeu_reel": false
+    },
+    {
+      "ref": "57187586",
+      "version": "v7.0",
+      "date": "2026-10-14T15:41:55Z",
+      "status": "SubmissionStatus.COMPLETE",
+      "public_score": 0.14,
+      "mode_execution": "competition_rerun",
+      "jeu_reel": true
+    },
+    {
+      "ref": "57180631",
+      "version": "inconnue",
+      "date": "2026-10-14T11:33:12Z",
+      "status": "SubmissionStatus.ERROR",
+      "public_score": null
+    }
+  ],
+
+  "analyse_logs_v135": {
+    "fichier": "logs/kaggle_v135_raw.log",
+    "nb_lignes": 51,
+    "nb_lignes_stdout": 35,
+    "nb_lignes_stderr": 16,
+    "temps_total_secondes": 22.05,
+    "jeu_detecte": false,
+    "gateway_contact": false,
+    "traces_fsm": false,
+    "traces_debug_lucy": false,
+    "raison": "mode commit — KAGGLE_IS_COMPETITION_RERUN absent",
+    "dummy_parquet_genere": true,
+    "dummy_parquet_contenu": {
+      "row_id": "1_0",
+      "game_id": "1",
+      "end_of_game": true,
+      "score": 1
+    }
+  },
+
+  "analyse_logs_v70": {
+    "fichier": "logs/kaggle_v70_raw.log",
+    "nb_lignes": 51,
+    "nb_lignes_stdout": 35,
+    "nb_lignes_stderr": 16,
+    "temps_total_secondes": 19.91,
+    "jeu_detecte": false,
+    "note": "Logs de commit identiques — score 0.14 obtenu lors du competition rerun non logué ici"
+  },
+
+  "diagnostic_root_cause": {
+    "cause": "mode_commit_pas_competition_rerun",
+    "explication": "kaggle kernels push déclenche save-and-run-all (commit). KAGGLE_IS_COMPETITION_RERUN est absent. Cellule 5 (dummy) s'exécute. Cellule 4 (jeu réel) est ignorée.",
+    "score_0_signifie": "dummy parquet soumis — pas d'interaction avec le moteur ARC-AGI-3",
+    "action_requise": "Utilisateur doit cliquer Submit to Competition sur l UI Kaggle pour déclencher le competition rerun"
+  },
+
+  "tests_locaux_v135": {
+    "total": 123,
+    "pass": 123,
+    "fail": 0,
+    "commit": "a068d18"
+  },
+
+  "corrections_v135": [
+    "BFS groupes connexes (_pick_cluster_centre)",
+    "GUARD-DISTINCT (piece != target)",
+    "GUARD-FLOOR-COVERAGE (max 30% grille)",
+    "T-FSM-49/51/56 renforcés"
+  ],
+
+  "anomalies_ouvertes": [
+    {
+      "id": "P0-LOG",
+      "description": "Agent n a jamais joue — aucune trace de jeu dans les logs Kaggle",
+      "priorite": 0,
+      "action": "Declencher competition rerun via UI Kaggle"
+    },
+    {
+      "id": "P0-1",
+      "description": "Rarete != perception structurelle — heuristique non universelle",
+      "priorite": 0,
+      "statut": "code corrige v13.5, comportement live non mesure"
+    }
+  ],
+
+  "plan_correctif": {
+    "P0": "Soumettre via Submit to Competition sur Kaggle UI",
+    "P1": "Apres rerun : lire logs avec traces FSM reelles",
+    "P2": "Si score 0.00 persiste : auditer cellule 4 gateway",
+    "P3": "Developper perception structurelle v14.x"
+  },
+
+  "fichiers_produits": [
+    "rapports/L-056_audit_logs_kaggle_v135_score_0_analyse_2026-10-16.md",
+    "logs/lucy_L056_audit_kaggle_v135_20261016T164000Z.json",
+    "logs/kaggle_v135_raw.log",
+    "logs/kaggle_v135_submission.parquet",
+    "logs/kaggle_v70_raw.log",
+    "logs/kaggle_v70_submission.parquet"
+  ]
+}
