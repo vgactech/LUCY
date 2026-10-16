@@ -1,0 +1,33 @@
+{
+  "session": "L-054",
+  "version": "13.5",
+  "timestamp": "2026-10-16T12:00:00Z",
+  "CERTIFIED_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "previous_commit": "7332d7b",
+  "audit_source": "L-050 (anomalies P0/P1 identifiées dans le message utilisateur)",
+  "fixes_applied": {
+    "GUARD-DISTINCT": "piece_colour != target_colour garanti explicitement dans _classify_frame",
+    "GUARD-FLOOR-COVERAGE": "flag ambiguous_floor=True si floor < 20% des cellules",
+    "T-FSM-49-renforcé": "T-FSM-101 vérifie les IDs EXACTS piece=7 target=3 (pas seulement distincts)",
+    "T-FSM-51-renforcé": "T-FSM-102 vérifie que sky=2 (35%) est absent de piece ET target explicitement",
+    "T-FSM-56-renforcé": "T-FSM-103 vérifie la cellule retournée = plus proche du centroïde global"
+  },
+  "limits_documented": {
+    "T-FSM-109": "Si un artefact décoratif a >= MIN_PIECE_CELLS cellules et est plus rare que la pièce, il devient piece_colour — limite P0-1 documentée, pas corrigée à ce stade",
+    "P0-1-rarity": "La stratégie rareté reste heuristique : guards ajoutés pour les cas dégénérés mais pas de perception sémantique des objets"
+  },
+  "test_results": {
+    "new_tests_T-FSM-101_to_120": {"passed": 20, "failed": 0},
+    "full_suite_v130_to_v135": {"passed": 123, "failed": 0, "skipped": 0},
+    "duration_s": 1.27
+  },
+  "files_created": [
+    "agent/my_agent_v135.py",
+    "tests/test_lucy_v135_l054.py",
+    "logs/lucy_L054_v135_20261016T120000Z.json",
+    "rapports/L-054_guards_rarete_tests_renforces_v135_2026-10-16.md"
+  ],
+  "next_step": "Exécuter v13.5 sur Kaggle (jeu ls20 en premier, protocole de validation audit §6)"
+}
