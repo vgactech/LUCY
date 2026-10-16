@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "report_ref": "L-052",
+  "agent_version": "13.3",
+  "timestamp_utc": "20261016T082932Z",
+  "test_suite": [
+    "tests/test_lucy_v130_l048_fsm.py",
+    "tests/test_lucy_v131_l049.py",
+    "tests/test_lucy_v132_l050.py",
+    "tests/test_lucy_v133_l052.py"
+  ],
+  "results": {
+    "total": 86,
+    "passed": 86,
+    "failed": 0,
+    "skipped": 0,
+    "new_tests": 17,
+    "previous_tests": 69
+  },
+  "fixes_applied": [
+    "FIX-BFS: _find_connected_groups() BFS 4-connectivity",
+    "FIX-BFS: _pick_cluster_centre() selects largest connected group",
+    "FIX-BFS: skips fully-blacklisted groups before fallback",
+    "RENFORCEMENT T-FSM-49: exact piece/target attribution asserted",
+    "RENFORCEMENT T-FSM-51: strict exclusion without floor/sky tie",
+    "RENFORCEMENT T-FSM-56: fallback returns defined centroid cell"
+  ],
+  "invariants": {
+    "CERTIFIED_100": false,
+    "unique_human_proven": false,
+    "DEBUG": true
+  }
+}
