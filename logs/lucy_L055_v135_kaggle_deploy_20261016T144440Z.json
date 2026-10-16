@@ -1,0 +1,76 @@
+{
+  "report_id": "L-055",
+  "agent_version": "13.5",
+  "timestamp_utc": "2026-10-16T14:44:40Z",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug_mode": true,
+  "action": "kaggle_submission_deploy",
+  "git_head_lucy": "98eaecf",
+  "git_head_submodule": "fda5b56",
+  "kaggle": {
+    "username": "ndarray2000",
+    "kernel_id": "ndarray2000/lucy-v13-5-arc-agi-3-bfs-guards",
+    "kernel_url": "https://www.kaggle.com/code/ndarray2000/lucy-v13-5-arc-agi-3-bfs-guards-fsm-select-place",
+    "kernel_version": 1,
+    "competition": "arc-prize-2026-arc-agi-3",
+    "accelerator": "nvidiaTeslaT4",
+    "gpu_enabled": true,
+    "internet_enabled": false,
+    "push_result": "Kernel version 1 successfully pushed",
+    "push_status": "SUCCESS"
+  },
+  "notebook": {
+    "path": "LuCY/vendor/ARC-AGI-3-Kaggle-Starter/notebooks/submission.ipynb",
+    "cells": 5,
+    "cell_0": "markdown — titre ARC Prize 2026",
+    "cell_1": "pip install arc-agi depuis offline wheels",
+    "cell_2": "%%writefile /tmp/my_agent.py — corps LuCY v13.5",
+    "cell_3": "run si KAGGLE_IS_COMPETITION_RERUN",
+    "cell_4": "dummy submission.parquet si commit mode",
+    "version_detected_in_writefile": "13.5"
+  },
+  "agent_v135_features": {
+    "fsm_select_place": true,
+    "bfs_connected_groups": true,
+    "guard_distinct": true,
+    "guard_floor_coverage": true,
+    "guard_mincount": true,
+    "blacklist_recovery": true,
+    "centroid_largest_group": true,
+    "confirmation_selection_confidence": true,
+    "placement_whole_grid_check": true,
+    "forensic_logger_v2": true,
+    "levels_progress_signal": true,
+    "single_action_loop_detection": true,
+    "fix_p0a_win_levels": true,
+    "fix_p0b_levels_progress": true,
+    "fix_p0c_real_progress_counter": true,
+    "fix_p1d_single_action_loop": true
+  },
+  "tests": {
+    "total_pass": 123,
+    "total_fail": 0,
+    "test_file": "tests/test_lucy_v135_l054.py",
+    "last_run_commit": "a068d18"
+  },
+  "open_anomalies_from_l050_audit": {
+    "P0_generalization_rarity": "GUARDS added (GUARD-DISTINCT, GUARD-FLOOR-COVERAGE) — rarity still primary heuristic, not structural object detection",
+    "P0_centroid_disjoint_groups": "BFS FIXED in v13.3 — largest group selected; disjoint groups handled",
+    "P1_tests_t_fsm_49_51_56": "Strengthened in v13.5 — explicit IDs verified in T-FSM-49/51/56",
+    "open_future": "Structural object detection (shape+position+interaction) not yet implemented — noted for v14.x"
+  },
+  "files_modified": [
+    "LuCY/vendor/ARC-AGI-3-Kaggle-Starter/agent/my_agent.py",
+    "LuCY/vendor/ARC-AGI-3-Kaggle-Starter/notebooks/kernel-metadata.json"
+  ],
+  "files_generated": [
+    "LuCY/vendor/ARC-AGI-3-Kaggle-Starter/notebooks/submission.ipynb (generated, in .gitignore)"
+  ],
+  "next_steps": [
+    "Attendre résultat Kaggle competition rerun sur https://www.kaggle.com/code/ndarray2000/lucy-v13-5-arc-agi-3-bfs-guards-fsm-select-place",
+    "Vérifier protocole validation §6 audit L-050 : perception correcte couleur 3/15 sur r11l",
+    "Analyser logs forensics Kaggle après exécution",
+    "Implémenter détection structurelle objets (v14.x) si résultats insuffisants"
+  ]
+}
