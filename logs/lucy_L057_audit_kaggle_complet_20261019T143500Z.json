@@ -1,0 +1,66 @@
+{
+  "rapport": "L-057",
+  "timestamp": "2026-10-19T14:35:00Z",
+  "version_lucy": "13.5",
+  "commit_lucy": "0baaa84",
+  "kernel_id": "ndarray2000/lucy-v13-5-arc-agi-3-bfs-guards-fsm-select-place",
+  "kernel_status": "KernelWorkerStatus.COMPLETE",
+  "mode_debug": true,
+  "certified_100": false,
+  "unique_human_proven": false,
+  "tests_locaux": {
+    "total": 355,
+    "pass": 355,
+    "fail": 0,
+    "commit": "0baaa84"
+  },
+  "soumissions_kaggle": [
+    {"ref": "57273062", "date": "2026-10-16T14:55:55Z", "status": "COMPLETE", "publicScore": 0.00, "version": "13.5"},
+    {"ref": "57187586", "date": "2026-10-14T15:41:55Z", "status": "COMPLETE", "publicScore": 0.14, "version": "7.0"},
+    {"ref": "57180631", "date": "2026-10-14T11:33:12Z", "status": "ERROR", "publicScore": null, "version": "unknown"}
+  ],
+  "score_max": 0.14,
+  "score_v135": 0.00,
+  "parquet_v135": {"row_id": "1_0", "game_id": "1", "end_of_game": true, "score": 1, "note": "dummy commit"},
+  "parquet_v70_api": {"row_id": "1_0", "game_id": "1", "end_of_game": true, "score": 1, "note": "dummy commit - score 0.14 dans rerun parquet inaccessible via API"},
+  "diff_code_local_vs_kaggle": {
+    "agent_v135_lignes": 2616,
+    "vendor_agent_lignes": 2616,
+    "diff_sortie": "vide",
+    "identiques": true
+  },
+  "anomalies": {
+    "P0_PRIVATE": {
+      "gravite": "P0-BLOCANT",
+      "fichier": "vendor/ARC-AGI-3-Kaggle-Starter/notebooks/kernel-metadata.json",
+      "avant": "\"is_private\": true",
+      "apres_recommande": "\"is_private\": false",
+      "impact": "Submit to Competition impossible si kernel prive"
+    },
+    "P0_PARQUET": {
+      "gravite": "P0-COMPORTEMENT",
+      "description": "kaggle kernels output ne retourne que le parquet du run commit (dummy), jamais le parquet de competition rerun",
+      "consequence": "Impossible de verifier les resultats du jeu reel via API"
+    },
+    "P0_NOTEBOOK_MAIN": {
+      "gravite": "P0-ARCHITECTURE",
+      "fichier": "notebooks/lucy_arc_agi_submission.ipynb",
+      "description": "Notebook 8 cellules = solveur ARC-AGI-2 format JSON statique",
+      "competition_ciblee": "arc-prize-2026-arc-agi-2",
+      "ne_pas_soumettre_a": "arc-prize-2026-arc-agi-3"
+    },
+    "P1_SCORE_014": {
+      "gravite": "P1",
+      "description": "Score 0.14 de v7.0 non reproductible - logs de rerun inaccessibles par API"
+    },
+    "P1_RARITY": {
+      "gravite": "P1",
+      "description": "Perception par rareté heuristique, non structurelle (P0 L-050 partiel)"
+    }
+  },
+  "plan_correctif": {
+    "P0_immediat": "Mettre is_private: false + kaggle kernels push + Submit to Competition",
+    "P1_apres_rerun": "Lire logs FSM_CLASSIFY / FSM_TRANSITION / GAME_DONE",
+    "P2_v14x": "Perception structurelle si score < 0.14 apres rerun"
+  }
+}
