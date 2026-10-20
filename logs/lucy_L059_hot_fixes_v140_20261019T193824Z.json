@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "report": "L-059",
+  "ts_ns": 1792438806184017000,
+  "ts_iso": "2026-10-19T19:38:24Z",
+  "version_before": "13.5",
+  "version_after": "14.0",
+  "file_created": "LuCY/agent/my_agent_v140.py",
+  "tests_pass": 355,
+  "tests_fail": 0,
+  "tests_skip": 0,
+  "non_regression": true,
+  "fixes_applied": [
+    {
+      "id": "F-021",
+      "severity": "P0",
+      "description": "_to_int_grid unified \u2014 3 copies replaced by _to_int_grid_canonical module-level",
+      "file": "my_agent_v140.py",
+      "lines_before": "~729, ~909, ~1397",
+      "status": "FIXED"
+    },
+    {
+      "id": "F-022",
+      "severity": "P0",
+      "description": "add/clear order corrected in recovery \u2014 clear() before add()",
+      "file": "my_agent_v140.py",
+      "lines_before": "1576-1583",
+      "status": "FIXED"
+    },
+    {
+      "id": "F-011",
+      "severity": "P1",
+      "description": "deterministic seed: random.seed(hash(str(self.game_id)))",
+      "file": "my_agent_v140.py",
+      "lines_before": "2202",
+      "before_code": "random.seed(int(time.time() * 1_000_000) ^ hash(self.game_id))",
+      "after_code": "random.seed(hash(str(self.game_id)))",
+      "status": "FIXED"
+    },
+    {
+      "id": "F-019",
+      "severity": "P1",
+      "description": "forensic also writes to /tmp/lucy_forensic.jsonl (non-blocking)",
+      "file": "my_agent_v140.py",
+      "lines_before": "286",
+      "status": "FIXED"
+    }
+  ],
+  "kaggle_rerun_score": "UNAVAILABLE",
+  "kaggle_rerun_logs": "NOT_RECEIVED_YET",
+  "kaggle_commit_score": 0.0,
+  "kaggle_reference_score_v70": 0.14,
+  "decision_d_lucy_001": "two_branches_distinct",
+  "decision_d_lucy_001_source": "L-058 + user validation",
+  "roadmap_updated": true,
+  "next_action": "Retrieve competition rerun logs from Kaggle, produce L-060",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true
+}

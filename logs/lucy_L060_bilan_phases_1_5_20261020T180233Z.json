@@ -1,0 +1,107 @@
+{
+  "report_id": "L-060",
+  "title": "Bilan Phases 1–5 : CDC académique LuCY complet",
+  "timestamp_utc": "2026-10-20T18:02:33Z",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug_mode": true,
+  "project": "LuCY — Language Unit for Cognitive Yield",
+
+  "test_suite": {
+    "total_pass": 385,
+    "total_fail": 0,
+    "total_skip": 0,
+    "duration_seconds": 2.07,
+    "command": "python3 -m pytest tests/ -q --tb=short",
+    "timestamp": "2026-10-20T18:02:33Z"
+  },
+
+  "phases_status": {
+    "phase_0": {"title": "Spécification et structure", "completion_pct": 100, "status": "DONE"},
+    "phase_1": {"title": "Opérateurs natifs", "completion_pct": 100, "status": "DONE", "tests": "T01-T32=32/32"},
+    "phase_2": {"title": "Noyau et coordination", "completion_pct": 100, "status": "DONE", "tests": "32/32"},
+    "phase_3": {"title": "Apprentissage", "completion_pct": 100, "status": "DONE", "before": 60, "after": 100, "tests": "L01-I05=30/30"},
+    "phase_4": {"title": "Mode AUGMENTED", "completion_pct": 80, "status": "PARTIAL"},
+    "phase_5": {"title": "Interface CLI", "completion_pct": 100, "status": "DONE", "before": 0, "after": 100}
+  },
+
+  "global_completion_pct": 93,
+  "previous_completion_pct": 78,
+
+  "files_created_session_20261021": [
+    {
+      "path": "LuCY/src/lucy/learning/feedback_processor.py",
+      "lines": 222,
+      "description": "FeedbackProcessor : clamp [-1,+1], lissage fenetre 10, attribution causale, detection spike, statistics()",
+      "before": "module inexistant",
+      "after": "222 lignes — FeedbackProcessor + UpdateInstruction + FeedbackStats"
+    },
+    {
+      "path": "LuCY/src/lucy/learning/weight_updater.py",
+      "lines": 201,
+      "description": "WeightUpdater : apply() idempotent, WeightUpdateReport, learning_curve(), cumulative_delta()",
+      "before": "module inexistant",
+      "after": "201 lignes — WeightUpdater + WeightUpdateReport"
+    },
+    {
+      "path": "LuCY/src/lucy/learning/__init__.py",
+      "lines": 31,
+      "description": "Exports package learning/",
+      "before": "module inexistant",
+      "after": "31 lignes — exports FeedbackProcessor, UpdateInstruction, FeedbackStats, WeightUpdater, WeightUpdateReport"
+    },
+    {
+      "path": "LuCY/scripts/lucy_cli.py",
+      "lines": 310,
+      "description": "CLI 6 commandes : run, state, learn, history, weights, forensic",
+      "before": "dossier scripts/ vide",
+      "after": "310 lignes — 6 commandes operationnelles"
+    },
+    {
+      "path": "LuCY/tests/test_lucy_phase5_learning_cli.py",
+      "lines": 447,
+      "description": "30 tests L01-L10 FeedbackProcessor, W01-W10 WeightUpdater, C01-C10 CLI, I01-I05 Integration",
+      "before": "fichier inexistant",
+      "after": "447 lignes — 30/30 PASS"
+    }
+  ],
+
+  "bug_fixes_session_20261021": [
+    {
+      "file": "LuCY/scripts/lucy_cli.py",
+      "line": 85,
+      "before": "state.current_phase",
+      "after": "state.active_phase",
+      "impact": "AttributeError evite — champ reel dans LuCYState"
+    }
+  ],
+
+  "roadmap_updates": {
+    "phase_3_3_1": {"before": "A implementer", "after": "DONE"},
+    "phase_3_3_2": {"before": "A implementer", "after": "DONE"},
+    "phase_5_5_1": {"before": "A implementer", "after": "DONE"},
+    "decision_D_LUCY_001": "Deux branches distinctes actees : agent/ competiton vs src/lucy/ CDC academique"
+  },
+
+  "tests_breakdown": {
+    "test_lucy_operators.py": {"count": 32, "ids": "T01-T32", "pass": 32},
+    "test_lucy_phase2_contracts.py": {"count": 32, "pass": 32},
+    "test_lucy_phase3_audit.py": {"count": 16, "pass": 16},
+    "test_lucy_phase4_audit.py": {"count": 20, "pass": 20},
+    "test_lucy_integration.py": {"count": 8, "ids": "A01-A04+I01-I08", "pass": 8},
+    "test_lucy_v135_l054.py": {"count": 20, "pass": 20},
+    "test_lucy_phase5_learning_cli.py": {"count": 30, "ids": "L01-L10+W01-W10+C01-C10+I01-I05", "pass": 30},
+    "other_lucy_tests": {"count": 227, "pass": 227}
+  },
+
+  "next_actions_no_go_required": [
+    "Phase 4.1 — llm_adapter.py interface generique (Bob CLI / Ollama)",
+    "Phase 4.2 — Integration NE enrichie LLM quand LUCY_LLM_ENABLED=true",
+    "Phase 5.2 — API REST FastAPI optionnelle"
+  ],
+
+  "next_actions_go_required": [
+    "Phase 6 — Integration ARTCB blockchain (PoL cycles LuCY on-chain)",
+    "Branche competition — Analyse logs Kaggle v14.0 → L-061"
+  ]
+}

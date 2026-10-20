@@ -1,0 +1,77 @@
+{
+  "rapport": "L-058",
+  "timestamp": "2026-10-19T17:00:00Z",
+  "version_lucy": "13.5",
+  "commit_lucy": "0baaa84",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "mode": "audit_granulaire_cdc_vs_code",
+  "sources_analysees": [
+    "LuCY/agent/my_agent_v135.py (2616 lignes — lues intégralement)",
+    "LuCY/rapports/L-056_audit_logs_kaggle_v135_score_0_analyse_2026-10-16.md",
+    "LuCY/rapports/L-057_audit_complet_kaggle_local_vs_notebook_2026-10-19.md",
+    "LuCY/logs/kaggle_v135_raw.log (51 lignes)",
+    "LuCY/logs/lucy_L054_v135_20261016T120000Z.json",
+    "LuCY/logs/lucy_L055_v135_kaggle_deploy_20261016T144440Z.json",
+    "LuCY/logs/lucy_L056_audit_kaggle_v135_20261016T164000Z.json",
+    "LuCY/logs/lucy_L057_audit_kaggle_complet_20261019T143500Z.json",
+    "Cahier des charges Lucy (79 pages, octobre 2026, @Donnet) — fourni dans le prompt"
+  ],
+  "cdc_conformite": {
+    "etapes_cdc_satisfaites": 2,
+    "etapes_cdc_totales": 15,
+    "score_conformite_pct": 13.3,
+    "etapes_ok": ["etape_4_routage_adaptatif", "etape_7_partiel"],
+    "etapes_partielles": ["etape_1_banc_local", "etape_3_metacontroleur"],
+    "etapes_absentes": ["etape_2", "etape_5", "etape_6", "etape_8_a_15"]
+  },
+  "fonctions_cdc_presentes": ["Se_partiel", "Si_partiel", "Ti_partiel", "Te_bon"],
+  "fonctions_cdc_absentes": ["Ne", "Ni", "Fi_partiel", "Fe"],
+  "failles_identifiees": {
+    "P0": ["F-001", "F-002", "F-004", "F-006", "F-021", "F-022"],
+    "P1": ["F-003", "F-007", "F-008", "F-009", "F-010", "F-011", "F-017", "F-019", "F-020"],
+    "P2": ["F-012", "F-013", "F-014", "F-015", "F-016", "F-018"]
+  },
+  "failles_total": 22,
+  "plan_correctif": {
+    "v13_5_hot": {
+      "corrections": 4,
+      "failles": ["F-021", "F-022", "F-011", "F-019"],
+      "statut": "PRET_A_VALIDER"
+    },
+    "v14_0": {
+      "condition": "Après réception logs competition rerun (~1h)",
+      "failles_cibles": ["F-006", "F-009"],
+      "action_requise": "Lire logs forensic Kaggle rerun + produire L-059"
+    },
+    "v14_1": {
+      "condition": "Si score rerun < 0.14 ou pour amélioration",
+      "failles_cibles": ["F-002", "F-001", "F-020", "F-017"],
+      "module_nouveau": "_ObjectSegmentor (perception structurelle)"
+    },
+    "v14_2_plus": {
+      "condition": "Long terme",
+      "failles_cibles": ["F-007", "F-010", "F-003", "F-005"],
+      "note": "Architecture CDC complète (PyTorch, hubs, sommeil) = trajectoire séparée LuCY/src/lucy/"
+    }
+  },
+  "score_kaggle": {
+    "v70": 0.14,
+    "v135_commit_dummy": 0.00,
+    "v135_rerun": "EN_COURS_~1H"
+  },
+  "tests_locaux": {
+    "total": 355,
+    "pass": 355,
+    "fail": 0
+  },
+  "rapport_cree": "LuCY/rapports/L-058_audit_granulaire_cdc_vs_code_v135_plan_v14_2026-10-19.md",
+  "action_immediate_utilisateur": [
+    "1. Valider ou modifier le rapport L-058 avant push",
+    "2. Attendre les logs du competition rerun Kaggle (~1h)",
+    "3. Décision sur corrections P0-HOT (F-021/F-022/F-011/F-019) = applicables immédiatement",
+    "4. Après rerun : lire logs forensic + produire L-059"
+  ],
+  "decision_a_valider": "Stratégie CDC vs compétition : deux branches séparées (agent/ et src/lucy/) ou fusion dès v14.x ?"
+}

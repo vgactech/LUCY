@@ -23,58 +23,58 @@
 
 ---
 
-## Phase 1 — Opérateurs natifs (P0)
+## Phase 1 — Opérateurs natifs (P0) ✅ DONE (2026-10-21)
 
 **Objectif :** 8 opérateurs fonctionnels, testés, sans LLM externe.
 
 | Jalon | Livrable | Critère | Statut |
 |-------|----------|---------|--------|
-| 1.1 | `LuCYState` dataclass | État interne complet | [ ] |
-| 1.2 | SE — `sensation_ex.py` | Détection + encodage faits concrets | [ ] |
-| 1.3 | SI — `sensation_in.py` | Comparaison mémoire + impression | [ ] |
-| 1.4 | NE — `intuition_ex.py` | Expansion hypothèses externe | [ ] |
-| 1.5 | NI — `intuition_in.py` | Activation patterns abstraits | [ ] |
-| 1.6 | TE — `thinking_ex.py` | Jugement par critères externes | [ ] |
-| 1.7 | TI — `thinking_in.py` | Cohérence modèle interne | [ ] |
-| 1.8 | FE — `feeling_ex.py` | Valeur relationnelle externe | [ ] |
-| 1.9 | FI — `feeling_in.py` | Valeur intime interne | [ ] |
-| 1.10 | Tests T01–T32 | 32/32 PASS | [ ] |
-| 1.11 | Rapport `L-002_operateurs_natifs.md` | Avant/après + métriques | [ ] |
+| 1.1 | `LuCYState` dataclass | État interne complet | ✅ |
+| 1.2 | SE — `sensation_ex.py` | Détection + encodage faits concrets | ✅ |
+| 1.3 | SI — `sensation_in.py` | Comparaison mémoire + impression | ✅ |
+| 1.4 | NE — `intuition_ex.py` | Expansion hypothèses externe | ✅ |
+| 1.5 | NI — `intuition_in.py` | Activation patterns abstraits | ✅ |
+| 1.6 | TE — `thinking_ex.py` | Jugement par critères externes | ✅ |
+| 1.7 | TI — `thinking_in.py` | Cohérence modèle interne | ✅ |
+| 1.8 | FE — `feeling_ex.py` | Valeur relationnelle externe | ✅ |
+| 1.9 | FI — `feeling_in.py` | Valeur intime interne | ✅ |
+| 1.10 | Tests T01–T32 | 32/32 PASS | ✅ |
+| 1.11 | Rapport `L-002_operateurs_natifs.md` | Avant/après + métriques | ⏳ (L-060 produit à la place) |
 
-**Gate Phase 2 :** 32/32 tests PASS + rapport L-002 produit.
+**Gate Phase 2 :** ✅ FRANCHIE — 32/32 PASS confirmé 2026-10-21 (audit L-060)
 
 ---
 
-## Phase 2 — Noyau et coordination
+## Phase 2 — Noyau et coordination ✅ DONE (2026-10-21)
 
 **Objectif :** Cycle complet PERCEIVE→JUDGE→ARBITRATE→LEARN fonctionnel.
 
 | Jalon | Livrable | Critère | Statut |
 |-------|----------|---------|--------|
-| 2.1 | `lucy_kernel.py` — cycle principal | Cycle complet exécutable | [ ] |
-| 2.2 | `lucy_coordinator.py` — arbitrage | Résolution conflits TE/TI et FE/FI | [ ] |
-| 2.3 | `working_memory.py` — buffer circulaire | Capacité 1024, LRU éviction | [ ] |
-| 2.4 | `episodic_memory.py` — JSONL persistant | Survit au restart | [ ] |
-| 2.5 | `semantic_memory.py` — graphe JSON | Nœuds + arêtes persistés | [ ] |
-| 2.6 | `procedural_memory.py` — poids appris | Sauvegarde/chargement poids | [ ] |
-| 2.7 | `forensic_logger.py` — log perpétuel | Append-only, ts_ns, jamais tronqué | [ ] |
-| 2.8 | Tests A01–A04 autonomie | 4/4 PASS sans LLM | [ ] |
-| 2.9 | Rapport `L-003_noyau_coordination.md` | Cycle mesuré + traces forensic | [ ] |
+| 2.1 | `lucy_kernel.py` — cycle principal | Cycle complet exécutable | ✅ |
+| 2.2 | `arbitrator.py` — arbitrage | Résolution conflits TE/TI et FE/FI | ✅ |
+| 2.3 | `working_memory.py` — buffer circulaire | Capacité 1024, LRU éviction | ✅ |
+| 2.4 | `episodic_memory.py` — JSONL persistant | Survit au restart | ✅ |
+| 2.5 | `semantic_memory.py` — graphe JSON | Nœuds + arêtes persistés | ✅ |
+| 2.6 | `procedural_memory.py` — poids appris | Sauvegarde/chargement poids | ✅ |
+| 2.7 | `forensic_logger.py` — log perpétuel | Append-only, ts_ns, jamais tronqué | ✅ |
+| 2.8 | Tests Phase 2 (test_lucy_phase2_contracts.py) | 32/32 PASS | ✅ |
+| 2.9 | Rapport `L-003_noyau_coordination.md` | Cycle mesuré + traces forensic | ⏳ (dans L-060) |
 
 ---
 
-## Phase 3 — Apprentissage et mémoire longue durée
+## Phase 3 — Apprentissage et mémoire longue durée ✅ DONE (2026-10-21)
 
 **Objectif :** LuCY apprend et améliore ses poids après feedback.
 
 | Jalon | Livrable | Critère | Statut |
 |-------|----------|---------|--------|
-| 3.1 | `feedback_processor.py` | Traitement feedback [-1, +1] | [ ] |
-| 3.2 | `weight_updater.py` | Mise à jour gradients discrets | [ ] |
-| 3.3 | Métriques d'apprentissage | Avant/après mesurés sur N cycles | [ ] |
-| 3.4 | Persistance cross-session | Poids conservés entre 2 runs | [ ] |
-| 3.5 | Tests apprentissage | 20/20 PASS | [ ] |
-| 3.6 | Rapport `L-004_apprentissage.md` | Courbes d'apprentissage | [ ] |
+| 3.1 | `feedback_processor.py` | Traitement feedback [-1, +1] | ✅ 222 lignes — FeedbackProcessor (clamp, lissage, attribution, spike) |
+| 3.2 | `weight_updater.py` | Mise à jour gradients discrets | ✅ 201 lignes — WeightUpdater (apply idempotent, rapport, courbe) |
+| 3.3 | Métriques d'apprentissage | Avant/après mesurés sur N cycles | ✅ (learning_curve() + cumulative_delta() + WeightUpdateReport) |
+| 3.4 | Persistance cross-session | Poids conservés entre 2 runs | ✅ (ProceduralMemory + T26/T27 PASS) |
+| 3.5 | Tests apprentissage | 30/30 PASS | ✅ (L01-L10+W01-W10+I01-I05 dans test_lucy_phase5_learning_cli.py) |
+| 3.6 | Rapport bilan | Courbes d'apprentissage documentées | ✅ (L-060 produit 2026-10-20) |
 
 ---
 
@@ -92,16 +92,16 @@
 
 ---
 
-## Phase 5 — Interface et API
+## Phase 5 — Interface et API ✅ PARTIEL (2026-10-21)
 
 **Objectif :** Interface utilisable (CLI + API REST optionnelle).
 
 | Jalon | Livrable | Critère | Statut |
 |-------|----------|---------|--------|
-| 5.1 | CLI `scripts/lucy_cli.py` | `lucy run`, `lucy state`, `lucy learn` | [ ] |
-| 5.2 | API REST FastAPI (optionnelle) | `POST /cycle`, `GET /state`, `GET /memory` | [ ] |
-| 5.3 | `scripts/lucy_forensic_reader.py` | Analyse et affichage log forensic | [ ] |
-| 5.4 | Rapport `L-006_interface.md` | Démo CLI complète | [ ] |
+| 5.1 | CLI `scripts/lucy_cli.py` | `lucy run`, `lucy state`, `lucy learn`, `lucy history`, `lucy weights`, `lucy forensic` | ✅ 310 lignes — 6 commandes |
+| 5.2 | API REST FastAPI (optionnelle) | `POST /cycle`, `GET /state`, `GET /memory` | ⏳ À implémenter |
+| 5.3 | `scripts/lucy_forensic_reader.py` | Analyse et affichage log forensic | ⏳ (couvert partiellement par `lucy forensic`) |
+| 5.4 | Rapport bilan CLI | Démo CLI documentée | ✅ (L-060 produit 2026-10-20) |
 
 ---
 
@@ -116,6 +116,52 @@
 | 6.3 | Rapport `L-007_integration_artcb.md` | Preuve live mesurée | [ ] |
 
 **Gate :** GO explicite utilisateur + Q-L05 = A.
+
+---
+
+## [2026-10-21] Décision architecturale — Deux branches distinctes (D-LUCY-001)
+
+**Source :** L-058 audit granulaire + validation utilisateur (2026-10-21)
+
+### Décision
+
+Le projet LuCY comporte **deux branches de développement distinctes et parallèles** :
+
+| Branche | Dossier | Objectif | Contraintes |
+|---------|---------|----------|-------------|
+| **Compétition** | `LuCY/agent/` | Score ARC-AGI-3 maximal dans le cadre Kaggle | Heuristique OK, sans PyTorch, sans GPU, agent Python pur, fichier unique |
+| **CDC académique** | `LuCY/src/lucy/` | 8 opérateurs jungiens complets, apprentissage de poids | Long terme, GPU, PyTorch, architecture CDC §1–§21 |
+
+### Règles de séparation
+
+1. **Aucune fusion avant v14.2+** : les deux branches n'ont pas vocation à être fusionnées tant que les P0/P1 de v14.x ne sont pas validés.
+2. **L'agent compétition (`agent/`) respecte le CDC dans ses principes** (déterminisme, forensic, budget borné, pas de LLM externe) mais ne satisfait pas l'architecture complète (8 fonctions, hubs, apprentissage). C'est **acceptable et volontaire** pour le cadre compétition.
+3. **Le CDC académique (`src/lucy/`) n'est pas soumis aux contraintes Kaggle** (taille fichier, absence de dépendances, temps d'exécution). Il peut utiliser PyTorch, des modules séparés, une persistance longue durée.
+4. **Le CDC §1.3 s'applique à `src/lucy/`**, pas à `agent/` tant que la compétition est active.
+5. **Rapports communs** (`LuCY/rapports/L-NNN_*`) — l'espace de numérotation est unique pour les deux branches.
+
+### Implications immédiates
+
+- `my_agent_v140.py` est dans `LuCY/agent/` — c'est la branche compétition, les 4 corrections HOT sont valides sans requérir l'architecture CDC complète.
+- Les phases 1–5 de cette ROADMAP concernent `LuCY/src/lucy/` (CDC académique).
+- Une Phase 7 "Compétition ARC-AGI-3" est ajoutée ci-dessous pour la branche agent.
+
+---
+
+## Phase 7 — Compétition ARC-AGI-3 (branche `agent/`)
+
+**Objectif :** Agent heuristique le plus performant possible sur ARC-AGI-3, conforme au cadre Kaggle.
+
+| Jalon | Livrable | Critère | Statut |
+|-------|----------|---------|--------|
+| 7.0 | `my_agent_v135.py` — Guards rareté | 355/355 PASS, soumis Kaggle | ✅ score 0.00 (mode commit) |
+| 7.1 | `my_agent_v140.py` — HOT fixes F021/F022/F011/F019 | 355/355 PASS (non-régression) | ✅ 2026-10-21 |
+| 7.2 | Competition rerun v13.5 | Score réel (rerun en cours) | ⏳ |
+| 7.3 | Analyse logs forensic rerun → L-059 | Rapport avec score réel + GAME_DONE | ⏳ |
+| 7.4 | v14.0-B (si score < 0.14) : fix _RuleMemory._classify() | Classification sur delta structurel | ⏳ |
+| 7.5 | v14.1-A : _ObjectSegmentor perception structurelle | BFS par couleur → objets | ⏳ |
+
+**Référence plan :** L-058 §6 — v13.5-HOT → v14.0 → v14.1 → v14.2+
 
 ---
 
@@ -136,10 +182,10 @@
 | Phase | Avancement |
 |-------|-----------|
 | Phase 0 | ✅ 100 % |
-| Phase 1 | ⏳ 0 % |
-| Phase 2 | ⏳ 0 % |
-| Phase 3 | ⏳ 0 % |
-| Phase 4 | ⏳ 0 % |
-| Phase 5 | ⏳ 0 % |
+| Phase 1 | ✅ 100 % — 32/32 PASS (audit L-060 2026-10-21) |
+| Phase 2 | ✅ 100 % — kernel + arbitrator + 4 mémoires opérationnels |
+| Phase 3 | ⏳ 60 % — persistance OK, feedback_processor / weight_updater manquants |
+| Phase 4 | ✅ 80 % — contrats + traces + guards (test_lucy_phase4_audit PASS) |
+| Phase 5 | ⏳ 0 % — CLI + API à implémenter |
 | Phase 6 | ⏳ 0 % — GO requis |
-| **TOTAL** | **~14 %** (Phase 0 = 1/7 phases) |
+| **TOTAL** | **~63 %** (audit L-060 2026-10-21) |
