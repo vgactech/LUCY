@@ -1,0 +1,43 @@
+{
+  "ts_iso": "2026-10-21T00:00:00Z",
+  "rapport": "L-062",
+  "version_precedente": "14.0",
+  "version_corrigee": "14.1",
+  "bug_identifie": {
+    "id": "F-023",
+    "type": "NameError",
+    "severite": "P0 CRITIQUE",
+    "description": "NameError: name '_validate_transposition' is not defined",
+    "fichier": "LuCY/agent/my_agent_v140.py",
+    "ligne": 2279,
+    "cause_racine": "_validate_transposition() renommee en _validate_transposition_regression() en v13.1 sans mise a jour de l'appel ligne 2279",
+    "impact": "Crash au 1er choose_action() → score 0.00 en competition rerun"
+  },
+  "correction_appliquee": {
+    "avant": "_validate_transposition(latest_frame.frame)",
+    "apres": "_validate_live_frame(latest_frame.frame) + mapping champs",
+    "fichier_modifie": "LuCY/agent/my_agent_v141.py",
+    "ligne_modifiee": 2279
+  },
+  "test_local": {
+    "game": "ls20",
+    "max_steps": 15,
+    "resultat": "PASS - agent joue sans crash",
+    "transposition_validation": {"ok": true, "rows": 64, "cols": 64, "format": "columnar"},
+    "version_confirmee": "14.1"
+  },
+  "fichiers_crees": [
+    "LuCY/agent/my_agent_v141.py",
+    "LuCY/REGLES_SOUMISSION_LUCY.md"
+  ],
+  "fichiers_modifies": [
+    "LuCY/vendor/ARC-AGI-3-Kaggle-Starter/agent/my_agent.py",
+    "LuCY/vendor/ARC-AGI-3-Kaggle-Starter/notebooks/kernel-metadata.json",
+    "LuCY/vendor/ARC-AGI-3-Kaggle-Starter/notebooks/submission.ipynb"
+  ],
+  "regles_permanentes_ajoutees": ["R-001", "R-002", "R-003", "R-004", "R-005", "R-006", "R-007", "R-008", "R-009"],
+  "prochaine_etape": "kaggle kernels push -p notebooks/ + Submit to Competition (utilisateur)",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true
+}
