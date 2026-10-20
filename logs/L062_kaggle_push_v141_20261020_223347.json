@@ -1,0 +1,27 @@
+{
+  "rapport": "L-062",
+  "timestamp": "2026-10-21T00:00:00Z",
+  "action": "kaggle_kernels_push",
+  "kernel_id": "ndarray2000/lucy-v14-1-arc-agi-3-fix-nameerror-f023",
+  "version_pushed": 1,
+  "status": "complete",
+  "kaggle_key_source": "~/Downloads/kaggle (3).json",
+  "kaggle_key_updated_doppler": true,
+  "kaggle_key_updated_local": true,
+  "kernel_title_fix": {
+    "avant": "LuCY v14.1 ARC-AGI-3 FIX NameError _validate_transposition F023",
+    "apres": "LuCY v14.1 ARC-AGI-3 FIX NameError F023",
+    "raison": "titre > 50 caracteres — refus API Kaggle 400 Bad Request"
+  },
+  "github_push": {
+    "repo": "vgactech/LUCY.git",
+    "avant": "7bd82a2",
+    "apres": "87dcd37",
+    "branche": "main",
+    "status": "PUSH_OK"
+  },
+  "certified_100": false,
+  "unique_human_proven": false,
+  "mode_debug": true,
+  "prochaine_action": "Utilisateur doit cliquer Submit to Competition sur Kaggle UI"
+}
