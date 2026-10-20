@@ -1,0 +1,61 @@
+{
+  "report": "L-061",
+  "ts": "2026-10-20T18:49:36Z",
+  "version_deployed": "14.0",
+  "certified_100": false,
+  "unique_human_proven": false,
+  "debug": true,
+  "actions": {
+    "agent_copy": {
+      "source": "LuCY/agent/my_agent_v140.py",
+      "destination": "LuCY/vendor/ARC-AGI-3-Kaggle-Starter/agent/my_agent.py",
+      "lines": 2600,
+      "version_before": "13.5",
+      "version_after": "14.0",
+      "status": "OK"
+    },
+    "kernel_metadata_update": {
+      "file": "LuCY/vendor/ARC-AGI-3-Kaggle-Starter/notebooks/kernel-metadata.json",
+      "id_before": "ndarray2000/lucy-v13-5-arc-agi-3-bfs-guards-fsm-select-place",
+      "id_after": "ndarray2000/lucy-v14-0-arc-agi-3-hot-fixes-deterministic",
+      "title_before": "LuCY v13.5 ARC-AGI-3 BFS Guards FSM SELECT PLACE",
+      "title_after": "LuCY v14.0 ARC-AGI-3 HOT F021 F022 F011 F019 Deterministic",
+      "status": "OK"
+    },
+    "notebook_rebuild": {
+      "script": "scripts/build_notebook.py",
+      "output": "notebooks/submission.ipynb",
+      "accelerator": "t4",
+      "cells": 5,
+      "version_in_notebook": "14.0",
+      "kaggle_is_competition_rerun_present": true,
+      "gateway_present": true,
+      "writefile_present": true,
+      "dummy_parquet_present": true,
+      "agent_cell_bytes": 114067,
+      "status": "OK"
+    }
+  },
+  "hot_fixes_confirmed_in_notebook": {
+    "F021_to_int_grid_canonical": true,
+    "F022_clear_before_add": true,
+    "F011_deterministic_seed": true,
+    "F019_forensic_tmp": true
+  },
+  "diagnosis": {
+    "root_cause": "vendor/agent/my_agent.py was still v13.5 — never updated after v14.0 creation. Notebook contained v13.5 agent code.",
+    "score_0_00_cause": "kaggle kernels push alone = commit mode = dummy parquet. Real score requires 'Submit to Competition' UI click.",
+    "v70_score_014_explanation": "v7.0 was submitted via Kaggle UI 'Submit to Competition' which triggers competition rerun with real game loop.",
+    "v135_score_000_explanation": "v13.5 was submitted via kaggle kernels push only = commit mode = dummy parquet = no game played."
+  },
+  "next_actions": {
+    "P0": "kaggle kernels push -p notebooks/ (in vendor/ARC-AGI-3-Kaggle-Starter/)",
+    "P0_mandatory": "User must click 'Submit to Competition' on Kaggle UI after push completes",
+    "P1": "Retrieve /tmp/lucy_forensic.jsonl after competition rerun",
+    "P2": "Produce L-062 from forensic logs"
+  },
+  "files_produced": [
+    "LuCY/rapports/L-061_deploy_v140_notebook_regenere_kaggle_2026-10-20.md",
+    "LuCY/logs/lucy_L061_deploy_v140_notebook_20261020T184936Z.json"
+  ]
+}
